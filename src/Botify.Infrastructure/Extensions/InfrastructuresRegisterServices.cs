@@ -1,3 +1,4 @@
+using Botify.Application.Common.Interfaces;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -17,8 +18,9 @@ public static class InfrastructureRegisterServices
         
         services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-        
+                .AddDefaultTokenProviders()
+                ;
+        services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 
         return services;
     }
