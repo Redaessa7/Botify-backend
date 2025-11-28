@@ -17,6 +17,103 @@ namespace Botify.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.BotConfigs.BotConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MerchantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PlatformVerified")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Secret")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TargetPlatform")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WebhookUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
+
+                    b.ToTable("BotConfigs", (string)null);
+                });
+
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Merchants", (string)null);
+                });
+
             modelBuilder.Entity("Botify.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -209,6 +306,97 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.BotConfigs.BotConfig", b =>
+                {
+                    b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
+                        .WithMany("BotConfigs")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
+                {
+                    b.OwnsOne("Botify.Domain.Models.Merchants.MerchantSubscription", "Subscription", b1 =>
+                        {
+                            b1.Property<Guid>("MerchantId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("CurrentPlan")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<DateTime>("ExpiryDate")
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("MerchantId");
+
+                            b1.ToTable("MerchantSubscriptions", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("MerchantId");
+                        });
+
+                    b.OwnsOne("Botify.Domain.Models.Merchants.ShopsDetails.ShopDetails", "ShopDetails", b1 =>
+                        {
+                            b1.Property<Guid>("MerchantId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Address")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTimeOffset>("CreatedAtUtc")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("CreatedBy")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(10)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("ImageUrl")
+                                .HasMaxLength(500)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Language")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("LastModifiedBy")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTimeOffset>("LastModifiedUtc")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<decimal?>("TaxRate")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("TelegramLink")
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("MerchantId");
+
+                            b1.ToTable("ShopDetails", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("MerchantId");
+                        });
+
+                    b.Navigation("ShopDetails");
+
+                    b.Navigation("Subscription")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -258,6 +446,11 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
+                {
+                    b.Navigation("BotConfigs");
                 });
 #pragma warning restore 612, 618
         }
