@@ -106,10 +106,17 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("VerifiedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Merchants", (string)null);
                 });
@@ -367,6 +374,12 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
                 {
+                    b.HasOne("Botify.Infrastructure.Identity.ApplicationUser", null)
+                        .WithOne()
+                        .HasForeignKey("Botify.Domain.Models.Merchants.Merchant", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.OwnsOne("Botify.Domain.Models.Merchants.MerchantSubscription", "Subscription", b1 =>
                         {
                             b1.Property<Guid>("MerchantId")

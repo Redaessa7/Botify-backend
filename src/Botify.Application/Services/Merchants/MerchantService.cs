@@ -17,9 +17,9 @@ namespace Botify.Application.Services.Merchants
             _db = db;
         }
 
-        public async Task<Result<Merchant>> CreateAsync(string fullName, string imageUrl, Plan plan, CancellationToken cancellationToken = default)
+        public async Task<Result<Merchant>> CreateAsync(string fullName, string UserId,string imageUrl, Plan plan, CancellationToken cancellationToken = default)
         {
-            var merchantResult = Merchant.Create(Guid.NewGuid(), fullName, imageUrl, plan);
+            var merchantResult = Merchant.Create(Guid.NewGuid(),UserId, fullName, imageUrl, plan);
             if (!merchantResult.IsSuccess)
                 return merchantResult;
 

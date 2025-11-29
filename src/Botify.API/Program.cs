@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Botify.API.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
@@ -14,9 +15,20 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices(builder.Configuration);
+
 builder.Services.AddFluentValidationAutoValidation();
 
-// builder.Services.AddValidatorsFromAssemblyContaining<>();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = (context) =>
+    {
+        context.ProblemDetails.Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+        context.ProblemDetails.Extensions.Add("requestId", context.HttpContext.TraceIdentifier);
+    };
+});
 
 
 builder.Services.AddCors(options =>
@@ -32,11 +44,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    await InfrastructureRegisterServices.SeedRolesAsync(scope.ServiceProvider);
+}
+
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseHttpsRedirection();
 app.UseCors("DevelopmentPolicy");
@@ -45,5 +68,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

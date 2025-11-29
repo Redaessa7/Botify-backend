@@ -1,3 +1,4 @@
+using Botify.Domain.Models.Merchants;
 using Botify.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

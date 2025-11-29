@@ -2,7 +2,11 @@ using Botify.Application.Common.Interfaces;
 using Botify.Application.Requests;
 using Botify.Application.Responses;
 using Botify.Application.Services.Auths;
+using Botify.Application.Services.Merchants;
 using Botify.Domain.Identity;
+using Botify.Domain.Identity.Enums;
+using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.ResultPattern;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
@@ -14,11 +18,13 @@ namespace Botify.Infrastructure.Authentication;
 public class AuthService(
     UserManager<ApplicationUser> userManager,
     ITokenProvider tokenProvider,
-    ApplicationDbContext dbContext) : IAuthServices
+    ApplicationDbContext dbContext,
+    IMerchantService merchantService) : IAuthServices
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ITokenProvider _tokenProvider = tokenProvider;
     private readonly ApplicationDbContext _dbContext = dbContext;
+    private readonly IMerchantService _MerchantService = merchantService;
 
     // --------------------------
     // Login
@@ -65,7 +71,16 @@ public class AuthService(
             return Error.Unexpected();
 
         // default role (e.g. Merchant)
-        await _userManager.AddToRoleAsync(user, "User");
+        await _userManager.AddToRoleAsync(user, request.Role.ToString());
+        if(request.Role == Roles.Merchant)
+        {
+            var merchant = await _MerchantService.CreateAsync($"{request.FirstName} {request.LastName}",user.Id, "default.png", Plan.Free);
+            if (!merchant.IsSuccess)
+            {
+                await _userManager.DeleteAsync(user);
+                return merchant.Errors;
+            }
+        }
 
         var roles = await _userManager.GetRolesAsync(user);
 

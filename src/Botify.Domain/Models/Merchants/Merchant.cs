@@ -17,6 +17,7 @@ namespace Botify.Domain.Models.Merchants
         public MerchantStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? VerifiedAt { get; private set; }
+        public string UserId { get; private set; }
 
         public MerchantSubscription Subscription { get; private set; }
         public ShopDetails? ShopDetails { get; private set; }
@@ -26,8 +27,9 @@ namespace Botify.Domain.Models.Merchants
 
         private Merchant() { }
 
-        private Merchant(Guid id, string fullName, string imageUrl, Plan plan) : base(id)
+        private Merchant(Guid id,string userId, string fullName, string imageUrl, Plan plan) : base(id)
         {
+            UserId = userId; 
             FullName = fullName;
             ImageUrl = imageUrl;
             Status = MerchantStatus.Pending;
@@ -35,7 +37,7 @@ namespace Botify.Domain.Models.Merchants
             Subscription = MerchantSubscription.Start(Id, plan);
         }
 
-        public static Result<Merchant> Create(Guid id, string fullName, string imageUrl, Plan plan)
+        public static Result<Merchant> Create(Guid id,string userId, string fullName, string imageUrl, Plan plan)
         {
             if (id == Guid.Empty)
                 id = Guid.NewGuid();
@@ -46,7 +48,7 @@ namespace Botify.Domain.Models.Merchants
             if (string.IsNullOrWhiteSpace(imageUrl))
                 return MerchantErrors.ImageUrlRequired;
 
-            return new Merchant(id, fullName, imageUrl, plan);
+            return new Merchant(id,userId, fullName, imageUrl, plan);
         }
 
         public Result<Success> Approve()

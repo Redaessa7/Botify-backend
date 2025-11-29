@@ -36,29 +36,44 @@ public static class InfrastructureRegisterServices
 
         return services;
     }
-    
+
     private static IServiceCollection AddAuthenticationJwtToken(this IServiceCollection services, IConfiguration configuration)
     {
-         services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            var jwtOptions = configuration.GetSection("JWTOptions");
-            options.TokenValidationParameters = new()
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtOptions["Issuer"],
-                ValidAudience = jwtOptions["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions["SecurityKey"]!))
-            };
-        });
+        services.AddAuthentication(options =>
+       {
+           options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+           options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+       }).AddJwtBearer(options =>
+       {
+           var jwtOptions = configuration.GetSection("JWTOptions");
+           options.TokenValidationParameters = new()
+           {
+               ValidateIssuer = true,
+               ValidateAudience = true,
+               ValidateLifetime = true,
+               ValidateIssuerSigningKey = true,
+               ValidIssuer = jwtOptions["Issuer"],
+               ValidAudience = jwtOptions["Audience"],
+               IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions["SecurityKey"]!))
+           };
+       });
 
         return services;
     }
 
+    public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
+    {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            string[] roles = new[] { "MERCHANT", "ADMIN", "USER" };
+
+            foreach (var role in roles)
+            {
+                var exists = await roleManager.RoleExistsAsync(role);
+                if (!exists)
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+    }
 }

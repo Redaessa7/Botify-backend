@@ -1,4 +1,5 @@
 ﻿using Botify.Domain.Models.Merchants;
+using Botify.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -61,6 +62,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
                    .WithOne()
                    .HasForeignKey(b => b.MerchantId)
                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<Merchant>(m => m.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
