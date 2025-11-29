@@ -1,4 +1,5 @@
 using Botify.Application.Common.Interfaces;
+using Botify.Application.Services.Merchants;
 using Botify.Domain.Events;
 using Botify.Domain.Events.Merchants;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             // Register domain event handlers
             DomainEventDispatcher.Register(MerchantEventHandlers.Handle);
+            services.AddScoped<IMerchantService, MerchantService>();
             return services;
         }
 
