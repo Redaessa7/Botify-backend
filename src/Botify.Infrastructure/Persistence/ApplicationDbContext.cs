@@ -15,9 +15,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<BotConfig> BotConfigs => Set<BotConfig>();
     public DbSet<ShopDetails> ShopDetails => Set<ShopDetails>();
     public DbSet<MerchantSubscription> MerchantSubscription => Set<MerchantSubscription>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
 
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await base.SaveChangesAsync(cancellationToken);
     }
