@@ -1,5 +1,6 @@
 using System.Text;
 using Botify.Application.Common.Interfaces;
+using Botify.Application.Services.Auths;
 using Botify.Infrastructure.Authentication;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
@@ -30,6 +31,7 @@ public static class InfrastructureRegisterServices
 
 
         services.AddScoped<ITokenProvider, JwtTokenProvider>();
+        services.AddScoped<IAuthServices, AuthService>();
         
 
         return services;
