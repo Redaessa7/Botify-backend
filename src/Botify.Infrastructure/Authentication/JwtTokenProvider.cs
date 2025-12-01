@@ -40,8 +40,6 @@ public class JwtTokenProvider(
         {
             new(JwtRegisteredClaimNames.Sub, request.Id!),
             new(JwtRegisteredClaimNames.Email, request.Email!),
-            new(JwtRegisteredClaimNames.GivenName, request.FirstName!),
-            new(JwtRegisteredClaimNames.FamilyName, request.LastName!),
         };
 
         foreach (var role in request.Roles)

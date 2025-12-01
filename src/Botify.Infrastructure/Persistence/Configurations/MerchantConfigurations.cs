@@ -1,5 +1,4 @@
 ﻿using Botify.Domain.Models.Merchants;
-using Botify.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,19 +14,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
             // Primary key
             builder.HasKey(m => m.Id);
 
-            // Properties
-            builder.Property(m => m.FullName)
-                   .IsRequired()
-                   .HasMaxLength(200);
-
-            builder.Property(m => m.ImageUrl)
+            builder.Property(m => m.LogoUrl)
                    .IsRequired()
                    .HasMaxLength(500);
 
             builder.Property(m => m.Status)
-                   .IsRequired();
-
-            builder.Property(m => m.CreatedAt)
                    .IsRequired();
 
             builder.Property(m => m.VerifiedAt);
@@ -45,7 +36,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             });
 
             // One-to-one relationship with ShopDetails
-            builder.OwnsOne(m => m.ShopDetails, shop =>
+            builder.OwnsOne(m => m.ShopSettings, shop =>
             {
                 shop.Property(s => s.Name).HasMaxLength(200).IsRequired();
                 shop.Property(s => s.Currency).HasMaxLength(10).IsRequired();
@@ -54,19 +45,20 @@ namespace Botify.Infrastructure.Persistence.Configurations
                 shop.Property(s => s.ImageUrl).HasMaxLength(500);
                 shop.Property(s => s.TaxRate);
 
-                shop.ToTable("ShopDetails");
+                shop.ToTable("ShopSettings");
             });
 
             // One-to-many relationship with BotConfigs
-            builder.HasMany(m => m.BotConfigs)
+            builder.HasMany(m => m.Bots)
                    .WithOne()
                    .HasForeignKey(b => b.MerchantId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne<ApplicationUser>()
-                .WithOne()
-                .HasForeignKey<Merchant>(m => m.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(m => m.Profile)
+                    .WithOne()
+                    .HasForeignKey<Merchant>(m => m.UserProfileId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
         }
     }
 }

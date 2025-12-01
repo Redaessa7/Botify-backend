@@ -1,13 +1,16 @@
-using Botify.Domain.Identity.Enums;
-
 namespace Botify.Application.Requests;
 
 public class RegisterRequest
 {
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
-    public string Email { get; set; } = default!;
-    public string Password { get; set; } = default!;
-    public Roles Role { get; set; } = Roles.User;
-    public string? ShopName { get; set; } 
+    public required string Email { get; set; }
+    public required string Password { get; set; }
+    public required string Phone { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+    public  string? Bio { get; set; }
+    public string? ProfileImageUrl { get; set; }
+    public string? Language { get; set; }
+    public required string MerchantName { get; set; }
+    public required string Industry { get; set; }
+    public string? LogoUrl { get; set; }
 }

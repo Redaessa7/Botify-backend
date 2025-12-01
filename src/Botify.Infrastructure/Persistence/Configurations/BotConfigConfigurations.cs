@@ -1,18 +1,15 @@
-﻿using Botify.Domain.Models.Merchants.BotConfigs;
+﻿using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Botify.Infrastructure.Persistence.Configurations
 {
-    internal class BotConfigConfigurations : IEntityTypeConfiguration<BotConfig>
+    internal class BotConfigConfigurations : IEntityTypeConfiguration<Bot>
     {
-        public void Configure(EntityTypeBuilder<BotConfig> builder)
+        public void Configure(EntityTypeBuilder<Bot> builder)
         {
-            builder.ToTable("BotConfigs");
+            builder.ToTable("Bots");
             builder.HasKey(b => b.Id);
 
             builder.Property(b => b.Token).IsRequired().HasMaxLength(200);

@@ -2,17 +2,37 @@
 @contentType = application/json
 
 ### Register
+### Register a new merchant
 POST {{baseurl}}/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "ahmed.merchant@example.com",
-  "password": "SecureP@ss123!",
-  "firstName": "Ahmed",
-  "lastName": "Hassan",
-  "role": "Merchant",
-  "shopName": "Ahmed's Store"
+  "email": "owner@myshop.com",
+  "password": "StrongPass123!",
+  "phone": "+201234567890",
+  "firstName": "Reda",
+  "lastName": "Ahmed",
+  "bio": "Merchant owner using Botify platform",
+  "profileImageUrl": "https://cdn.example.com/profiles/reda.png",
+  "language": "en",
+  "merchantName": "MyShop",
+  "industry": "Retail",
+  "logoUrl": "https://cdn.example.com/logos/myshop.png"
 }
+
+### Example of invalid request (missing email)
+POST {{baseurl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "password": "StrongPass123!",
+  "phone": "+201234567890",
+  "firstName": "Reda",
+  "lastName": "Ahmed",
+  "merchantName": "MyShop",
+  "industry": "Retail"
+}
+
 
 
 ### Login
@@ -20,8 +40,8 @@ POST {{baseurl}}/api/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "ahmed.merchant@example.com",
-  "password": "SecureP@ss123!"
+  "email": "owner@myshop.com",
+  "password": "StrongPass123!"
 }
 
 ### Refresh Token

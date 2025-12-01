@@ -1,6 +1,6 @@
-﻿namespace Botify.Domain.Models.Merchants.ShopsDetails
+﻿namespace Botify.Domain.Models.Merchants.Shops
 {
-    public sealed class ShopDetails : AuditableEntity
+    public sealed class ShopSettings : AuditableEntity
     {
         public Guid MerchantId { get; private set; }
         public string Name { get; private set; }
@@ -11,8 +11,8 @@
         public string? ImageUrl { get; private set; }
         public decimal? TaxRate { get; private set; }
 
-        private ShopDetails() { }
-        private ShopDetails(Guid id, Guid merchantId, string name, string currency, string language, string address) : base(id)
+        private ShopSettings() { }
+        private ShopSettings(Guid id, Guid merchantId, string name, string currency, string language, string address) : base(id)
         {
             MerchantId = merchantId;
             Name = name;
@@ -21,13 +21,13 @@
             Address = address;
         }
 
-        public static ShopDetails Create(Guid id, Guid merchantId, string name, string currency, string language, string address)
+        public static ShopSettings Create(Guid id, Guid merchantId, string name, string currency, string language, string address)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(currency) ||
                 string.IsNullOrWhiteSpace(language) || string.IsNullOrWhiteSpace(address))
                 throw new ArgumentException("All required fields must be filled.");
 
-            return new ShopDetails(id, merchantId, name, currency, language, address);
+            return new ShopSettings(id, merchantId, name, currency, language, address);
         }
 
         public bool IsComplete()

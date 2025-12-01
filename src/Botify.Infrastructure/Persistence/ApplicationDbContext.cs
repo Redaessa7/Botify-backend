@@ -1,7 +1,8 @@
 using Botify.Application.Common.Interfaces;
+using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.BotConfigs;
-using Botify.Domain.Models.Merchants.ShopsDetails;
+using Botify.Domain.Models.Merchants.Bots;
+using Botify.Domain.Models.Merchants.Shops;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +13,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
 
     public DbSet<Merchant> Merchants =>  Set<Merchant>();
-    public DbSet<BotConfig> BotConfigs => Set<BotConfig>();
-    public DbSet<ShopDetails> ShopDetails => Set<ShopDetails>();
+    public DbSet<Bot> Bots => Set<Bot>();
+    public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<MerchantSubscription> MerchantSubscription => Set<MerchantSubscription>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 

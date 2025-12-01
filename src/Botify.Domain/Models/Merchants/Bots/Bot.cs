@@ -1,8 +1,8 @@
 ﻿using Botify.Domain.Models.Merchants.ValueObjects;
 
-namespace Botify.Domain.Models.Merchants.BotConfigs
+namespace Botify.Domain.Models.Merchants.Bots
 {
-    public sealed class BotConfig : AuditableEntity
+    public sealed class Bot : AuditableEntity
     {
         public Guid MerchantId { get; private set; }
         public string Token { get; private set; }
@@ -13,8 +13,8 @@ namespace Botify.Domain.Models.Merchants.BotConfigs
         public bool IsPrimary { get; set; }
         public string? WebhookUrl { get; private set; }
 
-        private BotConfig() { }
-        private BotConfig(Guid id, Guid merchantId, string token, string secret, BotPlatform platform) : base(id)
+        private Bot() { }
+        private Bot(Guid id, Guid merchantId, string token, string secret, BotPlatform platform) : base(id)
         {
             MerchantId = merchantId;
             Token = token;
@@ -24,12 +24,12 @@ namespace Botify.Domain.Models.Merchants.BotConfigs
             PlatformVerified = false;
         }
 
-        public static BotConfig Create(Guid id,  Guid merchantId, string token, string secret, BotPlatform platform)
+        public static Bot Create(Guid id,  Guid merchantId, string token, string secret, BotPlatform platform)
         {
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(secret))
                 throw new ArgumentException("Token and secret are required.");
 
-            return new BotConfig(id, merchantId, token, secret, platform);
+            return new Bot(id, merchantId, token, secret, platform);
         }
 
         public void VerifyPlatform()

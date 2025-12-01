@@ -3,10 +3,9 @@ using Botify.Application.Requests;
 using Botify.Application.Responses;
 using Botify.Application.Services.Auths;
 using Botify.Application.Services.Merchants;
+using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Identity;
 using Botify.Domain.Identity.Enums;
-using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.ResultPattern;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
@@ -45,8 +44,6 @@ public class AuthService(
         {
             Id = user.Id,
             Email = user.Email!,
-            FirstName = user.FirstName,
-            LastName = user.LastName!,
             Roles = roles.ToList()
         };
 
@@ -62,25 +59,42 @@ public class AuthService(
         {
             Email = request.Email,
             UserName = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName
+            PhoneNumber = request.Phone
         };
 
         var created = await _userManager.CreateAsync(user, request.Password);
         if (!created.Succeeded)
-            return Error.Unexpected();
-
-        // default role (e.g. Merchant)
-        await _userManager.AddToRoleAsync(user, request.Role.ToString());
-        if(request.Role == Roles.Merchant)
         {
-            var merchant = await _MerchantService.CreateAsync($"{request.FirstName} {request.LastName}",user.Id, "default.png", Plan.Free);
-            if (!merchant.IsSuccess)
-            {
-                await _userManager.DeleteAsync(user);
-                return merchant.Errors;
-            }
+            var errors = created.Errors
+                .Select(e => Error.Validation(e.Code,e.Description))
+                .ToList();
+
+            return errors;
         }
+
+
+        var createMerchant = new CreateMerchantRequest(
+            user.Id,
+            request.MerchantName,
+            request.Industry,
+            request.LogoUrl,
+            new CreateUserProfileRequest(
+                request.FirstName,
+                request.LastName,
+                request.Bio,
+                request.ProfileImageUrl,
+                request.Language
+            )
+        ); 
+        
+        var merchant = await _MerchantService.CreateAsync(createMerchant,default);
+        if (!merchant.IsSuccess)
+        {
+            await _userManager.DeleteAsync(user);
+            return merchant.Errors;
+        }
+        
+        await _userManager.AddToRoleAsync(user, Roles.Merchant.ToString());
 
         var roles = await _userManager.GetRolesAsync(user);
 
@@ -88,8 +102,6 @@ public class AuthService(
         {
             Id = user.Id,
             Email = user.Email!,
-            FirstName = user.FirstName!,
-            LastName = user.LastName!,
             Roles = roles.ToList()
         };
 
@@ -118,8 +130,6 @@ public class AuthService(
         {
             Id = user.Id,
             Email = user.Email!,
-            FirstName = user.FirstName!,
-            LastName = user.LastName!,
             Roles = roles.ToList(),
             OldRefreshToken = oldToken.Token
         };
