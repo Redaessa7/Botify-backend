@@ -7,8 +7,10 @@ namespace Botify.Domain.Models.Merchants
         // Validation
         public static Error FullNameRequired =>
             Error.Validation("Merchant.FullName.Required", "Full name is required.");
+        public static Error UserProfileRequired =>
+            Error.Validation("Merchant.UserProfile.Required", "UserProfile is required.");
 
-        public static Error ImageUrlRequired =>
+        public static Error LogoUrlRequired =>
             Error.Validation("Merchant.ImageUrl.Required", "Image URL is required.");
 
         // Status

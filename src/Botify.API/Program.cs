@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
+using Botify.API.Filters;
 using Botify.API.Validators;
+using Botify.Application.Common.Interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
@@ -9,7 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<EnvelopeResultFilter>();
+}).AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
@@ -42,6 +47,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+builder.Services.AddScoped<IUser, CurrentUser>();
 var app = builder.Build();
 
 // Seed roles

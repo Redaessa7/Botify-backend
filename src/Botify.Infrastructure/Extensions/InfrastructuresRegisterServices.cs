@@ -4,9 +4,11 @@ using Botify.Application.Services.Auths;
 using Botify.Infrastructure.Authentication;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
+using Botify.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -16,15 +18,18 @@ public static class InfrastructureRegisterServices
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        services.AddDbContext<ApplicationDbContext>((sp,options) =>
         {
+            
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
             options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
         });
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders()
-                ;
+                .AddDefaultTokenProviders();
+
         services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 
         services.AddAuthenticationJwtToken(configuration);
