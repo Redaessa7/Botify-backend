@@ -7,6 +7,7 @@ using Botify.Application.Requests;
 using Botify.Application.Responses;
 using Botify.Domain.ResultPattern;
 using Botify.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -88,7 +89,8 @@ public class JwtTokenProvider(
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
-            Expires = accessExpiresAt
+            AccessTokenExpires = accessExpiresAt,
+            RefreshTokenExpires = refreshExpiresAt
         };
     }
 

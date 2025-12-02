@@ -111,9 +111,9 @@ public class AuthService(
     // --------------------------
     // Refresh Token
     // --------------------------
-    public async Task<Result<TokenResponse>> RefreshTokenAsync(RefreshTokenRequest request)
+    public async Task<Result<TokenResponse>> RefreshTokenAsync(string refreshToken)
     {
-        var oldToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(t=> t.Token == request.RefreshToken);
+        var oldToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(t=> t.Token == refreshToken);
         if (oldToken is null)
             return IdentityErrors.RefreshTokenInvalid;
 
@@ -140,9 +140,9 @@ public class AuthService(
     // --------------------------
     // Logout = revoke refresh token
     // --------------------------
-    public async Task<Result<bool>> LogoutAsync(LogoutRequest request)
+    public async Task<Result<bool>> LogoutAsync(string refreshToken)
     {
-        var token =  await _dbContext.RefreshTokens.FirstOrDefaultAsync(t=> t.Token == request.RefreshToken);
+        var token =  await _dbContext.RefreshTokens.FirstOrDefaultAsync(t=> t.Token == refreshToken);
 
         if (token is null)
             return IdentityErrors.RefreshTokenInvalid;
