@@ -22,6 +22,7 @@ public sealed class UserProfile : AuditableEntity
         string firstName,
         string lastName,
         string? bio,
+        string profileImageUrl,
         string? language,
         string? timeZone
     ) : base(id)
@@ -32,6 +33,7 @@ public sealed class UserProfile : AuditableEntity
         Bio = bio;
         Language = language;
         TimeZone = timeZone;
+        ProfileImageUrl = profileImageUrl;
     }
 
     public static Result<UserProfile> Create(
@@ -40,6 +42,7 @@ public sealed class UserProfile : AuditableEntity
         string firstName,
         string lastName,
         string? bio = null,
+        string? profileImageUrl = null,
         string? language = null,
         string? timeZone = null
     )
@@ -59,6 +62,7 @@ public sealed class UserProfile : AuditableEntity
             firstName,
             lastName,
             bio,
+            profileImageUrl ?? string.Empty,
             language,
             timeZone
         );

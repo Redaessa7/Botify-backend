@@ -1,5 +1,6 @@
 ﻿using Botify.Application.Common.Interfaces;
 using Botify.Application.Services.Merchants.Requests;
+using Botify.Application.Services.Merchants.Responses;
 using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
@@ -12,10 +13,11 @@ namespace Botify.Application.Services.Merchants
     public class MerchantService : IMerchantService
     {
         private readonly IApplicationDbContext _db;
-
-        public MerchantService(IApplicationDbContext db)
+        private readonly IUser _user;
+        public MerchantService(IApplicationDbContext db, IUser user)
         {
             _db = db;
+            _user = user;
         }
 
         public async Task<Result<Merchant>> CreateAsync(CreateMerchantRequest request, CancellationToken cancellationToken = default)
@@ -26,6 +28,7 @@ namespace Botify.Application.Services.Merchants
                 request.Profile.FirstName,
                 request.Profile.LastName,
                 request.Profile.Bio,
+                request.Profile.ProfileImageUrl,
                 request.Profile.Language
             );
 
@@ -139,6 +142,19 @@ namespace Botify.Application.Services.Merchants
 
             await _db.SaveChangesAsync(cancellationToken);
             return result;
+        }
+
+        public async Task<Result<CurrentMerchantResponse>> GetCurrentMerchantAsync(CancellationToken cancellationToken = default)
+        {
+            var merchant = await _db.Merchants
+                .Include(m => m.Profile)
+                .Include(m => m.Subscription)
+                .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
+
+            if (merchant is null)
+                return Error.NotFound("Merchant.NotFound", "Merchant not found.");
+
+            return merchant.ToCurrentResponse();
         }
     }
 }

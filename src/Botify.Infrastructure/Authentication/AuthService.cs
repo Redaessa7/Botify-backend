@@ -15,15 +15,17 @@ using Microsoft.EntityFrameworkCore;
 namespace Botify.Infrastructure.Authentication;
 
 public class AuthService(
-    UserManager<ApplicationUser> userManager,
-    ITokenProvider tokenProvider,
-    ApplicationDbContext dbContext,
-    IMerchantService merchantService) : IAuthServices
+        UserManager<ApplicationUser> userManager,
+        IMerchantService merchantService,
+        ITokenProvider tokenProvider,
+        ApplicationDbContext dbContext,
+        IFileService fileService) : IAuthServices
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly IMerchantService _merchantService = merchantService;
     private readonly ITokenProvider _tokenProvider = tokenProvider;
+    private readonly IFileService _fileService = fileService;
     private readonly ApplicationDbContext _dbContext = dbContext;
-    private readonly IMerchantService _MerchantService = merchantService;
 
     // --------------------------
     // Login
@@ -50,63 +52,7 @@ public class AuthService(
         return await _tokenProvider.GenerateTokenAsync(generateTokenRequest,default);
     }
 
-    // --------------------------
-    // Register
-    // --------------------------
-    public async Task<Result<TokenResponse>> RegisterAsync(RegisterRequest request)
-    {
-        var user = new ApplicationUser
-        {
-            Email = request.Email,
-            UserName = request.Email,
-            PhoneNumber = request.Phone
-        };
 
-        var created = await _userManager.CreateAsync(user, request.Password);
-        if (!created.Succeeded)
-        {
-            var errors = created.Errors
-                .Select(e => Error.Validation(e.Code,e.Description))
-                .ToList();
-
-            return errors;
-        }
-
-
-        var createMerchant = new CreateMerchantRequest(
-            user.Id,
-            request.MerchantName,
-            request.Industry,
-            request.LogoUrl,
-            new CreateUserProfileRequest(
-                request.FirstName,
-                request.LastName,
-                request.Bio,
-                request.ProfileImageUrl,
-                request.Language
-            )
-        ); 
-        
-        var merchant = await _MerchantService.CreateAsync(createMerchant,default);
-        if (!merchant.IsSuccess)
-        {
-            await _userManager.DeleteAsync(user);
-            return merchant.Errors;
-        }
-        
-        await _userManager.AddToRoleAsync(user, Roles.Merchant.ToString());
-
-        var roles = await _userManager.GetRolesAsync(user);
-
-        var generateTokenRequest = new GenerateTokenRequest
-        {
-            Id = user.Id,
-            Email = user.Email!,
-            Roles = roles.ToList()
-        };
-
-        return await _tokenProvider.GenerateTokenAsync(generateTokenRequest,default);
-    }
 
     // --------------------------
     // Refresh Token
@@ -136,7 +82,102 @@ public class AuthService(
 
         return await _tokenProvider.GenerateTokenAsync(generateTokenRequest,default);
     }
+    public async Task<Result<TokenResponse>> RegisterAsync(RegisterRequest request)
+    {
+        // 1. Create Identity user
+        var user = new ApplicationUser
+        {
+            Email = request.Email,
+            UserName = request.Email,
+            PhoneNumber = request.Phone
+        };
 
+        var created = await _userManager.CreateAsync(user, request.Password);
+        if (!created.Succeeded)
+        {
+            var errors = created.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+
+            return errors;
+        }
+
+        // 2. Handle file uploads (Logo + ProfileImage)
+        string? logoUrl = null;
+        if (request.Logo is not null)
+        {
+            if (!_fileService.ValidateFile(request.Logo.FileName, request.Logo.ContentType, request.Logo.Length))
+            {
+                await _userManager.DeleteAsync(user);
+                return Error.Validation("File.InvalidLogo", "Logo file is invalid.");
+            }
+
+            var logoResult = await _fileService.SaveFileAsync(request.Logo.OpenReadStream(), request.Logo.FileName, "logos");
+            if (!logoResult.IsSuccess)
+            {
+                await _userManager.DeleteAsync(user);
+                return logoResult.Errors;
+            }
+
+            logoUrl = logoResult.Value;
+        }
+
+        string? profileImageUrl = null;
+        if (request.ProfileImage is not null)
+        {
+            if (!_fileService.ValidateFile(request.ProfileImage.FileName, request.ProfileImage.ContentType, request.ProfileImage.Length))
+            {
+                await _userManager.DeleteAsync(user);
+                return Error.Validation("File.InvalidProfileImage", "Profile image file is invalid.");
+            }
+
+            var profileResult = await _fileService.SaveFileAsync(request.ProfileImage.OpenReadStream(), request.ProfileImage.FileName, "profiles");
+            if (!profileResult.IsSuccess)
+            {
+                await _userManager.DeleteAsync(user);
+                return profileResult.Errors;
+            }
+
+            profileImageUrl = profileResult.Value;
+        }
+
+        // 3. Create merchant + profile
+        var createMerchant = new CreateMerchantRequest(
+            user.Id,
+            request.MerchantName,
+            request.Industry,
+            logoUrl,
+            new CreateUserProfileRequest(
+                request.FirstName,
+                request.LastName,
+                request.Bio,
+                profileImageUrl,
+                request.Language
+            )
+        );
+
+        var merchant = await _merchantService.CreateAsync(createMerchant, default);
+        if (!merchant.IsSuccess)
+        {
+            await _userManager.DeleteAsync(user);
+            return merchant.Errors;
+        }
+
+        // 4. Assign role
+        await _userManager.AddToRoleAsync(user, Roles.Merchant.ToString());
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        // 5. Generate token
+        var generateTokenRequest = new GenerateTokenRequest
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            Roles = roles.ToList()
+        };
+
+        return await _tokenProvider.GenerateTokenAsync(generateTokenRequest, default);
+    }
     // --------------------------
     // Logout = revoke refresh token
     // --------------------------
