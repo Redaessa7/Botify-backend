@@ -1,54 +1,84 @@
+using Botify.API.Extensions;
+using Botify.Application.Common.Interfaces;
 using Botify.Application.Requests;
+using Botify.Domain.Identity;
+using Botify.Domain.ResultPattern;
 using FluentValidation;
 
 namespace Botify.API.Validators;
 
 public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
-    public RegisterRequestValidator()
+    public RegisterRequestValidator(IFileService fileService)
     {
         // IdentityUser
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required.")
-            .EmailAddress().WithMessage("Invalid email format.");
+            .RequiredField(UserProfileErrors.EmailRequired)
+            .EmailAddress()
+                .WithMessage(UserProfileErrors.EmailInvalid.Description)
+                .WithErrorCode(UserProfileErrors.EmailInvalid.Code)
+                .WithState(_ => UserProfileErrors.EmailInvalid);
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(6).WithMessage("Password must be at least 6 characters.");
+            .RequiredField(UserProfileErrors.PasswordRequired)
+            .MinimumLength(6)
+                .WithMessage(UserProfileErrors.PasswordTooShort.Description)
+                .WithErrorCode(UserProfileErrors.PasswordTooShort.Code)
+                .WithState(_ => UserProfileErrors.PasswordTooShort);
 
         RuleFor(x => x.Phone)
-            .NotEmpty().WithMessage("Phone number is required.")
+            .RequiredField(UserProfileErrors.PhoneRequired)
             .Matches(@"^\+?[0-9]{8,15}$")
-            .WithMessage("Invalid phone number format.");
+                .WithMessage(UserProfileErrors.PhoneInvalid.Description)
+                .WithErrorCode(UserProfileErrors.PhoneInvalid.Code)
+                .WithState(_ => UserProfileErrors.PhoneInvalid);
 
         // Profile
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("First name is required.")
-            .Length(2, 50).WithMessage("First name must be between 2 and 50 characters.");
+            .RequiredField(UserProfileErrors.FirstNameRequired)
+            .Length(2, 50)
+                .WithMessage(UserProfileErrors.FirstNameLengthInvalid.Description)
+                .WithErrorCode(UserProfileErrors.FirstNameLengthInvalid.Code)
+                .WithState(_ => UserProfileErrors.FirstNameLengthInvalid);
 
         RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage("Last name is required.")
-            .Length(2, 50).WithMessage("Last name must be between 2 and 50 characters.");
+            .RequiredField(UserProfileErrors.LastNameRequired)
+            .Length(2, 50)
+                .WithMessage(UserProfileErrors.LastNameLengthInvalid.Description)
+                .WithErrorCode(UserProfileErrors.LastNameLengthInvalid.Code)
+                .WithState(_ => UserProfileErrors.LastNameLengthInvalid);
 
         RuleFor(x => x.Language)
             .Must(lang => string.IsNullOrEmpty(lang) || lang!.Length <= 5)
-            .WithMessage("Language code cannot exceed 5 characters.");
+                .WithMessage(UserProfileErrors.LanguageTooLong.Description)
+                .WithErrorCode(UserProfileErrors.LanguageTooLong.Code)
+                .WithState(_ => UserProfileErrors.LanguageTooLong);
 
         // Merchant
         RuleFor(x => x.MerchantName)
-            .NotEmpty().WithMessage("Merchant name is required.")
-            .MaximumLength(100).WithMessage("Merchant name cannot exceed 100 characters.");
+            .RequiredField(UserProfileErrors.MerchantNameRequired)
+            .MaximumLength(100)
+                .WithMessage(UserProfileErrors.MerchantNameTooLong.Description)
+                .WithErrorCode(UserProfileErrors.MerchantNameTooLong.Code)
+                .WithState(_ => UserProfileErrors.MerchantNameTooLong);
 
         RuleFor(x => x.Industry)
-            .NotEmpty().WithMessage("Industry is required.")
-            .MaximumLength(100).WithMessage("Industry cannot exceed 100 characters.");
+            .RequiredField(UserProfileErrors.IndustryRequired)
+            .MaximumLength(100)
+                .WithMessage(UserProfileErrors.IndustryTooLong.Description)
+                .WithErrorCode(UserProfileErrors.IndustryTooLong.Code)
+                .WithState(_ => UserProfileErrors.IndustryTooLong);
+        // File validation
+        RuleFor(x => x.Logo)
+            .Must(file => file == null || fileService.ValidateFile(file.FileName, file.ContentType, file.Length))
+                .WithMessage(UserProfileErrors.LogoUrlInvalid.Description)
+                .WithErrorCode(UserProfileErrors.LogoUrlInvalid.Code)
+                .WithState(_ => UserProfileErrors.LogoUrlInvalid);
 
-        RuleFor(x => x.LogoUrl)
-            .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
-            .WithMessage("LogoUrl must be a valid URL.");
-
-        RuleFor(x => x.ProfileImageUrl)
-            .Must(url => string.IsNullOrEmpty(url) || Uri.IsWellFormedUriString(url, UriKind.Absolute))
-            .WithMessage("ProfileImageUrl must be a valid URL.");
+        RuleFor(x => x.ProfileImage)
+            .Must(file => file == null || fileService.ValidateFile(file.FileName, file.ContentType, file.Length))
+                .WithMessage(UserProfileErrors.ProfileImageUrlInvalid.Description)
+                .WithErrorCode(UserProfileErrors.ProfileImageUrlInvalid.Code)
+                .WithState(_ => UserProfileErrors.ProfileImageUrlInvalid);
     }
 }

@@ -1,16 +1,19 @@
-using System.Text;
 using Botify.Application.Common.Interfaces;
 using Botify.Application.Services.Auths;
 using Botify.Infrastructure.Authentication;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
 using Botify.Infrastructure.Persistence.Interceptors;
+using Botify.Infrastructure.Services.FileServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -37,8 +40,8 @@ public static class InfrastructureRegisterServices
 
         services.AddScoped<ITokenProvider, JwtTokenProvider>();
         services.AddScoped<IAuthServices, AuthService>();
-        
 
+        services.AddFileService();
         return services;
     }
 
@@ -78,6 +81,13 @@ public static class InfrastructureRegisterServices
         return services;
     }
 
+    private static IServiceCollection AddFileService(this IServiceCollection services)
+    {
+        services.AddSingleton<IFileValidator, FileValidator>();
+        services.AddScoped<IFileService>(sp =>
+            new LocalFileService("uploads", sp.GetRequiredService<IFileValidator>(), sp.GetRequiredService<ILogger<LocalFileService>>()));
+        return services;
+    }
     public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
     {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();

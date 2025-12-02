@@ -1,38 +1,34 @@
 using Botify.API.Extensions;
 using Botify.Application.Requests;
 using Botify.Application.Services.Auths;
+using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Botify.API.Controllers;
 
-[ApiController]
 [Route("api/auth")]
-public class AuthController(IAuthServices authServices) : ControllerBase
+public class AuthController(IAuthServices authServices) : ApiController
 {
-    /// <summary>
-    /// Register new user
-    /// </summary>
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var result = await authServices.RegisterAsync(request);
+
         if (!result.IsSuccess)
-            return BadRequest(result.Errors);
+            return Problem(result.Errors);
 
         await HttpContext.SetTokenCookiesAsync(result.Value);
-        return Ok(new { message = "register merchant is successfully" });
+        return Ok(new { message = "Register merchant successfully" });
     }
 
-    /// <summary>
-    /// Login user
-    /// </summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var result = await authServices.LoginAsync(request);
+
         if (!result.IsSuccess)
-            return BadRequest(result.Errors);
+            return Problem(result.Errors);
 
         await HttpContext.SetTokenCookiesAsync(result.Value);
         return Ok(new { message = "Logged in successfully" });
@@ -42,53 +38,29 @@ public class AuthController(IAuthServices authServices) : ControllerBase
     public async Task<IActionResult> Refresh()
     {
         if (!Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
-        {
-               return Problem(
-                title: "Unauthorized",
-                detail: "Refresh token is missing",
-                statusCode: StatusCodes.Status401Unauthorized
-            );
-        }
+            return Problem([Error.Unauthorized("RefreshToken.Missing", "Refresh token is missing")]);
 
         var result = await authServices.RefreshTokenAsync(refreshToken);
 
         if (!result.IsSuccess)
-        {
-             return Problem(
-                title: "Unauthorized",
-                detail: string.Join(", ", result.Errors),
-                statusCode: StatusCodes.Status401Unauthorized
-            );
-        }
+            return Problem(result.Errors);
 
-        var tokens = result.Value;
-        await HttpContext.SetTokenCookiesAsync(tokens);
-
+        await HttpContext.SetTokenCookiesAsync(result.Value);
         return Ok(new { message = "Token refreshed successfully" });
     }
 
-    /// <summary>
-    /// Logout user
-    /// </summary>
     [HttpPost("logout")]
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        // Optionally, revoke refresh token in DB if you want full logout server-side
-        // await authServices.LogoutAsync(UserIdFromClaims);
         if (!Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
-        {
-            return Unauthorized(new { message = "Refresh token is missing" });
-        }
+            return Problem([Error.Unauthorized("RefreshToken.Missing", "Refresh token is missing")]);
 
         var result = await authServices.LogoutAsync(refreshToken);
 
         if (!result.IsSuccess)
-        {
-            return Unauthorized(result.Errors);
-        }
+            return Problem(result.Errors);
 
-        // Delete auth cookies
         Response.Cookies.Delete("access_token");
         Response.Cookies.Delete("refresh_token");
 
@@ -101,10 +73,9 @@ public class AuthController(IAuthServices authServices) : ControllerBase
     {
         var userInfo = User.UserInfo();
 
-        if (userInfo.Id == null || userInfo.Email == null)
-            return Unauthorized();
+        if (string.IsNullOrEmpty(userInfo.Id) || string.IsNullOrEmpty(userInfo.Email))
+            return Problem([Error.Unauthorized("User.Invalid", "User info is missing")]);
 
         return Ok(userInfo);
     }
-
 }

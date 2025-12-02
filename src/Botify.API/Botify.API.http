@@ -10,8 +10,8 @@ Content-Type: application/json
   "email": "owner@myshop.com",
   "password": "StrongPass123!",
   "phone": "+201234567890",
-  "firstName": "Reda",
-  "lastName": "Ahmed",
+  "firstName": "",
+  "lastName": "gdgf",
   "bio": "Merchant owner using Botify platform",
   "profileImageUrl": "https://cdn.example.com/profiles/reda.png",
   "language": "en",
@@ -40,8 +40,8 @@ POST {{baseurl}}/api/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "owner@myshop.com",
-  "password": "StrongPass123!"
+  "email": "merchant12@example.com",
+  "password": "StrongPass12W@@a3"
 }
 
 ### user info
@@ -49,6 +49,7 @@ GET {{baseurl}}/api/auth/user
 
 ### Refresh Token
 POST {{baseurl}}/api/auth/refresh-token
-
+###
+GET {{baseurl}}/api/merchants/me
 ### Logout
 POST {{baseurl}}/api/auth/logout
