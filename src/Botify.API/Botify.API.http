@@ -44,19 +44,11 @@ Content-Type: {{contentType}}
   "password": "StrongPass123!"
 }
 
-### Refresh Token
-POST {{baseurl}}/api/auth/refresh
-Content-Type: {{contentType}}
+### user info
+GET {{baseurl}}/api/auth/user
 
-{
-  "refreshToken": "PUT_REFRESH_TOKEN_HERE"
-}
+### Refresh Token
+POST {{baseurl}}/api/auth/refresh-token
 
 ### Logout
 POST {{baseurl}}/api/auth/logout
-Content-Type: {{contentType}}
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlZmQ5NGQ5YS01MTM2LTRlM2UtYmE5Zi02YjFmOGYxYTJhYzMiLCJlbWFpbCI6InJlZGFAZXhhbXBsZS5jb20iLCJnaXZlbl9uYW1lIjoiUmVkYSIsImZhbWlseV9uYW1lIjoiRXNzYSIsIm5iZiI6MTc2NDQzNTI1NCwiZXhwIjoxNzY0NDM2NDU0LCJpYXQiOjE3NjQ0MzUyNTQsImlzcyI6Imh0dHBzOi8vYXBpLkJvdGlmeS5jb20iLCJhdWQiOiJodHRwczovL0JvdGlmeS5jb20ifQ.sJ8-7siBjjjEkl7Y2ivn_FSaV3zX-npPNm15L-qUUJc
-
-{
-  "refreshToken": "s4y5TL0zpMC+l72FY8s53nO6Y3IV1hZjwcOXkpSQlcCss5e3lQweoxyKnlbOwCC9wMAk0BuEC9PGjQCwQzE1uA=="
-}

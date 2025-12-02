@@ -10,7 +10,7 @@ public interface IAuthServices
 
     Task<Result<TokenResponse>> RegisterAsync(RegisterRequest request);
 
-    Task<Result<TokenResponse>> RefreshTokenAsync(RefreshTokenRequest request);
+    Task<Result<TokenResponse>> RefreshTokenAsync(string refreshToken);
 
-    Task<Result<bool>> LogoutAsync(LogoutRequest request);
+    Task<Result<bool>> LogoutAsync(string refreshToken);
 }
