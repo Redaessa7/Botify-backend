@@ -18,7 +18,7 @@ builder.Services
     .AddControllers(options =>
     {
         options.Filters.Add<EnvelopeResultFilter>();
-        options.Filters.Add<FluentValidationFilter>();
+        //options.Filters.Add<FluentValidationFilter>();
     })
     .ConfigureJsonConverters();
 

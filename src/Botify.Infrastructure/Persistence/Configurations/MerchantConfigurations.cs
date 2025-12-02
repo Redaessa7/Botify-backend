@@ -21,6 +21,13 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(m => m.Status)
                    .IsRequired();
 
+            builder.Property(m => m.MerchantName)
+                   .IsRequired()
+                   .HasMaxLength(200);
+
+            builder.Property(m => m.Industry)
+                .IsRequired();
+
             builder.Property(m => m.VerifiedAt);
 
             // One-to-one relationship with Subscription

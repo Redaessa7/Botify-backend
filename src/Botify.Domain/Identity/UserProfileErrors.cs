@@ -6,58 +6,43 @@ public static class UserProfileErrors
 {
     // Identity
     public static readonly Error IdentityUserIdRequired =
-        Error.Validation("Profile.IdentityUserIdRequired", "IdentityUserId is required.");
+        Error.Validation("Profile.IdentityUserId.Required", "IdentityUserId is required.");
 
     public static readonly Error EmailRequired =
-        Error.Validation("Profile.EmailRequired", "Email is required.");
+        Error.Validation("Profile.Email.Required", "Email is required.");
 
     public static readonly Error EmailInvalid =
-        Error.Validation("Profile.EmailInvalid", "Invalid email format.");
+        Error.Validation("Profile.Email.Invalid", "Invalid email format.");
 
     public static readonly Error PasswordRequired =
-        Error.Validation("Profile.PasswordRequired", "Password is required.");
+        Error.Validation("Profile.Password.Required", "Password is required.");
 
     public static readonly Error PasswordTooShort =
-        Error.Validation("Profile.PasswordTooShort", "Password must be at least 6 characters.");
+        Error.Validation("Profile.Password.TooShort", "Password must be at least 6 characters.");
 
     public static readonly Error PhoneRequired =
-        Error.Validation("Profile.PhoneRequired", "Phone number is required.");
+        Error.Validation("Profile.Phone.Required", "Phone number is required.");
 
     public static readonly Error PhoneInvalid =
-        Error.Validation("Profile.PhoneInvalid", "Invalid phone number format.");
+        Error.Validation("Profile.Phone.Invalid", "Invalid phone number format.");
 
-    // Profile
+    // Personal Info
     public static readonly Error FirstNameRequired =
-        Error.Validation("Profile.FirstNameRequired", "First name is required.");
+        Error.Validation("Profile.FirstName.Required", "First name is required.");
 
     public static readonly Error FirstNameLengthInvalid =
-        Error.Validation("Profile.FirstNameLengthInvalid", "First name must be between 2 and 50 characters.");
+        Error.Validation("Profile.FirstName.LengthInvalid", "First name must be between 2 and 50 characters.");
 
     public static readonly Error LastNameRequired =
-        Error.Validation("Profile.LastNameRequired", "Last name is required.");
+        Error.Validation("Profile.LastName.Required", "Last name is required.");
 
     public static readonly Error LastNameLengthInvalid =
-        Error.Validation("Profile.LastNameLengthInvalid", "Last name must be between 2 and 50 characters.");
+        Error.Validation("Profile.LastName.LengthInvalid", "Last name must be between 2 and 50 characters.");
 
     public static readonly Error LanguageTooLong =
-        Error.Validation("Profile.LanguageTooLong", "Language code cannot exceed 5 characters.");
+        Error.Validation("Profile.Language.TooLong", "Language code cannot exceed 5 characters.");
 
-    // Merchant
-    public static readonly Error MerchantNameRequired =
-        Error.Validation("Profile.MerchantNameRequired", "Merchant name is required.");
-
-    public static readonly Error MerchantNameTooLong =
-        Error.Validation("Profile.MerchantNameTooLong", "Merchant name cannot exceed 100 characters.");
-
-    public static readonly Error IndustryRequired =
-        Error.Validation("Profile.IndustryRequired", "Industry is required.");
-
-    public static readonly Error IndustryTooLong =
-        Error.Validation("Profile.IndustryTooLong", "Industry cannot exceed 100 characters.");
-
-    public static readonly Error LogoUrlInvalid =
-        Error.Validation("Profile.LogoUrlInvalid", "LogoUrl must be a valid URL.");
-
+    // Media
     public static readonly Error ProfileImageUrlInvalid =
-        Error.Validation("Profile.ProfileImageUrlInvalid", "ProfileImageUrl must be a valid URL.");
+        Error.Validation("Profile.ImageUrl.Invalid", "ProfileImageUrl must be a valid URL.");
 }

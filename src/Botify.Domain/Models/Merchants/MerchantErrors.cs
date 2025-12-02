@@ -1,46 +1,52 @@
 ﻿using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants
+namespace Botify.Domain.Models.Merchants;
+
+public static class MerchantErrors
 {
-    public static class MerchantErrors
-    {
-        // Validation
-        public static Error FullNameRequired =>
-            Error.Validation("Merchant.FullName.Required", "Full name is required.");
-        public static Error UserProfileRequired =>
-            Error.Validation("Merchant.UserProfile.Required", "UserProfile is required.");
+    // General Validation
+    public static Error IdRequired =>
+        Error.Validation("Merchant.General.Id.Required", "Merchant ID is required.");
 
-        public static Error LogoUrlRequired =>
-            Error.Validation("Merchant.ImageUrl.Required", "Image URL is required.");
+    public static Error MerchantNameRequired =>
+        Error.Validation("Merchant.General.Name.Required", "Merchant name is required.");
 
-        // Status
-        public static Error NotPending =>
-            Error.Conflict("Merchant.NotPending", "Merchant must be pending to approve.");
+    public static Error MerchantNameTooLong =>
+        Error.Validation("Merchant.General.Name.TooLong", "Merchant name cannot exceed 100 characters.");
 
-        public static Error NotApproved =>
-            Error.Conflict("Merchant.NotApproved", "Merchant must be approved before this action.");
+    public static Error IndustryRequired =>
+        Error.Validation("Merchant.General.Industry.Required", "Industry is required.");
 
-        public static Error Suspended =>
-            Error.Forbidden("Merchant.Suspended", "Merchant is suspended and cannot perform this action.");
+    public static Error IndustryTooLong =>
+        Error.Validation("Merchant.General.Industry.TooLong", "Industry cannot exceed 100 characters.");
 
-        // Shop
-        public static Error ShopIncomplete =>
-            Error.Validation("Shop.Incomplete", "Shop details must be complete before adding or activating bots.");
+    public static Error LogoUrlRequired =>
+        Error.Validation("Merchant.General.LogoUrl.Required", "Logo URL is required.");
 
-        // Subscription
-        public static Error SubscriptionExpired =>
-            Error.Unauthorized("Subscription.Expired", "Subscription expired. Please renew.");
+    public static Error LogoUrlInvalid =>
+        Error.Validation("Merchant.General.LogoUrl.Invalid", "Logo URL must be a valid URL.");
 
-        public static Error PlanLimitReached =>
-            Error.Conflict("Plan.LimitReached", "Plan limit reached. Upgrade required.");
-        public static readonly Error NotFound =
-    Error.NotFound("Merchant.NotFound", "The specified merchant could not be found.");
+    public static Error UserProfileRequired =>
+        Error.Validation("Merchant.General.UserProfile.Required", "User profile is required.");
 
-        // Bot
-        public static Error BotNotFound =>
-            Error.NotFound("Bot.NotFound", "Bot not found.");
+    // Status
+    public static Error NotPending =>
+        Error.Conflict("Merchant.Status.NotPending", "Merchant must be pending to approve.");
 
-        public static Error BotPlatformConflict =>
-            Error.Conflict("Bot.PlatformConflict", "Only one bot can be active per platform.");
-    }
+    public static Error NotApproved =>
+        Error.Conflict("Merchant.Status.NotApproved", "Merchant must be approved before this action.");
+
+    public static Error Suspended =>
+        Error.Forbidden("Merchant.Status.Suspended", "Merchant is suspended and cannot perform this action.");
+
+    // Subscription
+    public static Error SubscriptionExpired =>
+        Error.Unauthorized("Merchant.Subscription.Expired", "Subscription expired. Please renew.");
+
+    public static Error PlanLimitReached =>
+        Error.Conflict("Merchant.Subscription.PlanLimitReached", "Plan limit reached. Upgrade required.");
+
+    // Lookup
+    public static Error NotFound =>
+        Error.NotFound("Merchant.Lookup.NotFound", "The specified merchant could not be found.");
 }
