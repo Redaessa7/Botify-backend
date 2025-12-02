@@ -10,8 +10,9 @@ namespace Botify.Domain.Models.Merchants
 {
     public sealed class Merchant : AuditableEntity
     {
-        public string MerchantName { get; set; }
-        public string LogoUrl { get; private set; }
+        public string MerchantName { get; private set; }
+        public string Industry { get; private set; }
+        public string? LogoUrl { get; private set; }
         public MerchantStatus Status { get; private set; }
         public DateTime? VerifiedAt { get; private set; }
         public Guid UserProfileId { get; private set; }
@@ -25,23 +26,34 @@ namespace Botify.Domain.Models.Merchants
 
         private Merchant() { }
 
-        private Merchant(Guid id, string merchantName,UserProfile userProfile,string? logoUrl, Plan plan = Plan.Free) : base(id)
+        private Merchant(Guid id, string merchantName, string industry, UserProfile userProfile, string? logoUrl, Plan plan = Plan.Free)
+            : base(id)
         {
-            UserProfileId = userProfile.Id; 
+            UserProfileId = userProfile.Id;
+            MerchantName = merchantName;
+            Industry = industry;
             LogoUrl = logoUrl;
             Status = MerchantStatus.Pending;
-            MerchantName = merchantName;
             Subscription = MerchantSubscription.Start(Id, plan);
         }
 
-        public static Result<Merchant> Create(Guid id,string merchantName,UserProfile userProfile, string? LogoUrl)
+        public static Result<Merchant> Create(Guid id, string merchantName, string industry, UserProfile userProfile, string? logoUrl)
         {
+            if (id == Guid.Empty)
+                return MerchantErrors.IdRequired;
+
+            if (string.IsNullOrWhiteSpace(merchantName))
+                return MerchantErrors.MerchantNameRequired;
+
+            if (string.IsNullOrWhiteSpace(industry))
+                return MerchantErrors.IndustryRequired;
 
             if (userProfile is null)
                 return MerchantErrors.UserProfileRequired;
 
-            return new Merchant(id,merchantName,userProfile, LogoUrl);
+            return new Merchant(id, merchantName, industry, userProfile, logoUrl);
         }
+
 
         public Result<Success> Approve()
         {
@@ -59,7 +71,7 @@ namespace Botify.Domain.Models.Merchants
         {
             var bot = _bots.FirstOrDefault(b => b.Id == botId);
             if (bot == null)
-                return MerchantErrors.BotNotFound;
+                return BotErrors.BotNotFound;
 
             bot.Enable();
             DomainEventDispatcher.Raise(new BotActivated(Id, bot.Id, bot.TargetPlatform.ToString()));
@@ -72,7 +84,7 @@ namespace Botify.Domain.Models.Merchants
             return Result.Success;
         }
 
-        public Result<Success> AssignShopDetails(ShopSettings settings)
+        public Result<Success> AssignShop(ShopSettings settings)
         {
             if (Status != MerchantStatus.Approved)
                 return MerchantErrors.NotApproved;
@@ -81,10 +93,10 @@ namespace Botify.Domain.Models.Merchants
             return Result.Success;
         }
 
-        public Result<Success> AddBotConfig(Bot bot)
+        public Result<Success> AddBot(Bot bot)
         {
             if (ShopSettings == null || !ShopSettings.IsComplete())
-                return MerchantErrors.ShopIncomplete;
+                return ShopErrors.ShopIncomplete;
 
             if (!Subscription.IsActive())
                 return MerchantErrors.SubscriptionExpired;
@@ -93,7 +105,7 @@ namespace Botify.Domain.Models.Merchants
                 return MerchantErrors.PlanLimitReached;
 
             if (Bots.Any(b => b.Enabled && b.TargetPlatform == bot.TargetPlatform))
-                return MerchantErrors.BotPlatformConflict;
+                return BotErrors.BotPlatformConflict;
 
             _bots.Add(bot);
             return Result.Success;
@@ -103,7 +115,7 @@ namespace Botify.Domain.Models.Merchants
         {
             var bot = _bots.FirstOrDefault(b => b.Id == botId);
             if (bot == null)
-                return MerchantErrors.BotNotFound;
+                return BotErrors.BotNotFound;
 
             bot.Disable();
             return Result.Success;

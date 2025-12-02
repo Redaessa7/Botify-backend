@@ -141,6 +141,10 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Industry")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 

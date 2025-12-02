@@ -4,6 +4,7 @@ using Botify.Application.Services.Auths;
 using Botify.Application.Services.Merchants;
 using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Botify.API.Controllers;
@@ -18,8 +19,7 @@ public class MerchantController(IMerchantService merchantService) : ApiControlle
     public async Task<IActionResult> GetCurrentMerchant()
     {
         var result = await _merchantService.GetCurrentMerchantAsync();
-        if (!result.IsSuccess)
-            return Problem(result.Errors);
-        return Ok(result.Value);
+
+        return result.Match(value => Ok(value), Problem);
     }
 }

@@ -82,8 +82,20 @@ public class AuthService(
 
         return await _tokenProvider.GenerateTokenAsync(generateTokenRequest,default);
     }
+
+    private async Task<Result<bool>> IsDuplicateEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        var exists = await _dbContext.Users
+            .AnyAsync(u => u.Email == email, cancellationToken);
+
+        return exists;
+    }
     public async Task<Result<TokenResponse>> RegisterAsync(RegisterRequest request)
     {
+        if ((await IsDuplicateEmailAsync(request.Email)).Value)
+        {
+            return IdentityErrors.EmailAlreadyExists;
+        }
         // 1. Create Identity user
         var user = new ApplicationUser
         {

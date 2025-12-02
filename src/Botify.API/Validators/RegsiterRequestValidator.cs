@@ -2,6 +2,7 @@ using Botify.API.Extensions;
 using Botify.Application.Common.Interfaces;
 using Botify.Application.Requests;
 using Botify.Domain.Identity;
+using Botify.Domain.Models.Merchants;
 using Botify.Domain.ResultPattern;
 using FluentValidation;
 
@@ -56,24 +57,24 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
         // Merchant
         RuleFor(x => x.MerchantName)
-            .RequiredField(UserProfileErrors.MerchantNameRequired)
+            .RequiredField(MerchantErrors.MerchantNameRequired)
             .MaximumLength(100)
-                .WithMessage(UserProfileErrors.MerchantNameTooLong.Description)
-                .WithErrorCode(UserProfileErrors.MerchantNameTooLong.Code)
-                .WithState(_ => UserProfileErrors.MerchantNameTooLong);
+                .WithMessage(MerchantErrors.MerchantNameTooLong.Description)
+                .WithErrorCode(MerchantErrors.MerchantNameTooLong.Code)
+                .WithState(_ => MerchantErrors.MerchantNameTooLong);
 
         RuleFor(x => x.Industry)
-            .RequiredField(UserProfileErrors.IndustryRequired)
+            .RequiredField(MerchantErrors.IndustryRequired)
             .MaximumLength(100)
-                .WithMessage(UserProfileErrors.IndustryTooLong.Description)
-                .WithErrorCode(UserProfileErrors.IndustryTooLong.Code)
-                .WithState(_ => UserProfileErrors.IndustryTooLong);
+                .WithMessage(MerchantErrors.IndustryTooLong.Description)
+                .WithErrorCode(MerchantErrors.IndustryTooLong.Code)
+                .WithState(_ => MerchantErrors.IndustryTooLong);
         // File validation
         RuleFor(x => x.Logo)
             .Must(file => file == null || fileService.ValidateFile(file.FileName, file.ContentType, file.Length))
-                .WithMessage(UserProfileErrors.LogoUrlInvalid.Description)
-                .WithErrorCode(UserProfileErrors.LogoUrlInvalid.Code)
-                .WithState(_ => UserProfileErrors.LogoUrlInvalid);
+                .WithMessage(MerchantErrors.LogoUrlInvalid.Description)
+                .WithErrorCode(MerchantErrors.LogoUrlInvalid.Code)
+                .WithState(_ => MerchantErrors.LogoUrlInvalid);
 
         RuleFor(x => x.ProfileImage)
             .Must(file => file == null || fileService.ValidateFile(file.FileName, file.ContentType, file.Length))

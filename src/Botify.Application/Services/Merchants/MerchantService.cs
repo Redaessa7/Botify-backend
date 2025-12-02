@@ -34,14 +34,13 @@ namespace Botify.Application.Services.Merchants
 
             if (!profileResult.IsSuccess)
                 return profileResult.Errors;
-
+            
             var profile = profileResult.Value;
-
             _db.UserProfiles.Add(profile);
-
             var merchantResult = Merchant.Create(
                 Guid.NewGuid(),
                 request.MerchantName,
+                request.Industry,
                 profile,
                 request.LogoUrl
             );
@@ -63,7 +62,7 @@ namespace Botify.Application.Services.Merchants
         {
             var merchant = await _db.Merchants.FirstOrDefaultAsync(x => x.Id == merchantId,cancellationToken);
             if (merchant is null)
-                return MerchantErrors.NotFound; // you may add MerchantErrors.NotFound
+                return MerchantErrors.NotFound; 
 
             var result = merchant.Approve();
             if (!result.IsSuccess) return result;
@@ -76,36 +75,36 @@ namespace Botify.Application.Services.Merchants
         {
             var merchant = await _db.Merchants.FindAsync(new object[] { merchantId }, cancellationToken);
             if (merchant is null)
-                return MerchantErrors.BotNotFound;
+                return BotErrors.BotNotFound;
 
             var result = merchant.Suspend(reason);
             await _db.SaveChangesAsync(cancellationToken);
             return result;
         }
 
-        public async Task<Result<Success>> AssignShopDetailsAsync(Guid merchantId, ShopSettings settings, CancellationToken cancellationToken = default)
+        public async Task<Result<Success>> AssignShopAsync(Guid merchantId, ShopSettings settings, CancellationToken cancellationToken = default)
         {
             var merchant = await _db.Merchants.FindAsync(new object[] { merchantId }, cancellationToken);
             if (merchant is null)
-                return MerchantErrors.BotNotFound;
+                return BotErrors.BotNotFound;
 
-            var result = merchant.AssignShopDetails(settings);
+            var result = merchant.AssignShop(settings);
             if (!result.IsSuccess) return result;
 
             await _db.SaveChangesAsync(cancellationToken);
             return result;
         }
 
-        public async Task<Result<Success>> AddBotConfigAsync(Guid merchantId, Bot bot, CancellationToken cancellationToken = default)
+        public async Task<Result<Success>> AddBotAsync(Guid merchantId, Bot bot, CancellationToken cancellationToken = default)
         {
             var merchant = await _db.Merchants
                 .Include(m => m.Bots)
                 .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
 
             if (merchant is null)
-                return MerchantErrors.BotNotFound;
+                return BotErrors.BotNotFound;
 
-            var result = merchant.AddBotConfig(bot);
+            var result = merchant.AddBot(bot);
             if (!result.IsSuccess) return result;
 
             await _db.SaveChangesAsync(cancellationToken);
@@ -119,7 +118,7 @@ namespace Botify.Application.Services.Merchants
                 .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
 
             if (merchant is null)
-                return MerchantErrors.BotNotFound;
+                return BotErrors.BotNotFound;
 
             var result = merchant.ActivateBot(botId);
             if (!result.IsSuccess) return result;
@@ -135,7 +134,7 @@ namespace Botify.Application.Services.Merchants
                 .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
 
             if (merchant is null)
-                return MerchantErrors.BotNotFound;
+                return MerchantErrors.NotFound;
 
             var result = merchant.DeactivateBot(botId);
             if (!result.IsSuccess) return result;
@@ -152,7 +151,9 @@ namespace Botify.Application.Services.Merchants
                 .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
 
             if (merchant is null)
-                return Error.NotFound("Merchant.NotFound", "Merchant not found.");
+            {
+                return MerchantErrors.NotFound;
+            }
 
             return merchant.ToCurrentResponse();
         }
