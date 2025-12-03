@@ -95,17 +95,17 @@ namespace Botify.Domain.Models.Merchants
 
         public Result<Success> AddBot(Bot bot)
         {
-            if (ShopSettings == null || !ShopSettings.IsComplete())
-                return ShopErrors.ShopIncomplete;
+            //if (ShopSettings == null || !ShopSettings.IsComplete())
+            //    return ShopErrors.ShopIncomplete;
 
-            if (!Subscription.IsActive())
-                return MerchantErrors.SubscriptionExpired;
+            //if (!Subscription.IsActive())
+            //    return MerchantErrors.SubscriptionExpired;
 
-            if (!CanCreateBot())
-                return MerchantErrors.PlanLimitReached;
+            //if (!CanCreateBot())
+            //    return MerchantErrors.PlanLimitReached;
 
-            if (Bots.Any(b => b.Enabled && b.TargetPlatform == bot.TargetPlatform))
-                return BotErrors.BotPlatformConflict;
+            //if (Bots.Any(b => b.Enabled && b.TargetPlatform == bot.TargetPlatform))
+            //    return BotErrors.BotPlatformConflict;
 
             _bots.Add(bot);
             return Result.Success;
@@ -125,7 +125,7 @@ namespace Botify.Domain.Models.Merchants
         {
             return Subscription.CurrentPlan switch
             {
-                Plan.Free => _bots.Count < 1,
+                Plan.Free => _bots.Count <= 1,
                 Plan.Pro => _bots.Count < 3,
                 Plan.Enterprise => true,
                 _ => false

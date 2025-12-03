@@ -4,6 +4,7 @@ using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Shops;
 using Botify.Domain.ResultPattern;
+using static Botify.Application.Services.Merchants.MerchantService;
 
 namespace Botify.Application.Services.Merchants
 {
@@ -14,7 +15,7 @@ namespace Botify.Application.Services.Merchants
         Task<Result<Success>> ApproveAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<Success>> SuspendAsync(Guid merchantId, string reason, CancellationToken cancellationToken = default);
         Task<Result<Success>> AssignShopAsync(Guid merchantId, ShopSettings settings, CancellationToken cancellationToken = default);
-        Task<Result<Success>> AddBotAsync(Guid merchantId, Bot bot, CancellationToken cancellationToken = default);
+        Task<Result<Success>> AddBotAsync(Guid merchantId, CreateBotRequest request, CancellationToken cancellationToken = default);
         Task<Result<Success>> ActivateBotAsync(Guid merchantId, Guid botId, CancellationToken cancellationToken = default);
         Task<Result<Success>> DeactivateBotAsync(Guid merchantId, Guid botId, CancellationToken cancellationToken = default);
     }
