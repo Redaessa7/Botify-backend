@@ -19,7 +19,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(b => b.Enabled).IsRequired();
             builder.Property(b => b.PlatformVerified).IsRequired();
             builder.Property(b => b.IsPrimary).IsRequired();
-            builder.Property(b => b.TargetPlatform).HasConversion(o => o.Name.ToLower(), c => new BotPlatform(c));
+            builder.Property(b => b.Platform).HasConversion(o => o.Name.ToLower(), c => new BotPlatform(c));
         }
     }
 
