@@ -5,12 +5,13 @@ using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Shops;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 
 namespace Botify.Application.Services.Merchants
 {
-    public class MerchantService : IMerchantService
+    public partial class MerchantService : IMerchantService
     {
         private readonly IApplicationDbContext _db;
         private readonly IUser _user;
@@ -95,18 +96,22 @@ namespace Botify.Application.Services.Merchants
             return result;
         }
 
-        public async Task<Result<Success>> AddBotAsync(Guid merchantId, Bot bot, CancellationToken cancellationToken = default)
+        public async Task<Result<Success>> AddBotAsync(Guid merchantId,CreateBotRequest request, CancellationToken cancellationToken = default)
         {
             var merchant = await _db.Merchants
                 .Include(m => m.Bots)
                 .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
 
             if (merchant is null)
-                return BotErrors.BotNotFound;
+                return MerchantErrors.NotFound;
 
-            var result = merchant.AddBot(bot);
+            var botResult = Bot.Create(Guid.NewGuid(), merchantId, request.Name.Trim(), request.ApiToken.Trim(), request.Platform.Trim());
+            if (!botResult.IsSuccess)
+                return botResult.Errors;
+            var result = merchant.AddBot(botResult.Value);
             if (!result.IsSuccess) return result;
 
+            _db.Bots.Add(botResult.Value);
             await _db.SaveChangesAsync(cancellationToken);
             return result;
         }

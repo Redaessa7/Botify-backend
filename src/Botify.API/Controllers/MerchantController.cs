@@ -6,6 +6,7 @@ using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using static Botify.Application.Services.Merchants.MerchantService;
 
 namespace Botify.API.Controllers;
 
@@ -20,6 +21,15 @@ public class MerchantController(IMerchantService merchantService) : ApiControlle
     {
         var result = await _merchantService.GetCurrentMerchantAsync();
 
+        return result.Match(value => Ok(value), Problem);
+    }
+
+
+    [HttpPost("{merchantId:guid}/bots")]
+    [Authorize]
+    public async Task<IActionResult> CreateBotAsync(Guid merchantId,CreateBotRequest request)
+    {
+        var result = await _merchantService.AddBotAsync(merchantId,request);
         return result.Match(value => Ok(value), Problem);
     }
 }

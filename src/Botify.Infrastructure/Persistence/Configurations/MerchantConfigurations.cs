@@ -1,4 +1,5 @@
 ﻿using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.Bots;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +16,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.HasKey(m => m.Id);
 
             builder.Property(m => m.LogoUrl)
-                   .IsRequired()
+                   .IsRequired(false)
                    .HasMaxLength(500);
 
             builder.Property(m => m.Status)
@@ -55,12 +56,15 @@ namespace Botify.Infrastructure.Persistence.Configurations
                 shop.ToTable("ShopSettings");
             });
 
-            // One-to-many relationship with BotConfigs
+            // One-to-many relationship with Bots using private backing field
             builder.HasMany(m => m.Bots)
                    .WithOne()
                    .HasForeignKey(b => b.MerchantId)
                    .OnDelete(DeleteBehavior.Cascade);
 
+            // Tell EF to use the private field "_bots" for change tracking
+            builder.Navigation(m => m.Bots)
+                   .UsePropertyAccessMode(PropertyAccessMode.Field);
             builder.HasOne(m => m.Profile)
                     .WithOne()
                     .HasForeignKey<Merchant>(m => m.UserProfileId)
