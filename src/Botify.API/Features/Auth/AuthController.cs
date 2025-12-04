@@ -1,11 +1,12 @@
-using Botify.API.Extensions;
+using Botify.API.CrossCutting.Controllers;
+using Botify.API.CrossCutting.Extensions;
 using Botify.Application.Requests;
 using Botify.Application.Services.Auths;
 using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Botify.API.Controllers;
+namespace Botify.API.Features.Auth;
 
 [Route("api/auth")]
 public class AuthController(IAuthServices authServices) : ApiController
@@ -90,7 +91,7 @@ public class AuthController(IAuthServices authServices) : ApiController
     [Authorize]
     public IActionResult GetUserInfo()
     {
-        var userInfo = User.UserInfo();
+        var userInfo = UserInfo();
 
         if (string.IsNullOrEmpty(userInfo.Id) || string.IsNullOrEmpty(userInfo.Email))
             return Problem([Error.Unauthorized("User.Invalid", "User info is missing")]);

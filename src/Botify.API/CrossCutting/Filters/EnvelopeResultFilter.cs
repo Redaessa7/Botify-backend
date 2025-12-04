@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Botify.API.Filters;
+namespace Botify.API.CrossCutting.Filters;
 
 public class EnvelopeResultFilter : IAsyncResultFilter
 {

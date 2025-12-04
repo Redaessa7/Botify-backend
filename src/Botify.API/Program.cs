@@ -1,4 +1,6 @@
-using Botify.API.Filters;
+using System.Text.Json.Serialization;
+using Botify.API.CrossCutting.Filters;
+using Botify.API.CrossCutting.Setup;
 using Botify.API.Validators;
 using FluentValidation;
 
@@ -20,16 +22,9 @@ builder.Services
         options.Filters.Add<EnvelopeResultFilter>();
         //options.Filters.Add<FluentValidationFilter>();
     })
-    .ConfigureJsonConverters();
+    .AddJsonOptions(options =>{ options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
-builder.Services
-    .AddPresentation(builder.Configuration, builder.Environment)
-    .AddApplicationServices(builder.Configuration)
-    .AddInfrastructureServices(builder.Configuration);
-
-// FluentValidation
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
-
+builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment);
 
 
 
@@ -56,6 +51,5 @@ app.UseRouting();
 app.UseCoreMiddlewares(builder.Configuration);
 
 app.MapControllers();
-app.MapFallbackToFile("index.html");
 
 app.Run();

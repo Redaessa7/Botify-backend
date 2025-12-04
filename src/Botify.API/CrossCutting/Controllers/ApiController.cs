@@ -1,8 +1,9 @@
-﻿using Botify.Domain.ResultPattern;
+﻿using System.Security.Claims;
+using Botify.Application.Responses;
+using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace Botify.API.Controllers;
+namespace Botify.API.CrossCutting.Controllers;
 
 [ApiController]
 public class ApiController : ControllerBase
@@ -58,12 +59,17 @@ public class ApiController : ControllerBase
         };
     }
 
-    //private ActionResult ValidationProblem(List<Error> errors)
-    //{
-    //    var modelStateDictionary = new ModelStateDictionary();
+    public UserInfoResponse UserInfo()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+        var roles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
-    //    errors.ForEach(error => modelStateDictionary.AddModelError(error.Code, error.Description));
-
-    //    return ValidationProblem(modelStateDictionary);
-    //}
+        return new UserInfoResponse
+        {
+            Id = userId!,
+            Email = email!,
+            Roles = roles,
+        };
+    }
 }

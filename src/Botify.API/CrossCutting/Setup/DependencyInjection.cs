@@ -1,51 +1,53 @@
-﻿using Botify.API.Filters;
-using Botify.API.Validators;
+﻿using Botify.API.Validators;
 using Botify.Application.Common.Interfaces;
-using Botify.Domain.Identity;
 using FluentValidation;
-using Microsoft.OpenApi;
-using System.Reflection;
+using FluentValidation.AspNetCore;
 using System.Text.Json.Serialization;
-using Microsoft.OpenApi.Models;
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class DependencyInjection
+internal static class DependencyInjection
 {
     /// <summary>
     /// Registers all Presentation (API) layer services.
     /// </summary>
-    public static IServiceCollection AddPresentation(
+    public static IServiceCollection AddPresentationServices(
         this IServiceCollection services,
         IConfiguration configuration,
         IWebHostEnvironment env)
     {
         return services
-            .AddIdentityServices()
-            .AddExceptionHandling()
+            .AddCurrentUserService()
+            .AddProblemDetailsExceptionHandling()
+            .AddFluentValidationServices()
             .AddCorsConfiguration(configuration, env);
     }
 
-    private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+    private static IServiceCollection AddCurrentUserService(this IServiceCollection services)
     {
         services.AddScoped<IUser, CurrentUser>();
         services.AddHttpContextAccessor();
         return services;
     }
 
-    private static IServiceCollection AddExceptionHandling(this IServiceCollection services)
+    private static IServiceCollection AddProblemDetailsExceptionHandling(this IServiceCollection services)
     {
         services.AddProblemDetails(options =>
         {
             options.CustomizeProblemDetails = context =>
             {
                 context.ProblemDetails.Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
-                context.ProblemDetails.Extensions.Add("requestId", context.HttpContext.TraceIdentifier);
             };
         });
 
         return services;
     }
 
+    private static IServiceCollection AddFluentValidationServices(this IServiceCollection services)
+    {
+        services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+        return services;
+    }
 
     /// <summary>
     /// Registers JSON converters for MVC.

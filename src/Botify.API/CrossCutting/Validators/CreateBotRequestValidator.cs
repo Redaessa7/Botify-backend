@@ -1,11 +1,11 @@
-﻿using Botify.API.Extensions;
-using Botify.Application.Services.Merchants;
+﻿using Botify.Application.Services.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using FluentValidation;
-using  Botify.Application.Services.Merchants.Requests;
+using Botify.Application.Services.Merchants.Requests;
+using Botify.API.CrossCutting.Extensions;
 
-namespace Botify.API.Validators;
+namespace Botify.API.CrossCutting.Validators;
 
 public class CreateBotRequestValidator : AbstractValidator<CreateBotRequest>
 {

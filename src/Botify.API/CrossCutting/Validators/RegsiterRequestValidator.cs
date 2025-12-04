@@ -1,4 +1,4 @@
-using Botify.API.Extensions;
+using Botify.API.CrossCutting.Extensions;
 using Botify.Application.Common.Interfaces;
 using Botify.Application.Requests;
 using Botify.Domain.Identity;

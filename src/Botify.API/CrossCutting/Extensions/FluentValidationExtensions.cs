@@ -1,7 +1,7 @@
 ﻿using Botify.Domain.ResultPattern;
 using FluentValidation;
 
-namespace Botify.API.Extensions
+namespace Botify.API.CrossCutting.Extensions
 {
     public static class FluentValidationExtensions
     {

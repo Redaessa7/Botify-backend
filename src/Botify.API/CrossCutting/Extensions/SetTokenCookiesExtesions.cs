@@ -1,6 +1,6 @@
 using Botify.Application.Responses;
 
-namespace Botify.API.Extensions;
+namespace Botify.API.CrossCutting.Extensions;
 
 
 public static class SetTokenCookiesExtensions

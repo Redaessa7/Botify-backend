@@ -1,4 +1,4 @@
-using Botify.API.Extensions;
+using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Requests;
 using Botify.Application.Services.Auths;
 using Botify.Application.Services.Merchants;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using static Botify.Application.Services.Merchants.MerchantService;
 
-namespace Botify.API.Controllers;
+namespace Botify.API.Features.Merchants;
 
 [Route("api/merchants")]
 public class MerchantController(IMerchantService merchantService) : ApiController
