@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Botify.Infrastructure\Botify.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CrossCutting\Commons\" />
+  </ItemGroup>
+
 </Project>

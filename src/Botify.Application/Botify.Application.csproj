@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="CrossCutting\Extensions\" />
     <Folder Include="Features\Merchants\Services\" />
   </ItemGroup>
 

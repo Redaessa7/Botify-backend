@@ -1,4 +1,4 @@
-﻿using Botify.Application.Common.Interfaces;
+﻿using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Application.Services.Merchants.Responses;

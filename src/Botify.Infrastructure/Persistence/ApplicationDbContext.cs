@@ -1,4 +1,4 @@
-using Botify.Application.Common.Interfaces;
+using Botify.Application.CrossCutting.Interfaces;
 using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;

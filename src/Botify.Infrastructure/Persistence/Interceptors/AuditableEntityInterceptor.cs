@@ -1,5 +1,4 @@
-
-using Botify.Application.Common.Interfaces;
+using Botify.Application.CrossCutting.Interfaces;
 using Botify.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

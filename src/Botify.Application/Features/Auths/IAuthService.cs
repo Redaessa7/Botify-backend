@@ -1,5 +1,5 @@
-using Botify.Application.Requests;
-using Botify.Application.Responses;
+using Botify.Application.CrossCutting.Requests;
+using Botify.Application.CrossCutting.Responses;
 using Botify.Domain.ResultPattern;
 
 namespace Botify.Application.Services.Auths;

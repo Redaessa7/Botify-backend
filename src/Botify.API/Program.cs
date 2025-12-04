@@ -1,6 +1,6 @@
-using Botify.API.Filters;
-using Botify.API.Validators;
-using FluentValidation;
+using System.Text.Json.Serialization;
+using Botify.API.CrossCutting.Filters;
+using Botify.API.CrossCutting.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,42 +20,35 @@ builder.Services
         options.Filters.Add<EnvelopeResultFilter>();
         //options.Filters.Add<FluentValidationFilter>();
     })
-    .ConfigureJsonConverters();
+    .AddJsonOptions(options =>{ options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
-builder.Services
-    .AddPresentation(builder.Configuration, builder.Environment)
-    .AddApplicationServices(builder.Configuration)
-    .AddInfrastructureServices(builder.Configuration);
-
-// FluentValidation
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
-
+builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment);
 
 
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Seed roles
 using (var scope = app.Services.CreateScope())
 {
-    await InfrastructureRegisterServices.SeedRolesAsync(scope.ServiceProvider);
+    await scope.ServiceProvider.SeedRolesAsync();
 }
+
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-else
-{
-    app.UseHsts();
-}
-
-app.UseStaticFiles();
-app.UseRouting();
 
 app.UseCoreMiddlewares(builder.Configuration);
 
-app.MapControllers();
-app.MapFallbackToFile("index.html");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();
