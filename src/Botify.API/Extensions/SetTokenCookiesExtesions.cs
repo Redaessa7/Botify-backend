@@ -11,7 +11,7 @@ public static class SetTokenCookiesExtensions
         {
             HttpOnly = true,
             Secure = true, // true لو https
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = tokens.AccessTokenExpires
         };
 
@@ -21,7 +21,7 @@ public static class SetTokenCookiesExtensions
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = tokens.RefreshTokenExpires
         };
 

@@ -46,7 +46,7 @@ public static class DependencyInjection
         return services;
     }
 
-   
+
     /// <summary>
     /// Registers JSON converters for MVC.
     /// </summary>
@@ -64,6 +64,7 @@ public static class DependencyInjection
         IConfiguration configuration,
         IWebHostEnvironment env)
     {
+        //
         var section = configuration.GetSection("AppSettings");
         var policyName = section["CorsPolicyName"]
                          ?? (env.IsDevelopment() ? "DevCors" : "ProdCorsPolicy");
@@ -74,11 +75,6 @@ public static class DependencyInjection
 
         services.AddCors(options =>
         {
-            options.AddPolicy("DevCors", b =>
-                b.AllowAnyOrigin()
-                 .AllowAnyHeader()
-                 .AllowAnyMethod());
-
             options.AddPolicy(policyName, b =>
             {
                 if (env.IsDevelopment())
@@ -113,6 +109,7 @@ public static class DependencyInjection
         app.UseExceptionHandler();
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+
 
         var policyName = app.ApplicationServices
             .GetRequiredService<CorsPolicyName>().Name;

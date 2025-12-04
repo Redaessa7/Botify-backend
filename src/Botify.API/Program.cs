@@ -30,6 +30,9 @@ builder.Services
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
+
+
+
 var app = builder.Build();
 
 // Seed roles

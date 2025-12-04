@@ -61,8 +61,27 @@ public class AuthController(IAuthServices authServices) : ApiController
         if (!result.IsSuccess)
             return Problem(result.Errors);
 
-        Response.Cookies.Delete("access_token");
-        Response.Cookies.Delete("refresh_token");
+        // ------ My code
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,                // if you set Secure = true originally
+            SameSite = SameSiteMode.None, // if originally SameSite=None
+            Path = "/",                   // should match original Path
+            Domain="localhost"              // Domain = "example.com",    // include if you set Domain originally
+        };
+
+        // expire them explicitly (safer than Delete if you want to control attributes)
+        Response.Cookies.Append("access_token", "", new CookieOptions(cookieOptions) { Expires = DateTimeOffset.UtcNow.AddDays(-1) });
+        Response.Cookies.Append("refresh_token", "", new CookieOptions(cookieOptions) { Expires = DateTimeOffset.UtcNow.AddDays(-1) });
+
+        //// or use Delete with the same options:
+        //Response.Cookies.Delete("access_token", cookieOptions);
+        //Response.Cookies.Delete("refresh_token", cookieOptions);
+
+        //-----  your code
+        //Response.Cookies.Delete("access_token");
+        //Response.Cookies.Delete("refresh_token"); 
 
         return Ok(new { message = "Logged out successfully" });
     }
