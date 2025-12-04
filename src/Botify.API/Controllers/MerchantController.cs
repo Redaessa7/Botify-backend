@@ -46,4 +46,17 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
             errors => Problem(errors)
         );
     }
+
+    [HttpGet("{merchantId:guid}/bots")]
+    [Authorize]
+    public async Task<IActionResult> GetBotsAsync(Guid merchantId, CancellationToken ct)
+    {
+        var result = await _merchantService.GetBotsAsync(merchantId, ct);
+
+        return result.Match(
+            bots => Ok(bots),
+            errors => Problem(errors)
+        );
+    }
+
 }

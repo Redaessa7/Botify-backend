@@ -147,6 +147,19 @@ public sealed class MerchantService : IMerchantService
 
         return Result.Success;
     }
+    public async Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default)
+    {
+        var merchant = await _db.Merchants
+            .Include(m => m.Bots)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
+
+        if (merchant is null)
+            return MerchantErrors.NotFound;
+
+        var bots = merchant.Bots.Select(GetListBotResponse.FromDomain).ToList();
+        return bots;
+    }
+
 
     public async Task<Result<Success>> ActivateBotAsync(Guid merchantId, Guid botId, CancellationToken cancellationToken = default)
     {

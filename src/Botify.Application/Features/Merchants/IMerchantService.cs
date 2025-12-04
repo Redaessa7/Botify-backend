@@ -10,6 +10,8 @@ namespace Botify.Application.Services.Merchants
 {
     public interface IMerchantService
     {
+        Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default);
+
         Task<Result<CurrentMerchantResponse>> GetCurrentMerchantAsync(CancellationToken cancellationToken = default);
         Task<Result<Merchant>> CreateAsync(CreateMerchantRequest request,CancellationToken cancellationToken = default);
         Task<Result<Success>> ApproveAsync(Guid merchantId, CancellationToken cancellationToken = default);
