@@ -101,6 +101,11 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("MerchantId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("PlatformVerified")
                         .HasColumnType("INTEGER");
 
@@ -152,12 +157,12 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LogoUrl")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MerchantName")
                         .IsRequired()
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
@@ -435,25 +440,6 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("Botify.Domain.Models.Merchants.MerchantSubscription", "Subscription", b1 =>
-                        {
-                            b1.Property<Guid>("MerchantId")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<int>("CurrentPlan")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<DateTime>("ExpiryDate")
-                                .HasColumnType("TEXT");
-
-                            b1.HasKey("MerchantId");
-
-                            b1.ToTable("MerchantSubscriptions", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("MerchantId");
-                        });
-
                     b.OwnsOne("Botify.Domain.Models.Merchants.Shops.ShopSettings", "ShopSettings", b1 =>
                         {
                             b1.Property<Guid>("MerchantId")
@@ -504,6 +490,25 @@ namespace Botify.Infrastructure.Persistence.Migrations
                             b1.HasKey("MerchantId");
 
                             b1.ToTable("ShopSettings", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("MerchantId");
+                        });
+
+                    b.OwnsOne("Botify.Domain.Models.Merchants.MerchantSubscription", "Subscription", b1 =>
+                        {
+                            b1.Property<Guid>("MerchantId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("CurrentPlan")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<DateTime>("ExpiryDate")
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("MerchantId");
+
+                            b1.ToTable("MerchantSubscriptions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("MerchantId");
