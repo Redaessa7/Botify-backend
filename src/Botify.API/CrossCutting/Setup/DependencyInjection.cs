@@ -1,7 +1,12 @@
-﻿using Botify.API.Validators;
+﻿using Botify.API.CrossCutting.Constants;
+using Botify.API.CrossCutting.Extensions;
+using Botify.API.CrossCutting.Filters;
+using Botify.API.Validators;
 using Botify.Application.CrossCutting.Interfaces;
+using Botify.Application.CrossCutting.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -16,10 +21,25 @@ internal static class DependencyInjection
         IWebHostEnvironment env)
     {
         return services
+            .AddOptionsConfiguration(configuration)
+            .AddControllersServices()
             .AddCurrentUserService()
             .AddProblemDetailsExceptionHandling()
             .AddFluentValidationServices()
-            .AddCorsConfiguration(configuration, env);
+            .AddCorsConfiguration(env);
+    }
+
+    private static IServiceCollection AddControllersServices(this IServiceCollection services)
+    {
+        services.AddControllers(options =>
+        {
+            options.Filters.Add<EnvelopeResultFilter>();
+        }).AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+
+        return services;
     }
 
     private static IServiceCollection AddCurrentUserService(this IServiceCollection services)
@@ -36,6 +56,7 @@ internal static class DependencyInjection
             options.CustomizeProblemDetails = context =>
             {
                 context.ProblemDetails.Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+                context.ProblemDetails.Extensions[LoggingConstants.TraceId] = context.HttpContext.TraceIdentifier;
             };
         });
 
@@ -49,31 +70,22 @@ internal static class DependencyInjection
         return services;
     }
 
-    /// <summary>
-    /// Registers JSON converters for MVC.
-    /// </summary>
-    public static IMvcBuilder ConfigureJsonConverters(this IMvcBuilder builder)
+    private static IServiceCollection AddOptionsConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        builder.AddJsonOptions(opts =>
-        {
-            opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        });
-        return builder;
+        services.Configure<JwtOptions>(configuration.GetSection(JwtConstants.OptionsSection));
+        services.Configure<CorsOptions>(configuration.GetSection(CorsConstants.OptionsSection));
+        return services;
     }
 
-    private static IServiceCollection AddCorsConfiguration(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment env)
+    private static IServiceCollection AddCorsConfiguration(this IServiceCollection services,IWebHostEnvironment env)
     {
-        //
-        var section = configuration.GetSection("AppSettings");
-        var policyName = section["CorsPolicyName"]
-                         ?? (env.IsDevelopment() ? "DevCors" : "ProdCorsPolicy");
+        using var sp = services.BuildServiceProvider();
+        var corsOptions = sp.GetRequiredService<IOptions<CorsOptions>>().Value;
 
-        var allowedOrigins = section
-            .GetSection("AllowedOrigins")
-            .Get<string[]>() ?? Array.Empty<string>();
+        var policyName = corsOptions.PolicyName ??
+                (env.IsDevelopment() ? CorsConstants.DevPolicy : CorsConstants.ProdPolicy);
+        var allowedOrigins = corsOptions.AllowedOrigins ?? Array.Empty<string>();
+
 
         services.AddCors(options =>
         {
@@ -101,23 +113,4 @@ internal static class DependencyInjection
         return services;
     }
 
-    /// <summary>
-    /// Configures the middleware pipeline.
-    /// </summary>
-    public static IApplicationBuilder UseCoreMiddlewares(
-        this IApplicationBuilder app,
-        IConfiguration configuration)
-    {
-        var policyName = app.ApplicationServices
-            .GetRequiredService<CorsPolicyName>().Name;
-        app.UseCors(policyName);
-
-
-        return app;
-    }
 }
-
-/// <summary>
-/// Holds the resolved CORS policy name for runtime.
-/// </summary>
-public record CorsPolicyName(string Name);
