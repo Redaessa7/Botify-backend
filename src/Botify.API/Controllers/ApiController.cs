@@ -1,6 +1,5 @@
 ﻿using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Botify.API.Controllers;
 
@@ -14,7 +13,14 @@ public class ApiController : ControllerBase
             return Problem();
         }
 
-        return errors.All(error => error.Type == ErrorKind.Validation) ? ValidationProblem(errors) : Problem(errors[0]);
+        // If all are validation errors, return 400 with the first code in detail
+        if (errors.All(error => error.Type == ErrorKind.Validation))
+        {
+            return ValidationProblem(errors);
+        }
+
+        // Otherwise return the first error
+        return Problem(errors[0]);
     }
 
     private ObjectResult Problem(Error error)
@@ -28,27 +34,30 @@ public class ApiController : ControllerBase
             _ => StatusCodes.Status500InternalServerError,
         };
 
-        return Problem(statusCode: statusCode, title: error.Description, detail: error.Code);
+        var problemDetails = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = error.Description,
+            Detail = error.Code, 
+            Instance = HttpContext.Request.Path
+        };
+
+        return new ObjectResult(problemDetails)
+        {
+            StatusCode = statusCode
+        };
     }
+
     private ActionResult ValidationProblem(List<Error> errors)
     {
-        var errorDictionary = new Dictionary<string, string[]>();
+        var firstError = errors.First();
 
-        foreach (var error in errors)
+        var problemDetails = new ProblemDetails
         {
-            if (!errorDictionary.ContainsKey(error.Code))
-            {
-                errorDictionary[error.Code] = Array.Empty<string>();
-            }
-
-            errorDictionary[error.Code] = errorDictionary[error.Code].Append(error.Description).ToArray();
-        }
-
-        var problemDetails = new ValidationProblemDetails(errorDictionary)
-        {
-            Title = "One or more validation errors occurred.",
+            Title = "Validation error occurred.",
             Status = StatusCodes.Status400BadRequest,
             Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+            Detail = firstError.Code, // ✅ only ErrorCode in detail
             Instance = HttpContext.Request.Path
         };
 
@@ -57,13 +66,4 @@ public class ApiController : ControllerBase
             StatusCode = problemDetails.Status
         };
     }
-
-    //private ActionResult ValidationProblem(List<Error> errors)
-    //{
-    //    var modelStateDictionary = new ModelStateDictionary();
-
-    //    errors.ForEach(error => modelStateDictionary.AddModelError(error.Code, error.Description));
-
-    //    return ValidationProblem(modelStateDictionary);
-    //}
 }

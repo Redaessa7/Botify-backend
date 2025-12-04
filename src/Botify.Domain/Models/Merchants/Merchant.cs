@@ -74,7 +74,7 @@ namespace Botify.Domain.Models.Merchants
                 return BotErrors.BotNotFound;
 
             bot.Enable();
-            DomainEventDispatcher.Raise(new BotActivated(Id, bot.Id, bot.TargetPlatform.ToString()));
+            DomainEventDispatcher.Raise(new BotActivated(Id, bot.Id, bot.Platform.ToString()));
             return Result.Success;
         }
 
@@ -92,25 +92,27 @@ namespace Botify.Domain.Models.Merchants
             ShopSettings = settings;
             return Result.Success;
         }
-
-        public Result<Success> AddBot(Bot bot)
+        private string BuildWebhookUrl(Guid botId, string secret, string platform, string baseWebhookUrl)
         {
-            //if (ShopSettings == null || !ShopSettings.IsComplete())
-            //    return ShopErrors.ShopIncomplete;
+            var webhookUrl = $"{baseWebhookUrl.TrimEnd('/')}/{platform.ToLowerInvariant()}/{botId}?secret={secret}";
 
-            //if (!Subscription.IsActive())
-            //    return MerchantErrors.SubscriptionExpired;
+            return webhookUrl;
+        }
+        public Result<Bot> AddBot(Guid botId, string name, string token, string platform, string secret, string baseWebhookUrl)
+        {
+            var botResult = Bot.Create(botId, Id, name, token, platform, secret);
+            if (!botResult.IsSuccess) return botResult.Errors;
 
-            //if (!CanCreateBot())
-            //    return MerchantErrors.PlanLimitReached;
+            var bot = botResult.Value;
 
-            //if (Bots.Any(b => b.Enabled && b.TargetPlatform == bot.TargetPlatform))
-            //    return BotErrors.BotPlatformConflict;
+            // Merchant builds webhook URL
+            var webhookUrl = BuildWebhookUrl(botId, secret, platform, baseWebhookUrl);
+            var setWebhookResult = bot.SetWebhook(webhookUrl);
+            if (!setWebhookResult.IsSuccess) return setWebhookResult.Errors;
 
             _bots.Add(bot);
-            return Result.Success;
+            return bot;
         }
-
         public Result<Success> DeactivateBot(Guid botId)
         {
             var bot = _bots.FirstOrDefault(b => b.Id == botId);
