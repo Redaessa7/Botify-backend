@@ -1,6 +1,7 @@
 using Botify.API.CrossCutting.Constants;
 using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Setup;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ app.UseAuthorization();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.MapControllers();

@@ -1,6 +1,7 @@
 ﻿using Botify.API.CrossCutting.Constants;
 using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Filters;
+using Botify.API.CrossCutting.OpenApi;
 using Botify.API.Validators;
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Options;
@@ -29,7 +30,23 @@ internal static class DependencyInjection
             .AddProblemDetailsExceptionHandling()
             .AddFluentValidationServices()
             .AddCorsConfiguration(env)
-            .AddApiVersioningServices();
+            .AddApiVersioningServices()
+            .AddApiDocumentation();
+    }
+
+    private static IServiceCollection AddApiDocumentation(this IServiceCollection services)
+    {
+        string[] Versions = ["v1"];
+        services.AddOpenApi(options =>
+        {
+            // api versioning config
+            options.AddDocumentTransformer<VersionInfoTransformer>();
+            // security scheme config
+            options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+            options.AddOperationTransformer<BearerSecuritySchemeTransformer>();
+
+        });
+        return services;
     }
 
     private static IServiceCollection AddApiVersioningServices(this IServiceCollection services)
