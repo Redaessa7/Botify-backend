@@ -39,9 +39,9 @@ app.MapControllers();
 
 #endregion
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     await scope.ServiceProvider.SeedRolesAsync();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    await scope.ServiceProvider.SeedRolesAsync();
+}
 
 app.Run();
