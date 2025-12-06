@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Botify.API.Features.Merchants;
 
+[ApiVersion("1.0")]
 [Route("api/merchants")]
 public class MerchantController(IMerchantService merchantService, IServiceProvider serviceProvider) : ApiController
 {

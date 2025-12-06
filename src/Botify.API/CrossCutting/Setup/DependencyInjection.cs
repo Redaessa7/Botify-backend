@@ -6,6 +6,8 @@ using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 namespace Microsoft.Extensions.DependencyInjection;
@@ -26,8 +28,22 @@ internal static class DependencyInjection
             .AddCurrentUserService()
             .AddProblemDetailsExceptionHandling()
             .AddFluentValidationServices()
-            .AddCorsConfiguration(env);
+            .AddCorsConfiguration(env)
+            .AddApiVersioningServices();
     }
+
+    private static IServiceCollection AddApiVersioningServices(this IServiceCollection services)
+    {
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1, 0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+            options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+        });
+        return services;
+    }
+
 
     private static IServiceCollection AddControllersServices(this IServiceCollection services)
     {

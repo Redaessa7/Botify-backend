@@ -95,8 +95,8 @@ POST {{baseurl}}/api/auth/login
 Content-Type: {{contentType}}
 
 {
-  "email": "merchant12@example.com",
-  "password": "StrongPass12W@@a3"
+  "email": "owner@myshop.com",
+  "password": "StrongPass123!"
 }
 
 ### user info

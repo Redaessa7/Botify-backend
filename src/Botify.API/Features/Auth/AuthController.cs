@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Botify.API.Features.Auth;
 
+[ApiVersion("1.0")]
 [Route("api/auth")]
 public class AuthController(IAuthServices authServices, IUser user) : ApiController
 {
