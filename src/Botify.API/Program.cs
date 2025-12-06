@@ -1,54 +1,49 @@
-using System.Text.Json.Serialization;
-using Botify.API.CrossCutting.Filters;
+using Botify.API.CrossCutting.Constants;
+using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Setup;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+#region Bootstrap
+builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), AppPaths.WwwRootFolder);
 Directory.CreateDirectory(builder.Environment.WebRootPath);
 
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile(AppPaths.AppSettingsFile, optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
+#endregion
 
-
-builder.Services
-    .AddControllers(options =>
-    {
-        options.Filters.Add<EnvelopeResultFilter>();
-        //options.Filters.Add<FluentValidationFilter>();
-    })
-    .AddJsonOptions(options =>{ options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
-
+#region DI Container
 builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment);
-
-
+#endregion
 
 var app = builder.Build();
+
+#region Middlewares
+
 app.UseExceptionHandler();
-
-// Seed roles
-using (var scope = app.Services.CreateScope())
-{
-    await scope.ServiceProvider.SeedRolesAsync();
-}
-
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.MapControllers();
+app.UseCors(app.CurrentCorsPolicy().Name);
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
-app.UseCoreMiddlewares(builder.Configuration);
+app.MapControllers();
 
-app.UseAuthentication();
-app.UseAuthorization();
+#endregion
+
+using (var scope = app.Services.CreateScope())
+{
+    await scope.ServiceProvider.SeedRolesAsync();
+}
 
 app.Run();

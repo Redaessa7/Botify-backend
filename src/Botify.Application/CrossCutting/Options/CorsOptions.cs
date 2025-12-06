@@ -1,4 +1,4 @@
-namespace Botify.API.CrossCutting.Options;
+namespace Botify.Application.CrossCutting.Options;
 
 public class CorsOptions
 {

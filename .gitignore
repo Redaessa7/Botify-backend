@@ -489,3 +489,6 @@ $RECYCLE.BIN/
 
 # Ignore database folder inside src directory
 src/Botify.Infrastructure/Database/
+
+# Ignore uploads folder inside src directory
+src/Botify.API/uploads/
