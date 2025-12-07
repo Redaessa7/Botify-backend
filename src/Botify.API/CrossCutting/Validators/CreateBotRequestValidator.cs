@@ -23,7 +23,7 @@ public class CreateBotRequestValidator : AbstractValidator<CreateBotRequest>
 
         RuleFor(x => x.Platform)
             .RequiredField(BotErrors.PlatformRequired)
-            .Must(p => BotPlatform.From(p).IsSuccess)
+            .Must(p => BotPlatformExtensions.From(p).IsSuccess)
                 .WithMessage(BotErrors.PlatformInvalid.Description)
                 .WithErrorCode(BotErrors.PlatformInvalid.Code)
                 .WithState(_ => BotErrors.PlatformInvalid);

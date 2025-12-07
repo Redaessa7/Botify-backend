@@ -1,27 +1,32 @@
 ﻿using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants.ValueObjects;
-
-public record BotPlatform(string Name)
+namespace Botify.Domain.Models.Merchants.ValueObjects
 {
-    public static BotPlatform Telegram => new("telegram");
-    public static BotPlatform WhatsApp => new("whatsApp");
-    public static BotPlatform Messenger => new("messenger");
-
-    public override string ToString() => Name;
-
-    public static Result<BotPlatform> From(string platform)
+    public enum BotPlatform
     {
-        if (string.IsNullOrWhiteSpace(platform))
-            return BotErrors.PlatformRequired;
+        TELEGRAM,
+        WHATSAPP,
+        MESSENGER
+    }
 
-        return platform.ToLowerInvariant() switch
+    public static class BotPlatformExtensions
+    {
+        public static Result<BotPlatform> From(string platform)
         {
-            "telegram" => Telegram,
-            "whatsapp" => WhatsApp,
-            "messenger" => Messenger,
-            _ => BotErrors.PlatformInvalid
-        };
+            if (string.IsNullOrWhiteSpace(platform))
+                return BotErrors.PlatformRequired;
+
+            return platform.ToUpperInvariant() switch
+            {
+                "TELEGRAM" => BotPlatform.TELEGRAM,
+                "WHATSAPP" => BotPlatform.WHATSAPP,
+                "MESSENGER" => BotPlatform.MESSENGER,
+                _ => BotErrors.PlatformInvalid
+            };
+        }
+
+        public static string AsString(this BotPlatform platform) =>
+            platform.ToString(); // returns uppercase string by default
     }
 }

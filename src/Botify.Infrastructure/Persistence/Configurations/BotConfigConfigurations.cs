@@ -16,10 +16,14 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(b => b.Secret).IsRequired().HasMaxLength(200);
             builder.Property(b => b.WebhookUrl).HasMaxLength(500);
             builder.Property(b => b.Name).IsRequired().HasMaxLength(500);
-            builder.Property(b => b.Enabled).IsRequired();
+            builder.Property(b => b.Active).IsRequired();
             builder.Property(b => b.PlatformVerified).IsRequired();
             builder.Property(b => b.IsPrimary).IsRequired();
-            builder.Property(b => b.Platform).HasConversion(o => o.Name.ToLower(), c => new BotPlatform(c));
+            builder.Property(b => b.Platform)
+                .HasConversion(
+                    o => o.ToString().ToUpperInvariant(),          
+                    c => Enum.Parse<BotPlatform>(c, true)          
+                );
         }
     }
 

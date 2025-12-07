@@ -3,6 +3,7 @@ using Botify.Application.CrossCutting.Requests;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Services.Auths;
 using Botify.Application.Services.Merchants;
+using Botify.Application.Services.Merchants.Responses;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
@@ -34,7 +35,7 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     }
 
     [HttpPost("bots/check-token")]
-    [AllowAnonymous] // or [Authorize] if you want to restrict
+    [Authorize] 
     public async Task<IActionResult> CheckValidToken([FromBody] CheckTokenRequest request, CancellationToken ct)
     {
         // Resolve platform service via KeyedServices
@@ -60,4 +61,27 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         );
     }
 
+    [HttpPatch("{merchantId:guid}/bots/{botId:guid}/activate")]
+    [Authorize]
+    public async Task<IActionResult> ActivateBotAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    {
+        var result = await _merchantService.ActivateBotAsync(merchantId, botId, ct);
+
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors)
+        );
+    }
+
+    [HttpPatch("{merchantId:guid}/bots/{botId:guid}/deactivate")]
+    [Authorize]
+    public async Task<IActionResult> DeactivateBotAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    {
+        var result = await _merchantService.DeactivateBotAsync(merchantId, botId, ct);
+
+        return result.Match(
+            _ => NoContent(),
+            errors => Problem(errors)
+        );
+    }
 }
