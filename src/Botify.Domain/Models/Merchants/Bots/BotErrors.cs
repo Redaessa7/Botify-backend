@@ -40,13 +40,13 @@ public static class BotErrors
 
     // Status / Lifecycle
     public static Error PlatformNotVerified =>
-        Error.Conflict("Bot.Platform.NotVerified", "Platform must be verified before enabling bot.");
+        Error.Conflict("Bot.Platform.NotVerified", "Platform must be verified before activating bot.");
 
-    public static Error AlreadyEnabled =>
-        Error.Conflict("Bot.Status.AlreadyEnabled", "Bot is already enabled.");
+    public static Error AlreadyActive =>
+        Error.Conflict("Bot.Status.AlreadyActive", "Bot is already active.");   // ✅ renamed
 
-    public static Error AlreadyDisabled =>
-        Error.Conflict("Bot.Status.AlreadyDisabled", "Bot is already disabled.");
+    public static Error AlreadyInactive =>
+        Error.Conflict("Bot.Status.AlreadyInactive", "Bot is already inactive."); // ✅ renamed
 
     public static Error BotPlatformConflict =>
         Error.Conflict("Bot.Platform.Conflict", "Only one bot can be active per platform.");

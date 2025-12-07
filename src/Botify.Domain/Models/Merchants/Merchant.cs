@@ -73,7 +73,7 @@ namespace Botify.Domain.Models.Merchants
             if (bot == null)
                 return BotErrors.BotNotFound;
 
-            bot.Enable();
+            bot.Activate();
             DomainEventDispatcher.Raise(new BotActivated(Id, bot.Id, bot.Platform.ToString()));
             return Result.Success;
         }
@@ -119,7 +119,7 @@ namespace Botify.Domain.Models.Merchants
             if (bot == null)
                 return BotErrors.BotNotFound;
 
-            bot.Disable();
+            bot.Deactivate();
             return Result.Success;
         }
         

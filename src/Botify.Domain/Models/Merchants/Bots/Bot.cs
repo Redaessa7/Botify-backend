@@ -10,7 +10,7 @@ public sealed class Bot : AuditableEntity
     public string Token { get; private set; }
     public string Secret { get; private set; }
     public BotPlatform Platform { get; private set; }
-    public bool Enabled { get; private set; }
+    public bool Active { get; private set; }           
     public bool PlatformVerified { get; private set; }
     public bool IsPrimary { get; private set; }
     public string? WebhookUrl { get; private set; }
@@ -24,7 +24,7 @@ public sealed class Bot : AuditableEntity
         Token = token;
         Platform = platform;
         Secret = secret;
-        Enabled = false;
+        Active = false;                                  
         PlatformVerified = false;
         IsPrimary = false;
     }
@@ -38,7 +38,7 @@ public sealed class Bot : AuditableEntity
         if (string.IsNullOrWhiteSpace(token)) return BotErrors.TokenRequired;
         if (string.IsNullOrWhiteSpace(secret)) return BotErrors.SecretRequired;
 
-        var platformResult = BotPlatform.From(platform);
+        var platformResult = BotPlatformExtensions.From(platform);
         if (!platformResult.IsSuccess) return platformResult.Errors;
 
         return new Bot(id, merchantId, name.Trim(), token.Trim(), platformResult.Value, secret.Trim());
@@ -59,20 +59,20 @@ public sealed class Bot : AuditableEntity
         return Result.Success;
     }
 
-    public Result<Success> Enable()
+    public Result<Success> Activate()
     {
-        if (!PlatformVerified) return BotErrors.PlatformNotVerified;
-        if (Enabled) return BotErrors.AlreadyEnabled;
+        //if (!PlatformVerified) return BotErrors.PlatformNotVerified;
+        if (Active) return BotErrors.AlreadyActive;  
 
-        Enabled = true;
+        Active = true;
         return Result.Success;
     }
 
-    public Result<Success> Disable()
+    public Result<Success> Deactivate()
     {
-        if (!Enabled) return BotErrors.AlreadyDisabled;
+        if (!Active) return BotErrors.AlreadyInactive;    
 
-        Enabled = false;
+        Active = false;
         return Result.Success;
     }
 }
