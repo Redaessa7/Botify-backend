@@ -116,7 +116,7 @@ public static class DependencyInjection
 
         // Register keyed services for each platform
         services.AddHttpClient<TelegramBotService>();
-        services.AddKeyedScoped<IBotPlatformService, TelegramBotService>("telegram");
+        services.AddKeyedScoped<IBotPlatformService, TelegramBotService>(BotPlatform.TELEGRAM.AsString());
         services.Configure<WebhookOptions>(configuration.GetSection("WebhookOptions"));
         // Future platforms can be added here:
         // services.AddHttpClient<WhatsAppBotService>();
