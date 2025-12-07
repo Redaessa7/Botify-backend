@@ -9,7 +9,9 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Options;
+using System.IO.Compression;
 using System.Text.Json.Serialization;
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -31,9 +33,39 @@ internal static class DependencyInjection
             .AddFluentValidationServices()
             .AddCorsConfiguration(env)
             .AddApiVersioningServices()
-            .AddApiDocumentation();
+            .AddApiDocumentation()
+            .AddResponseCompressionsServices();
     }
 
+    private static IServiceCollection AddResponseCompressionsServices(this IServiceCollection services)
+    {
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+            options.Providers.Add<BrotliCompressionProvider>();
+            options.Providers.Add<GzipCompressionProvider>();
+            options.MimeTypes = new[]
+            {
+                "application/json",
+                "text/plain",
+                "text/html",
+                "application/xml",
+            };
+        });
+
+        services.Configure<BrotliCompressionProviderOptions>(options =>
+        {
+            options.Level = CompressionLevel.Fastest;
+        });
+    
+
+        services.Configure<GzipCompressionProviderOptions>(options =>
+        {
+            options.Level = CompressionLevel.Fastest;
+        });
+
+        return services;
+    }
     private static IServiceCollection AddApiDocumentation(this IServiceCollection services)
     {
         string[] Versions = ["v1"];
