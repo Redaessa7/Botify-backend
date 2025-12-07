@@ -36,7 +36,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-
+app.UseResponseCompression();
 app.MapControllers();
 
 #endregion

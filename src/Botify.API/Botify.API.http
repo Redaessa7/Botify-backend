@@ -106,5 +106,6 @@ GET {{baseurl}}/api/auth/user
 POST {{baseurl}}/api/auth/refresh-token
 ###
 GET {{baseurl}}/api/merchants/me
+
 ### Logout
 POST {{baseurl}}/api/auth/logout
