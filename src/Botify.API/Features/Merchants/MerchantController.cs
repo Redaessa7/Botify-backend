@@ -68,7 +68,7 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         var result = await _merchantService.ActivateBotAsync(merchantId, botId, ct);
 
         return result.Match(
-            _ => NoContent(),
+            _ => Ok(new { }),
             errors => Problem(errors)
         );
     }
@@ -80,7 +80,7 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         var result = await _merchantService.DeactivateBotAsync(merchantId, botId, ct);
 
         return result.Match(
-            _ => NoContent(),
+            _ => Ok(new { }),
             errors => Problem(errors)
         );
     }
