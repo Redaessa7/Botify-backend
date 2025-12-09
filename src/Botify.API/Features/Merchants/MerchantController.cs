@@ -39,7 +39,7 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     public async Task<IActionResult> CheckValidToken([FromBody] CheckTokenRequest request, CancellationToken ct)
     {
         // Resolve platform service via KeyedServices
-        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToLowerInvariant());
+        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToUpperInvariant());
         if (platformService is null)
             return Problem([BotErrors.PlatformInvalid]);
         var result = await platformService.ValidateTokenAsync(request.ApiToken, ct);

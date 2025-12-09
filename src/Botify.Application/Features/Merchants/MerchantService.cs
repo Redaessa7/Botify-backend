@@ -123,7 +123,7 @@ public sealed class MerchantService : IMerchantService
         if (merchant is null) return MerchantErrors.NotFound;
 
         // Resolve platform service via KeyedServices
-        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToLowerInvariant());
+        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToUpperInvariant());
         if (platformService is null) return BotErrors.PlatformInvalid;
 
         // Validate token externally
