@@ -117,7 +117,7 @@ public sealed class MerchantService : IMerchantService
 
     #region Bot Management
 
-    public async Task<Result<Success>> CreateBotAsync(Guid merchantId, CreateBotRequest request, CancellationToken ct = default)
+    public async Task<Result<BotResponse>> CreateBotAsync(Guid merchantId, CreateBotRequest request, CancellationToken ct = default)
     {
         var merchant = await _db.Merchants.Include(m => m.Bots).FirstOrDefaultAsync(m => m.Id == merchantId, ct);
         if (merchant is null) return MerchantErrors.NotFound;
@@ -145,7 +145,7 @@ public sealed class MerchantService : IMerchantService
         var webhookResult = await platformService.SetWebhookAsync(bot.Token, bot.WebhookUrl!, ct);
         if (!webhookResult.IsSuccess) return BotErrors.WebhookRegistrationFailed;
 
-        return Result.Success;
+        return BotResponse.FromDomain(bot);
     }
     public async Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {

@@ -24,7 +24,7 @@ public sealed class Bot : AuditableEntity
         Token = token;
         Platform = platform;
         Secret = secret;
-        Active = false;                                  
+        Active = true;                                  
         PlatformVerified = false;
         IsPrimary = false;
     }
