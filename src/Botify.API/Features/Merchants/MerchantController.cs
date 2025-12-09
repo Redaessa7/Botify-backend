@@ -21,7 +21,7 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     public async Task<IActionResult> GetCurrentMerchant()
     {
         var result = await _merchantService.GetCurrentMerchantAsync();
-        return result.Match(value => Ok(value), Problem);
+        return result.Match(Ok, Problem);
     }
 
     [HttpPost("{merchantId:guid}/bots")]
@@ -61,6 +61,16 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     public async Task<IActionResult> GetBotsAsync(Guid merchantId, CancellationToken ct)
     {
         var result = await _merchantService.GetBotsAsync(merchantId, ct);
+
+        return result.Match(Ok, Problem);
+
+    }
+
+    [HttpGet("{merchantId:guid}/bots/{botId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> GetBotByIdAsync(Guid merchantId,Guid botId, CancellationToken ct)
+    {
+        var result = await _merchantService.GetBotByIdAsync(merchantId,botId, ct);
 
         return result.Match(Ok, Problem);
 

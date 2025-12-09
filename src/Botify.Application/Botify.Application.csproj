@@ -14,7 +14,6 @@
   <ItemGroup>
     <Folder Include="CrossCutting\Extensions\" />
     <Folder Include="Features\Merchants\Validators\" />
-    <Folder Include="Features\Merchants\Services\" />
   </ItemGroup>
 
   <PropertyGroup>

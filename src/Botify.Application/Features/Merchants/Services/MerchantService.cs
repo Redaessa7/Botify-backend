@@ -1,6 +1,7 @@
 ﻿using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Responses;
+using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Botify.Application.Services.Merchants;
+namespace Botify.Application.Features.Merchants.Services;
 
 public sealed class MerchantService : IMerchantService
 {
@@ -181,7 +182,16 @@ public sealed class MerchantService : IMerchantService
 
         return BotResponse.FromDomain(bot);
     }
+    public async Task<Result<BotResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    {
+       var bot =  await _db.Bots
+            .Where(b => b.MerchantId == merchantId && b.Id == botId)
+            .FirstOrDefaultAsync(ct);
 
+        if (bot is null) return BotErrors.BotNotFound;
+
+        return BotResponse.FromDomain(bot);
+    }
     public async Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {
         var merchant = await _db.Merchants
