@@ -30,6 +30,8 @@ public static class MerchantErrors
         Error.Validation("Merchant.General.UserProfile.Required", "User profile is required.");
 
     // Status
+    public static Error ShopAlreadyAssigned =>
+    Error.Validation("Merchant.Shop.AlreadyAssigned", "Shop is already assigned to this merchant.");
     public static Error NotPending =>
         Error.Conflict("Merchant.Status.NotPending", "Merchant must be pending to approve.");
 

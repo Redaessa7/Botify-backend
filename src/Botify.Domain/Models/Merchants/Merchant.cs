@@ -86,8 +86,8 @@ namespace Botify.Domain.Models.Merchants
 
         public Result<Success> AssignShop(ShopSettings settings)
         {
-            if (Status != MerchantStatus.Approved)
-                return MerchantErrors.NotApproved;
+            //if (Status != MerchantStatus.Approved)
+            //    return MerchantErrors.NotApproved;
 
             ShopSettings = settings;
             return Result.Success;

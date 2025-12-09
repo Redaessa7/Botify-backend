@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.Models.Merchants.Bots;
 
-namespace Botify.Application.Services.Merchants.Responses
+namespace Botify.Application.Features.Merchants.Responses
 {
     /// <summary>
     /// Response DTO for listing bots by merchant.

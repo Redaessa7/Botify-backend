@@ -1,8 +1,8 @@
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Requests;
 using Botify.Application.CrossCutting.Responses;
+using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Services.Auths;
-using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Identity;
 using Botify.Domain.Identity.Enums;
