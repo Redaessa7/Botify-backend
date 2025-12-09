@@ -109,3 +109,24 @@ GET {{baseurl}}/api/merchants/me
 
 ### Logout
 POST {{baseurl}}/api/auth/logout
+
+
+### Test webhook Receive message
+@platform = telegram
+@botId = 312c5fe0-de56-4c80-856a-03699a98ef53
+
+###
+POST {{baseurl}}/api/webhook/bot/{{platform}}/{{botId}}
+Content-Type: {{contentType}}
+X-Telegram-Bot-Api-Secret-Token: JgLaDUrPxdluYjz6zoGWmzgumKNDL9PQL6L_nfMemO8
+
+{
+  "message":"Hello Reda"
+}
+
+
+### Delete All webhooks 
+@botToken = 2101566260:AAGIbxYaqcBfHB-0znVqkuQDh00
+
+POST https://api.telegram.org/bot{{botToken}}/deleteWebhook
+

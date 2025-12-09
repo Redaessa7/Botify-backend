@@ -10,7 +10,7 @@ namespace Botify.Application.Services.Merchants.Responses
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
         public string Platform { get; init; } = string.Empty;
-        public string? WebhookUrl { get; init; }
+        public string? ApiToken { get; init; }
         public bool IsActive { get; init; }
         public DateTimeOffset CreatedAt { get; init; }
         public DateOnly LastPing { get; init; }
@@ -25,7 +25,7 @@ namespace Botify.Application.Services.Merchants.Responses
             Id = bot.Id,
             Name = bot.Name,
             Platform = bot.Platform.ToString(),
-            WebhookUrl = bot.WebhookUrl,
+            ApiToken = bot.Token,
             IsActive = bot.Active,
             CreatedAt = bot.CreatedAtUtc,
             LastPing = DateOnly.FromDateTime(DateTime.UtcNow),

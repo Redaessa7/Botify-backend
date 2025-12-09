@@ -134,7 +134,8 @@ public sealed class MerchantService : IMerchantService
         var secret = _secretGenerator.Generate();
 
         // Add bot via aggregate root
-        var botResult = merchant.AddBot(Guid.NewGuid(), request.Name, request.ApiToken, request.Platform, secret, _webhookOptions.BaseUrl);
+        var createWebhookUrl = _webhookOptions.GetWebhookUrl;
+        var botResult = merchant.AddBot(Guid.NewGuid(), request.Name, request.ApiToken, request.Platform, secret, createWebhookUrl);
         if (!botResult.IsSuccess) return botResult.Errors;
 
         var bot = botResult.Value;
@@ -142,7 +143,7 @@ public sealed class MerchantService : IMerchantService
         await _db.SaveChangesAsync(ct);
 
         // Register webhook with external platform
-        var webhookResult = await platformService.SetWebhookAsync(bot.Token, bot.WebhookUrl!, ct);
+        var webhookResult = await platformService.SetWebhookAsync(bot.Token, bot.WebhookUrl!,bot.Secret, ct);
         if (!webhookResult.IsSuccess) return BotErrors.WebhookRegistrationFailed;
 
         return BotResponse.FromDomain(bot);
@@ -199,6 +200,11 @@ public sealed class MerchantService : IMerchantService
         if (merchant is null) return MerchantErrors.NotFound;
 
         return merchant.ToCurrentResponse();
+    }
+
+    public Task<Result<Success>> DeleteBotAsync(Guid merchantId, Guid botId, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     #endregion

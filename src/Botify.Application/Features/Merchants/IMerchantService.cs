@@ -1,10 +1,8 @@
 ﻿using Botify.Application.Services.Merchants.Requests;
 using Botify.Application.Services.Merchants.Responses;
 using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Shops;
 using Botify.Domain.ResultPattern;
-using static Botify.Application.Services.Merchants.MerchantService;
 
 namespace Botify.Application.Services.Merchants
 {

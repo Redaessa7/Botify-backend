@@ -6,7 +6,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
     {
         string PlatformName { get; }
         Task<Result<Success>> ValidateTokenAsync(string apiToken, CancellationToken ct = default);
-        Task<Result<string>> SetWebhookAsync(string apiToken, string webhookUrl, CancellationToken ct = default);
+        Task<Result<string>> SetWebhookAsync(string apiToken, string webhookUrl,string secretToken, CancellationToken ct = default);
     }
 
 }
