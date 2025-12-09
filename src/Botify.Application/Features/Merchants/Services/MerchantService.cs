@@ -1,7 +1,8 @@
 ﻿using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.Features.Merchants.Interfaces;
+using Botify.Application.Features.Merchants.Responses;
+using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
-using Botify.Application.Services.Merchants.Responses;
 using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Botify.Application.Services.Merchants;
+namespace Botify.Application.Features.Merchants.Services;
 
 public sealed class MerchantService : IMerchantService
 {
@@ -21,19 +22,22 @@ public sealed class MerchantService : IMerchantService
     private readonly IBotSecretGenerator _secretGenerator;
     private readonly IServiceProvider _serviceProvider;
     private readonly WebhookOptions _webhookOptions;
+    private readonly IFileService _fileService;
 
     public MerchantService(
         IApplicationDbContext db,
         IUser user,
         IBotSecretGenerator secretGenerator,
         IServiceProvider serviceProvider,
-        IOptions<WebhookOptions> webhookOptions)
+        IOptions<WebhookOptions> webhookOptions,
+        IFileService fileService)
     {
         _db = db;
         _user = user;
         _secretGenerator = secretGenerator;
         _serviceProvider = serviceProvider;
         _webhookOptions = webhookOptions.Value;
+        _fileService = fileService;
     }
 
     #region Merchant Lifecycle
@@ -101,16 +105,45 @@ public sealed class MerchantService : IMerchantService
 
     #region Shop Management
 
-    public async Task<Result<Success>> AssignShopAsync(Guid merchantId, ShopSettings settings, CancellationToken cancellationToken = default)
+    public async Task<Result<ShopResponse>> AssignShopAsync(Guid merchantId, AssignShopRequest request, CancellationToken cancellationToken = default)
     {
-        var merchant = await _db.Merchants.FindAsync(new object[] { merchantId }, cancellationToken);
+        // Load aggregate root
+        var merchant = await _db.Merchants.Include(x=> x.ShopSettings).FirstOrDefaultAsync(x=> x.Id == merchantId, cancellationToken);
         if (merchant is null) return MerchantErrors.NotFound;
 
-        var result = merchant.AssignShop(settings);
-        if (!result.IsSuccess) return result;
+        if(merchant.ShopSettings is not null)
+            return MerchantErrors.ShopAlreadyAssigned;
+
+        string? uploadedImageUrl = null;
+        if (request.Image is not null)
+        {
+            await using var stream = request.Image.OpenReadStream();
+            var uploadResult = await _fileService.SaveFileAsync(stream, request.Image.FileName, "shop-images");
+            if (!uploadResult.IsSuccess) return uploadResult.Errors;
+            uploadedImageUrl = uploadResult.Value;
+        }
+
+        // Create ShopSettings via domain factory
+        var settingsResult = ShopSettings.Create(
+            id: Guid.NewGuid(),
+            merchantId: merchantId,
+            name: request.Name,
+            currency: request.Currency,
+            language: request.Language,
+            address: request.Address,
+            socialMediaLinks: request.SocialMediaLinks,
+            imageUrl: uploadedImageUrl,
+            taxRate: request.TaxRate
+        );
+
+        if (!settingsResult.IsSuccess) return settingsResult.Errors;
+        var shop = settingsResult.Value;
+        // Apply domain operation
+        var assignResult = merchant.AssignShop(shop);
+        if (!assignResult.IsSuccess) return assignResult.Errors;
 
         await _db.SaveChangesAsync(cancellationToken);
-        return result;
+        return ShopResponse.FromDomain(shop);
     }
 
     #endregion
@@ -122,18 +155,17 @@ public sealed class MerchantService : IMerchantService
         var merchant = await _db.Merchants.Include(m => m.Bots).FirstOrDefaultAsync(m => m.Id == merchantId, ct);
         if (merchant is null) return MerchantErrors.NotFound;
 
-        // Resolve platform service via KeyedServices
-        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToUpperInvariant());
-        if (platformService is null) return BotErrors.PlatformInvalid;
+        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(request.Platform);
 
-        // Validate token externally
+        if(platformService is null)
+            return BotErrors.PlatformInvalid;
+
+
         var tokenCheck = await platformService.ValidateTokenAsync(request.ApiToken, ct);
         if (!tokenCheck.IsSuccess) return tokenCheck.Errors;
 
-        // Generate secret
         var secret = _secretGenerator.Generate();
 
-        // Add bot via aggregate root
         var botResult = merchant.AddBot(Guid.NewGuid(), request.Name, request.ApiToken, request.Platform, secret, _webhookOptions.BaseUrl);
         if (!botResult.IsSuccess) return botResult.Errors;
 
@@ -141,9 +173,22 @@ public sealed class MerchantService : IMerchantService
         _db.Bots.Add(bot);
         await _db.SaveChangesAsync(ct);
 
-        // Register webhook with external platform
         var webhookResult = await platformService.SetWebhookAsync(bot.Token, bot.WebhookUrl!, ct);
-        if (!webhookResult.IsSuccess) return BotErrors.WebhookRegistrationFailed;
+        if (!webhookResult.IsSuccess)
+        {
+            // Optionally mark bot state or log; return error to caller
+            return BotErrors.WebhookRegistrationFailed;
+        }
+
+        return BotResponse.FromDomain(bot);
+    }
+    public async Task<Result<BotResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    {
+       var bot =  await _db.Bots
+            .Where(b => b.MerchantId == merchantId && b.Id == botId)
+            .FirstOrDefaultAsync(ct);
+
+        if (bot is null) return BotErrors.BotNotFound;
 
         return BotResponse.FromDomain(bot);
     }
@@ -153,13 +198,11 @@ public sealed class MerchantService : IMerchantService
             .Include(m => m.Bots)
             .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
 
-        if (merchant is null)
-            return MerchantErrors.NotFound;
+        if (merchant is null) return MerchantErrors.NotFound;
 
         var bots = merchant.Bots.Select(GetListBotResponse.FromDomain).ToList();
         return bots;
     }
-
 
     public async Task<Result<Success>> ActivateBotAsync(Guid merchantId, Guid botId, CancellationToken cancellationToken = default)
     {

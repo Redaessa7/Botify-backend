@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.Models.Merchants.Enums;
 
-namespace Botify.Application.Services.Merchants.Responses
+namespace Botify.Application.Features.Merchants.Responses
 {
     public sealed class CurrentMerchantResponse
     {
