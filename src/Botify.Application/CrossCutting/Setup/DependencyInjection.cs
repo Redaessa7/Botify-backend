@@ -1,6 +1,6 @@
-using Botify.Application.CrossCutting.Interfaces;
+using Botify.Application.Features.Merchants.Interfaces;
+using Botify.Application.Features.Merchants.Services;
 using Botify.Application.Features.Webhooks;
-using Botify.Application.Services.Merchants;
 using Botify.Domain.Events;
 using Botify.Domain.Events.Merchants;
 using Microsoft.Extensions.Configuration;
