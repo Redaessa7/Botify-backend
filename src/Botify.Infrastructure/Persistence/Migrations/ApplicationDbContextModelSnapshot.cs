@@ -503,15 +503,51 @@ namespace Botify.Infrastructure.Persistence.Migrations
                             b1.Property<decimal?>("TaxRate")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<string>("TelegramLink")
-                                .HasColumnType("TEXT");
-
                             b1.HasKey("MerchantId");
 
                             b1.ToTable("ShopSettings", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("MerchantId");
+
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.SocialMediaLinks", "SocialMediaLinks", b2 =>
+                                {
+                                    b2.Property<Guid>("ShopSettingsMerchantId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Facebook")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Instagram")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("LinkedIn")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Twitter")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Website")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Whatsapp")
+                                        .HasMaxLength(100)
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("ShopSettingsMerchantId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("ShopSettingsMerchantId");
+                                });
+
+                            b1.Navigation("SocialMediaLinks");
                         });
 
                     b.Navigation("Profile");

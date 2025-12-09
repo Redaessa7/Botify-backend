@@ -52,7 +52,15 @@ namespace Botify.Infrastructure.Persistence.Configurations
                 shop.Property(s => s.Address).HasMaxLength(500).IsRequired();
                 shop.Property(s => s.ImageUrl).HasMaxLength(500);
                 shop.Property(s => s.TaxRate);
-
+                shop.OwnsOne(s => s.SocialMediaLinks, sm =>
+                {
+                    sm.Property(l => l.Whatsapp).HasMaxLength(100);
+                    sm.Property(l => l.Website).HasMaxLength(200);
+                    sm.Property(l => l.Facebook).HasMaxLength(200);
+                    sm.Property(l => l.Twitter).HasMaxLength(200);
+                    sm.Property(l => l.Instagram).HasMaxLength(200);
+                    sm.Property(l => l.LinkedIn).HasMaxLength(200);
+                });
                 shop.ToTable("ShopSettings");
             });
 

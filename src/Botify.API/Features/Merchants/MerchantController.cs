@@ -1,11 +1,9 @@
 using Botify.API.CrossCutting.Controllers;
 using Botify.Application.CrossCutting.Requests;
 using Botify.Application.Features.Merchants.Interfaces;
-using Botify.Application.Services.Auths;
 using Botify.Application.Services.Merchants;
-using Botify.Application.Services.Merchants.Responses;
+using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.Merchants.Bots;
-using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,12 +29,21 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     public async Task<IActionResult> CreateBotAsync(Guid merchantId, CreateBotRequest request)
     {
         var result = await _merchantService.CreateBotAsync(merchantId, request);
-        return result.Match(value => Ok(value), Problem);
+        return result.Match(Ok, Problem);
+    }
+
+    [HttpPost("{merchantId:guid}/shops")]
+    [Authorize]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> AssignShopAsync(Guid merchantId, [FromForm] AssignShopRequest request)
+    {
+        var result = await _merchantService.AssignShopAsync(merchantId, request, HttpContext.RequestAborted);
+        return result.Match(Ok, Problem);
     }
 
     [HttpPost("bots/check-token")]
     [Authorize] 
-    public async Task<IActionResult> CheckValidToken([FromBody] CheckTokenRequest request, CancellationToken ct)
+    public async Task<IActionResult> CheckValidToken(CheckTokenRequest request, CancellationToken ct)
     {
         // Resolve platform service via KeyedServices
         var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToUpperInvariant());
@@ -55,10 +62,8 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     {
         var result = await _merchantService.GetBotsAsync(merchantId, ct);
 
-        return result.Match(
-            bots => Ok(bots),
-            errors => Problem(errors)
-        );
+        return result.Match(Ok, Problem);
+
     }
 
     [HttpPatch("{merchantId:guid}/bots/{botId:guid}/activate")]
