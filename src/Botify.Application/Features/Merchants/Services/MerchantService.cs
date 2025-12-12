@@ -173,7 +173,7 @@ public sealed class MerchantService : IMerchantService
         _db.Bots.Add(bot);
         await _db.SaveChangesAsync(ct);
 
-        var webhookResult = await platformService.SetWebhookAsync(bot.Token, bot.WebhookUrl!, ct);
+        var webhookResult = await platformService.SetWebhookAsync(bot.Token, bot.WebhookUrl!, bot.Secret,ct);
         if (!webhookResult.IsSuccess)
         {
             // Optionally mark bot state or log; return error to caller

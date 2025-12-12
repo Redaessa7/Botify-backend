@@ -23,11 +23,14 @@ public sealed class TelegramBotService : IBotPlatformService
         return Result.Success;
     }
 
-    public async Task<Result<string>> SetWebhookAsync(string apiToken, string webhookUrl, CancellationToken ct = default)
+    public async Task<Result<string>> SetWebhookAsync(string apiToken, string webhookUrl, string secretToken, CancellationToken ct = default)
     {
-        var resp = await _http.GetAsync($"https://api.telegram.org/bot{apiToken}/setWebhook?url={Uri.EscapeDataString(webhookUrl)}", ct);
+        var url = $"https://api.telegram.org/bot{apiToken}/setWebhook?url={Uri.EscapeDataString(webhookUrl)}&secret_token={Uri.EscapeDataString(secretToken)}";
+
+        var resp = await _http.GetAsync(url, ct);
         if (!resp.IsSuccessStatusCode) return BotErrors.WebhookUrlInvalid;
 
         return webhookUrl;
     }
+
 }
