@@ -1,5 +1,6 @@
 ﻿using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.Features.Merchants.Interfaces;
+using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Features.Merchants.Responses;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
@@ -22,22 +23,19 @@ public sealed class MerchantService : IMerchantService
     private readonly IBotSecretGenerator _secretGenerator;
     private readonly IServiceProvider _serviceProvider;
     private readonly WebhookOptions _webhookOptions;
-    private readonly IFileService _fileService;
 
     public MerchantService(
         IApplicationDbContext db,
         IUser user,
         IBotSecretGenerator secretGenerator,
         IServiceProvider serviceProvider,
-        IOptions<WebhookOptions> webhookOptions,
-        IFileService fileService)
+        IOptions<WebhookOptions> webhookOptions )
     {
         _db = db;
         _user = user;
         _secretGenerator = secretGenerator;
         _serviceProvider = serviceProvider;
         _webhookOptions = webhookOptions.Value;
-        _fileService = fileService;
     }
 
     #region Merchant Lifecycle
@@ -62,16 +60,19 @@ public sealed class MerchantService : IMerchantService
 
         var merchantResult = Merchant.Create(
             Guid.NewGuid(),
-            request.MerchantName,
-            request.Industry,
-            profile,
-            request.LogoUrl
+            profile
         );
 
         if (!merchantResult.IsSuccess)
             return merchantResult.Errors;
 
+        var merchant = merchantResult.Value;
+        var shop = ShopSettings.CreateDefault(merchant.Id);
+
+        merchant.AssignShop(shop);
+        
         _db.Merchants.Add(merchantResult.Value);
+
         await _db.SaveChangesAsync(cancellationToken);
 
         return merchantResult;
@@ -105,36 +106,37 @@ public sealed class MerchantService : IMerchantService
 
     #region Shop Management
 
-    public async Task<Result<ShopResponse>> AssignShopAsync(Guid merchantId, AssignShopRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<ShopResponse>> SetShopAsync(Guid merchantId, SetShopRequest request, CancellationToken cancellationToken = default)
     {
         // Load aggregate root
         var merchant = await _db.Merchants.Include(x=> x.ShopSettings).FirstOrDefaultAsync(x=> x.Id == merchantId, cancellationToken);
         if (merchant is null) return MerchantErrors.NotFound;
 
-        if(merchant.ShopSettings is not null)
-            return MerchantErrors.ShopAlreadyAssigned;
-
-        string? uploadedImageUrl = null;
-        if (request.Image is not null)
-        {
-            await using var stream = request.Image.OpenReadStream();
-            var uploadResult = await _fileService.SaveFileAsync(stream, request.Image.FileName, "shop-images");
-            if (!uploadResult.IsSuccess) return uploadResult.Errors;
-            uploadedImageUrl = uploadResult.Value;
-        }
 
         // Create ShopSettings via domain factory
-        var settingsResult = ShopSettings.Create(
-            id: Guid.NewGuid(),
-            merchantId: merchantId,
-            name: request.Name,
-            currency: request.Currency,
-            language: request.Language,
-            address: request.Address,
-            socialMediaLinks: request.SocialMediaLinks,
-            imageUrl: uploadedImageUrl,
-            taxRate: request.TaxRate
-        );
+        var settingsResult = ShopSettings.Set(
+    merchant.ShopSettings.Id,
+    merchantId: merchantId,
+    name: request.ShopName,
+    currency: request.Currency,
+    language: request.Language,
+    address: request.Address,
+    industryName: request.IndustryName,
+    businessEmail: request.BusinessEmail,
+    businessPhoneNumber: request.BusinessPhoneNumber,
+    socialMediaLinks: request.SocialMediaLinks,
+    logoImageUrl: request.LogoImageUrl,
+    coverImageUrl: request.CoverImageUrl,
+    taxRate: request.TaxRate,
+    description: request.Description,
+    timezone: request.Timezone,
+    deliveryEnabled: request.DeliveryEnabled,
+    pickupEnabled: request.PickupEnabled,
+    minimumOrder: request.MinimumOrder,
+    deliveryFee: request.DeliveryFee,
+    isOpen: request.IsOpen,
+    openingHours: request?.OpeningHours?.ToDomain() ?? null
+);
 
         if (!settingsResult.IsSuccess) return settingsResult.Errors;
         var shop = settingsResult.Value;
@@ -243,6 +245,18 @@ public sealed class MerchantService : IMerchantService
 
         return merchant.ToCurrentResponse();
     }
+    public async Task<Result<ShopResponse>> GetShopAsync(Guid merchantId, CancellationToken cancellationToken = default)
+    {
+        var shop = await _db.Merchants
+            .Include(m => m.ShopSettings)
+            .ThenInclude(s => s.SocialMediaLinks)
+            .Include(m => m.ShopSettings.OpeningHours)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
 
+        if (shop is null || shop.ShopSettings is null)
+            return ShopErrors.NotFound;
+
+        return ShopResponse.FromDomain(shop.ShopSettings);
+    }
     #endregion
 }

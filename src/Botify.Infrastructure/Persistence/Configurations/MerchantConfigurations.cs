@@ -15,19 +15,6 @@ namespace Botify.Infrastructure.Persistence.Configurations
             // Primary key
             builder.HasKey(m => m.Id);
 
-            builder.Property(m => m.LogoUrl)
-                   .IsRequired(false)
-                   .HasMaxLength(500);
-
-            builder.Property(m => m.Status)
-                   .IsRequired();
-
-            builder.Property(m => m.MerchantName)
-                   .IsRequired()
-                   .HasMaxLength(200);
-
-            builder.Property(m => m.Industry)
-                .IsRequired();
 
             builder.Property(m => m.VerifiedAt);
 
@@ -41,27 +28,6 @@ namespace Botify.Infrastructure.Persistence.Configurations
                             .IsRequired();
 
                 subscription.ToTable("MerchantSubscriptions");
-            });
-
-            // One-to-one relationship with ShopDetails
-            builder.OwnsOne(m => m.ShopSettings, shop =>
-            {
-                shop.Property(s => s.Name).HasMaxLength(200).IsRequired();
-                shop.Property(s => s.Currency).HasMaxLength(10).IsRequired();
-                shop.Property(s => s.Language).HasMaxLength(50).IsRequired();
-                shop.Property(s => s.Address).HasMaxLength(500).IsRequired();
-                shop.Property(s => s.ImageUrl).HasMaxLength(500);
-                shop.Property(s => s.TaxRate);
-                shop.OwnsOne(s => s.SocialMediaLinks, sm =>
-                {
-                    sm.Property(l => l.Whatsapp).HasMaxLength(100);
-                    sm.Property(l => l.Website).HasMaxLength(200);
-                    sm.Property(l => l.Facebook).HasMaxLength(200);
-                    sm.Property(l => l.Twitter).HasMaxLength(200);
-                    sm.Property(l => l.Instagram).HasMaxLength(200);
-                    sm.Property(l => l.LinkedIn).HasMaxLength(200);
-                });
-                shop.ToTable("ShopSettings");
             });
 
             // One-to-many relationship with Bots using private backing field

@@ -1,6 +1,7 @@
 using Botify.API.CrossCutting.Controllers;
 using Botify.Application.CrossCutting.Requests;
 using Botify.Application.Features.Merchants.Interfaces;
+using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.Merchants.Bots;
@@ -32,12 +33,19 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         return result.Match(Ok, Problem);
     }
 
-    [HttpPost("{merchantId:guid}/shops")]
+    [HttpPut("{merchantId:guid}/shops")]
     [Authorize]
-    [Consumes("multipart/form-data")]
-    public async Task<IActionResult> AssignShopAsync(Guid merchantId, [FromForm] AssignShopRequest request)
+    public async Task<IActionResult> SetShopAsync(Guid merchantId, SetShopRequest request)
     {
-        var result = await _merchantService.AssignShopAsync(merchantId, request, HttpContext.RequestAborted);
+        var result = await _merchantService.SetShopAsync(merchantId, request, HttpContext.RequestAborted);
+        return result.Match(Ok, Problem);
+    }
+
+    [HttpGet("{merchantId:guid}/shops")]
+    [Authorize]
+    public async Task<IActionResult> GetShopAsync(Guid merchantId)
+    {
+        var result = await _merchantService.GetShopAsync(merchantId, HttpContext.RequestAborted);
         return result.Match(Ok, Problem);
     }
 
