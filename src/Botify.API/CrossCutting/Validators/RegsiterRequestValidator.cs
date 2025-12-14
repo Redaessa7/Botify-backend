@@ -55,11 +55,5 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
                 .WithErrorCode(UserProfileErrors.LanguageTooLong.Code)
                 .WithState(_ => UserProfileErrors.LanguageTooLong);
 
-
-        RuleFor(x => x.ProfileImageUrl)
-            .NotEmpty()
-                .WithMessage(UserProfileErrors.ProfileImageUrlInvalid.Description)
-                .WithErrorCode(UserProfileErrors.ProfileImageUrlInvalid.Code)
-                .WithState(_ => UserProfileErrors.ProfileImageUrlInvalid);
     }
 }
