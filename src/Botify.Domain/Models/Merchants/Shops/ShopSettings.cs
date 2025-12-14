@@ -200,7 +200,7 @@ namespace Botify.Domain.Models.Merchants.Shops
                     Instagram = "https://instagram.com/defaultshop",
                     Twitter = "https://twitter.com/defaultshop",
                     Website = "https://defaultshop.com",
-                    Whatsapp = "+10000000000",
+                    Whatsapp = "https://wa.me/10000000000",
                     LinkedIn = "https://linkedin.com/company/defaultshop"
                 },
                 LogoImageUrl = "https://cdn.defaultshop.com/logo.png",

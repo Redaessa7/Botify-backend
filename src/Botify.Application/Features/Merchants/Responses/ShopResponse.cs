@@ -10,7 +10,7 @@ namespace Botify.Application.Features.Merchants.Responses
     public sealed class ShopResponse
     {
         public Guid Id { get; init; }
-        public string Name { get; init; } = string.Empty;
+        public string ShopName { get; init; } = string.Empty;
         public string? IndustryName { get; init; }
         public string Currency { get; init; } = string.Empty;
         public string Language { get; init; } = string.Empty;
@@ -37,7 +37,7 @@ namespace Botify.Application.Features.Merchants.Responses
         public static ShopResponse FromDomain(ShopSettings shop) => new()
         {
             Id = shop.Id,
-            Name = shop.Name,
+            ShopName = shop.Name,
             IndustryName = shop.IndustryName,
             Currency = shop.Currency,
             Language = shop.Language,

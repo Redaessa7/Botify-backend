@@ -5,8 +5,6 @@ namespace Botify.Application.Features.Merchants.Responses
     public sealed class CurrentMerchantResponse
     {
         public Guid merchantId { get; init; }
-        public string MerchantName { get; init; } = null!;
-        public string? LogoUrl { get; init; }
         public MerchantStatus Status { get; init; }
         public DateTime? VerifiedAt { get; init; }
 
@@ -17,7 +15,6 @@ namespace Botify.Application.Features.Merchants.Responses
         public string? ProfileImageUrl { get; init; }
         public string? Bio { get; init; }
         public string? Language { get; init; }
-        public string? TimeZone { get; init; }
 
         // Subscription info
         public Plan CurrentPlan { get; init; }
