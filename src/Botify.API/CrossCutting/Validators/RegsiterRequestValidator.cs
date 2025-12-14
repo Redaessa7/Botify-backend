@@ -55,29 +55,9 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
                 .WithErrorCode(UserProfileErrors.LanguageTooLong.Code)
                 .WithState(_ => UserProfileErrors.LanguageTooLong);
 
-        // Merchant
-        RuleFor(x => x.MerchantName)
-            .RequiredField(MerchantErrors.MerchantNameRequired)
-            .MaximumLength(100)
-                .WithMessage(MerchantErrors.MerchantNameTooLong.Description)
-                .WithErrorCode(MerchantErrors.MerchantNameTooLong.Code)
-                .WithState(_ => MerchantErrors.MerchantNameTooLong);
 
-        RuleFor(x => x.Industry)
-            .RequiredField(MerchantErrors.IndustryRequired)
-            .MaximumLength(100)
-                .WithMessage(MerchantErrors.IndustryTooLong.Description)
-                .WithErrorCode(MerchantErrors.IndustryTooLong.Code)
-                .WithState(_ => MerchantErrors.IndustryTooLong);
-        // File validation
-        RuleFor(x => x.Logo)
-            .Must(file => file == null || fileService.ValidateFile(file.FileName, file.ContentType, file.Length))
-                .WithMessage(MerchantErrors.LogoUrlInvalid.Description)
-                .WithErrorCode(MerchantErrors.LogoUrlInvalid.Code)
-                .WithState(_ => MerchantErrors.LogoUrlInvalid);
-
-        RuleFor(x => x.ProfileImage)
-            .Must(file => file == null || fileService.ValidateFile(file.FileName, file.ContentType, file.Length))
+        RuleFor(x => x.ProfileImageUrl)
+            .NotEmpty()
                 .WithMessage(UserProfileErrors.ProfileImageUrlInvalid.Description)
                 .WithErrorCode(UserProfileErrors.ProfileImageUrlInvalid.Code)
                 .WithState(_ => UserProfileErrors.ProfileImageUrlInvalid);

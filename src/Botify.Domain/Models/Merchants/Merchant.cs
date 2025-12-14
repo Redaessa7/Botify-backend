@@ -10,9 +10,6 @@ namespace Botify.Domain.Models.Merchants
 {
     public sealed class Merchant : AuditableEntity
     {
-        public string MerchantName { get; private set; }
-        public string Industry { get; private set; }
-        public string? LogoUrl { get; private set; }
         public MerchantStatus Status { get; private set; }
         public DateTime? VerifiedAt { get; private set; }
         public Guid UserProfileId { get; private set; }
@@ -26,32 +23,23 @@ namespace Botify.Domain.Models.Merchants
 
         private Merchant() { }
 
-        private Merchant(Guid id, string merchantName, string industry, UserProfile userProfile, string? logoUrl, Plan plan = Plan.Free)
+        private Merchant(Guid id,  UserProfile userProfile,  Plan plan = Plan.Free)
             : base(id)
         {
             UserProfileId = userProfile.Id;
-            MerchantName = merchantName;
-            Industry = industry;
-            LogoUrl = logoUrl;
             Status = MerchantStatus.Pending;
             Subscription = MerchantSubscription.Start(Id, plan);
         }
 
-        public static Result<Merchant> Create(Guid id, string merchantName, string industry, UserProfile userProfile, string? logoUrl)
+        public static Result<Merchant> Create(Guid id, UserProfile userProfile)
         {
             if (id == Guid.Empty)
                 return MerchantErrors.IdRequired;
 
-            if (string.IsNullOrWhiteSpace(merchantName))
-                return MerchantErrors.MerchantNameRequired;
-
-            if (string.IsNullOrWhiteSpace(industry))
-                return MerchantErrors.IndustryRequired;
-
             if (userProfile is null)
                 return MerchantErrors.UserProfileRequired;
 
-            return new Merchant(id, merchantName, industry, userProfile, logoUrl);
+            return new Merchant(id, userProfile);
         }
 
 

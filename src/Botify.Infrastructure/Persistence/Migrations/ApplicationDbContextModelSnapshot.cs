@@ -146,23 +146,10 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Industry")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset>("LastModifiedUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("MerchantName")
-                        .IsRequired()
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
@@ -180,6 +167,101 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Merchants", (string)null);
+                });
+
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Shops.ShopSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BusinessEmail")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BusinessPhoneNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CoverImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("DeliveryEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("DeliveryFee")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IndustryName")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsOpen")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MerchantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("MinimumOrder")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PickupEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("TaxRate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Timezone")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId")
+                        .IsUnique();
+
+                    b.ToTable("ShopSettings", (string)null);
                 });
 
             modelBuilder.Entity("Botify.Infrastructure.Identity.ApplicationUser", b =>
@@ -459,103 +541,242 @@ namespace Botify.Infrastructure.Persistence.Migrations
                                 .HasForeignKey("MerchantId");
                         });
 
-                    b.OwnsOne("Botify.Domain.Models.Merchants.Shops.ShopSettings", "ShopSettings", b1 =>
+                    b.Navigation("Profile");
+
+                    b.Navigation("Subscription")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Shops.ShopSettings", b =>
+                {
+                    b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
+                        .WithOne("ShopSettings")
+                        .HasForeignKey("Botify.Domain.Models.Merchants.Shops.ShopSettings", "MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.OpeningHours", "OpeningHours", b1 =>
                         {
-                            b1.Property<Guid>("MerchantId")
+                            b1.Property<Guid>("ShopSettingsId")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<string>("Address")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("TEXT");
+                            b1.HasKey("ShopSettingsId");
 
-                            b1.Property<DateTimeOffset>("CreatedAtUtc")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("CreatedBy")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("Currency")
-                                .IsRequired()
-                                .HasMaxLength(10)
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("ImageUrl")
-                                .HasMaxLength(500)
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("Language")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("LastModifiedBy")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<DateTimeOffset>("LastModifiedUtc")
-                                .HasColumnType("TEXT");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("TEXT");
-
-                            b1.Property<decimal?>("TaxRate")
-                                .HasColumnType("TEXT");
-
-                            b1.HasKey("MerchantId");
-
-                            b1.ToTable("ShopSettings", (string)null);
+                            b1.ToTable("ShopSettings");
 
                             b1.WithOwner()
-                                .HasForeignKey("MerchantId");
+                                .HasForeignKey("ShopSettingsId");
 
-                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.SocialMediaLinks", "SocialMediaLinks", b2 =>
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Friday", b2 =>
                                 {
-                                    b2.Property<Guid>("ShopSettingsMerchantId")
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
                                         .HasColumnType("TEXT");
 
-                                    b2.Property<string>("Facebook")
-                                        .HasMaxLength(200)
+                                    b2.Property<TimeOnly>("Close")
                                         .HasColumnType("TEXT");
 
-                                    b2.Property<string>("Instagram")
-                                        .HasMaxLength(200)
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
                                         .HasColumnType("TEXT");
 
-                                    b2.Property<string>("LinkedIn")
-                                        .HasMaxLength(200)
-                                        .HasColumnType("TEXT");
-
-                                    b2.Property<string>("Twitter")
-                                        .HasMaxLength(200)
-                                        .HasColumnType("TEXT");
-
-                                    b2.Property<string>("Website")
-                                        .HasMaxLength(200)
-                                        .HasColumnType("TEXT");
-
-                                    b2.Property<string>("Whatsapp")
-                                        .HasMaxLength(100)
-                                        .HasColumnType("TEXT");
-
-                                    b2.HasKey("ShopSettingsMerchantId");
+                                    b2.HasKey("OpeningHoursShopSettingsId");
 
                                     b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
-                                        .HasForeignKey("ShopSettingsMerchantId");
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
                                 });
 
-                            b1.Navigation("SocialMediaLinks");
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Monday", b2 =>
+                                {
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<TimeOnly>("Close")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("OpeningHoursShopSettingsId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
+                                });
+
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Saturday", b2 =>
+                                {
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<TimeOnly>("Close")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("OpeningHoursShopSettingsId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
+                                });
+
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Sunday", b2 =>
+                                {
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<TimeOnly>("Close")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("OpeningHoursShopSettingsId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
+                                });
+
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Thursday", b2 =>
+                                {
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<TimeOnly>("Close")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("OpeningHoursShopSettingsId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
+                                });
+
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Tuesday", b2 =>
+                                {
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<TimeOnly>("Close")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("OpeningHoursShopSettingsId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
+                                });
+
+                            b1.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.DayOpeningHours", "Wednesday", b2 =>
+                                {
+                                    b2.Property<Guid>("OpeningHoursShopSettingsId")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<TimeOnly>("Close")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<bool>("IsOpen")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<TimeOnly>("Open")
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("OpeningHoursShopSettingsId");
+
+                                    b2.ToTable("ShopSettings");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("OpeningHoursShopSettingsId");
+                                });
+
+                            b1.Navigation("Friday");
+
+                            b1.Navigation("Monday");
+
+                            b1.Navigation("Saturday");
+
+                            b1.Navigation("Sunday");
+
+                            b1.Navigation("Thursday");
+
+                            b1.Navigation("Tuesday");
+
+                            b1.Navigation("Wednesday");
                         });
 
-                    b.Navigation("Profile");
+                    b.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.SocialMediaLinks", "SocialMediaLinks", b1 =>
+                        {
+                            b1.Property<Guid>("ShopSettingsId")
+                                .HasColumnType("TEXT");
 
-                    b.Navigation("ShopSettings");
+                            b1.Property<string>("Facebook")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
 
-                    b.Navigation("Subscription")
+                            b1.Property<string>("Instagram")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("LinkedIn")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Twitter")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Website")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Whatsapp")
+                                .HasMaxLength(100)
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("ShopSettingsId");
+
+                            b1.ToTable("ShopSettings");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ShopSettingsId");
+                        });
+
+                    b.Navigation("OpeningHours")
                         .IsRequired();
+
+                    b.Navigation("SocialMediaLinks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -621,6 +842,8 @@ namespace Botify.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
                 {
                     b.Navigation("Bots");
+
+                    b.Navigation("ShopSettings");
                 });
 #pragma warning restore 612, 618
         }

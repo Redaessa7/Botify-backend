@@ -114,56 +114,15 @@ public class AuthService(
             return errors;
         }
 
-        // 2. Handle file uploads (Logo + ProfileImage)
-        string? logoUrl = null;
-        if (request.Logo is not null)
-        {
-            if (!_fileService.ValidateFile(request.Logo.FileName, request.Logo.ContentType, request.Logo.Length))
-            {
-                await _userManager.DeleteAsync(user);
-                return Error.Validation("File.InvalidLogo", "Logo file is invalid.");
-            }
-
-            var logoResult = await _fileService.SaveFileAsync(request.Logo.OpenReadStream(), request.Logo.FileName, "logos");
-            if (!logoResult.IsSuccess)
-            {
-                await _userManager.DeleteAsync(user);
-                return logoResult.Errors;
-            }
-
-            logoUrl = logoResult.Value;
-        }
-
-        string? profileImageUrl = null;
-        if (request.ProfileImage is not null)
-        {
-            if (!_fileService.ValidateFile(request.ProfileImage.FileName, request.ProfileImage.ContentType, request.ProfileImage.Length))
-            {
-                await _userManager.DeleteAsync(user);
-                return Error.Validation("File.InvalidProfileImage", "Profile image file is invalid.");
-            }
-
-            var profileResult = await _fileService.SaveFileAsync(request.ProfileImage.OpenReadStream(), request.ProfileImage.FileName, "profiles");
-            if (!profileResult.IsSuccess)
-            {
-                await _userManager.DeleteAsync(user);
-                return profileResult.Errors;
-            }
-
-            profileImageUrl = profileResult.Value;
-        }
 
         // 3. Create merchant + profile
         var createMerchant = new CreateMerchantRequest(
             user.Id,
-            request.MerchantName,
-            request.Industry,
-            logoUrl,
             new CreateUserProfileRequest(
                 request.FirstName,
                 request.LastName,
                 request.Bio,
-                profileImageUrl,
+                request.ProfileImageUrl,
                 request.Language
             )
         );

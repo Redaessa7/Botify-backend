@@ -10,9 +10,6 @@ public class RegisterRequest
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public string? Bio { get; set; }
-    public IFormFile? ProfileImage { get; set; }
+    public string? ProfileImageUrl { get; set; }
     public string? Language { get; set; }
-    public required string MerchantName { get; set; }
-    public required string Industry { get; set; }
-    public IFormFile? Logo { get; set; }
 }
