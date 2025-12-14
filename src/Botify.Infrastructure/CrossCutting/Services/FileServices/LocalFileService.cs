@@ -25,17 +25,42 @@ public class LocalFileService : IFileService
     private string GetFullPath(string relativePath)
         => Path.Combine(_rootPath, relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
 
-    private string GenerateRelativePath(string folder, string fileName)
+    private string GenerateRelativePath(string fileName)
     {
         var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(fileName)}";
-        return Path.Combine(folder, uniqueFileName).Replace("\\", "/");
+        return uniqueFileName.Replace("\\", "/");
     }
 
     public async Task<Result<string>> SaveFileAsync(Stream fileStream, string fileName, string folder)
     {
         try
         {
-            var relativePath = GenerateRelativePath(folder, fileName);
+            var relativePath = fileName;
+            var fullPath = GetFullPath(relativePath);
+
+            var directory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            await using var output = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+            await fileStream.CopyToAsync(output);
+
+            _logger.LogInformation("File saved successfully: {Path}", relativePath);
+            return relativePath;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving file: {FileName}", fileName);
+            return Error.Unexpected("An error occurred while saving the file.");
+        }
+    }
+
+    public async Task<Result<string>> SaveFileAsync(Stream fileStream, string fileName)
+    {
+        try
+        {
+            // Generate only the filename with GUID, not the full path
+            var relativePath = GenerateRelativePath(fileName);
             var fullPath = GetFullPath(relativePath);
 
             var directory = Path.GetDirectoryName(fullPath);
