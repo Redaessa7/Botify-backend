@@ -6,6 +6,7 @@ namespace Botify.Application.CrossCutting.Interfaces;
 public interface IFileService
 {
     Task<Result<string>> SaveFileAsync(Stream fileStream, string fileName, string folder);
+    Task<Result<string>> SaveFileAsync(Stream fileStream, string fileName);
     Task<Stream?> GetFileAsync(string relativePath);
     Task DeleteFileAsync(string relativePath);
     Task<string> ReplaceFileAsync(Stream fileStream, string fileName, string oldRelativePath, string folder);

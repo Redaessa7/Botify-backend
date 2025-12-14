@@ -100,7 +100,7 @@ public static class DependencyInjection
         services.AddSingleton<IFileValidator, FileValidator>();
         services.AddScoped<IFileService>(sp =>
             new LocalFileService(
-                rootPath: "uploads",
+                rootPath: "wwwroot/uploads",
                 validator: sp.GetRequiredService<IFileValidator>(),
                 logger: sp.GetRequiredService<ILogger<LocalFileService>>()
             )
