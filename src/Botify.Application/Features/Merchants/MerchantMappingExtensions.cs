@@ -33,7 +33,6 @@ namespace Botify.Application.Services.Merchants
                 ProfileImageUrl = merchant.Profile.ProfileImageUrl,
                 Bio = merchant.Profile.Bio,
                 Language = merchant.Profile.Language,
-                TimeZone = merchant.Profile.TimeZone,
 
                 CurrentPlan = merchant.Subscription.CurrentPlan,
                 ExpiryDate = merchant.Subscription.ExpiryDate
