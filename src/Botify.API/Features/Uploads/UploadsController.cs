@@ -7,7 +7,6 @@ namespace Botify.API.Features.Uploads;
 
 [Route("api/uploads")]
 [ApiVersion("1.0")]
-[Authorize]
 public class UploadsController(IFileService fileService) : ApiController
 {
     private readonly IFileService _fileService = fileService;
