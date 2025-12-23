@@ -31,9 +31,12 @@ public sealed class ProductService : IProductService
         if (!productResult.IsSuccess)
             return productResult.Errors;
 
-        var product = productResult.Value;
+        var merchanrProductRulesResult = merchant.AddProduct(productResult.Value);
 
-        merchant.AddProduct(product);
+        if (merchanrProductRulesResult.IsError)
+            return merchanrProductRulesResult.Errors;
+
+        var product = productResult.Value;
 
         _db.Products.Add(product);
 
