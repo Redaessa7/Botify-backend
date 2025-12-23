@@ -3,6 +3,7 @@ using Botify.Domain.Events.Merchants;
 using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Enums;
+using Botify.Domain.Models.Merchants.Products;
 using Botify.Domain.Models.Merchants.Shops;
 using Botify.Domain.ResultPattern;
 
@@ -19,11 +20,14 @@ namespace Botify.Domain.Models.Merchants
         public ShopSettings? ShopSettings { get; private set; }
 
         private readonly List<Bot> _bots = new();
+        private readonly List<Product> _products = new();
+
+        public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
         public IReadOnlyCollection<Bot> Bots => _bots.AsReadOnly();
 
         private Merchant() { }
 
-        private Merchant(Guid id,  UserProfile userProfile,  Plan plan = Plan.Free)
+        private Merchant(Guid id, UserProfile userProfile, Plan plan = Plan.Free)
             : base(id)
         {
             UserProfileId = userProfile.Id;
@@ -42,6 +46,7 @@ namespace Botify.Domain.Models.Merchants
             return new Merchant(id, userProfile);
         }
 
+        #region Merchant Lifecycle
 
         public Result<Success> Approve()
         {
@@ -55,6 +60,43 @@ namespace Botify.Domain.Models.Merchants
             return Result.Success;
         }
 
+        public Result<Success> Suspend(string reason)
+        {
+            Status = MerchantStatus.Suspended;
+            return Result.Success;
+        }
+
+        public Result<Success> AssignShop(ShopSettings settings)
+        {
+            ShopSettings = settings;
+            return Result.Success;
+        }
+
+        #endregion
+
+        #region Bot Management
+
+        private string BuildWebhookUrl(Guid botId, string secret, string platform, string baseWebhookUrl)
+        {
+            var webhookUrl = $"{baseWebhookUrl.TrimEnd('/')}/{platform.ToLowerInvariant()}/{botId}?secret={secret}";
+            return webhookUrl;
+        }
+
+        public Result<Bot> AddBot(Guid botId, string name, string token, string platform, string secret, string baseWebhookUrl)
+        {
+            var botResult = Bot.Create(botId, Id, name, token, platform, secret);
+            if (!botResult.IsSuccess) return botResult.Errors;
+
+            var bot = botResult.Value;
+
+            var webhookUrl = BuildWebhookUrl(botId, secret, platform, baseWebhookUrl);
+            var setWebhookResult = bot.SetWebhook(webhookUrl);
+            if (!setWebhookResult.IsSuccess) return setWebhookResult.Errors;
+
+            _bots.Add(bot);
+            return bot;
+        }
+
         public Result<Success> ActivateBot(Guid botId)
         {
             var bot = _bots.FirstOrDefault(b => b.Id == botId);
@@ -66,41 +108,6 @@ namespace Botify.Domain.Models.Merchants
             return Result.Success;
         }
 
-        public Result<Success> Suspend(string reason)
-        {
-            Status = MerchantStatus.Suspended;
-            return Result.Success;
-        }
-
-        public Result<Success> AssignShop(ShopSettings settings)
-        {
-            //if (Status != MerchantStatus.Approved)
-            //    return MerchantErrors.NotApproved;
-
-            ShopSettings = settings;
-            return Result.Success;
-        }
-        private string BuildWebhookUrl(Guid botId, string secret, string platform, string baseWebhookUrl)
-        {
-            var webhookUrl = $"{baseWebhookUrl.TrimEnd('/')}/{platform.ToLowerInvariant()}/{botId}?secret={secret}";
-
-            return webhookUrl;
-        }
-        public Result<Bot> AddBot(Guid botId, string name, string token, string platform, string secret, string baseWebhookUrl)
-        {
-            var botResult = Bot.Create(botId, Id, name, token, platform, secret);
-            if (!botResult.IsSuccess) return botResult.Errors;
-
-            var bot = botResult.Value;
-
-            // Merchant builds webhook URL
-            var webhookUrl = BuildWebhookUrl(botId, secret, platform, baseWebhookUrl);
-            var setWebhookResult = bot.SetWebhook(webhookUrl);
-            if (!setWebhookResult.IsSuccess) return setWebhookResult.Errors;
-
-            _bots.Add(bot);
-            return bot;
-        }
         public Result<Success> DeactivateBot(Guid botId)
         {
             var bot = _bots.FirstOrDefault(b => b.Id == botId);
@@ -108,9 +115,10 @@ namespace Botify.Domain.Models.Merchants
                 return BotErrors.BotNotFound;
 
             bot.Deactivate();
+            DomainEventDispatcher.Raise(new BotDeactivated(Id, bot.Id));
             return Result.Success;
         }
-        
+
         public bool CanCreateBot()
         {
             return Subscription.CurrentPlan switch
@@ -121,5 +129,37 @@ namespace Botify.Domain.Models.Merchants
                 _ => false
             };
         }
+
+        #endregion
+
+        #region Product Management
+
+        public Result<Product> AddProduct(Product product)
+        {
+            _products.Add(product);
+            return product;
+        }
+
+        public Result<Success> ActivateProduct(Guid productId)
+        {
+            var product = _products.FirstOrDefault(p => p.Id == productId);
+            if (product == null)
+                return ProductErrors.NotFound;
+
+            product.Activate();
+            return Result.Success;
+        }
+
+        public Result<Success> DeactivateProduct(Guid productId)
+        {
+            var product = _products.FirstOrDefault(p => p.Id == productId);
+            if (product == null)
+                return ProductErrors.NotFound;
+
+            product.Deactivate();
+            return Result.Success;
+        }
+
+        #endregion
     }
 }

@@ -12,7 +12,6 @@ namespace Botify.Application.Features.Merchants.Requests
         /// </summary>
         public sealed class SetShopRequest
         {
-            public Guid Id { get; init; }
             public string ShopName { get; set; } = default!;
             public string? IndustryName { get; set; }
             public string Currency { get; set; } = default!;

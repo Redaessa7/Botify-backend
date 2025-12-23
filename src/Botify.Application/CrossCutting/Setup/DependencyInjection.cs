@@ -15,6 +15,7 @@ public static class DependencyInjection
         DomainEventDispatcher.Register(MerchantEventHandlers.Handle);
         services.AddScoped<IMerchantService, MerchantService>();
         services.AddScoped<IWebhookService, WebhookService>();
+        services.AddScoped<IProductService, ProductService>();
         return services;
     }
 

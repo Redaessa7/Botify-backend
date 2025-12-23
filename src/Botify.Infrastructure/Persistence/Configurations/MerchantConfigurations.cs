@@ -44,6 +44,14 @@ namespace Botify.Infrastructure.Persistence.Configurations
                     .HasForeignKey<Merchant>(m => m.UserProfileId)
                     .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired();
+
+            builder.HasMany(x => x.Products)
+                     .WithOne()
+                     .HasForeignKey(p => p.MerchantId)
+                     .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Navigation(m => m.Products)
+                   .UsePropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

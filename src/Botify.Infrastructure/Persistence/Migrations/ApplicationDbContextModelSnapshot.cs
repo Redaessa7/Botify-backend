@@ -169,6 +169,63 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.ToTable("Merchants", (string)null);
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Products.Product", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MerchantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
+
+                    b.ToTable("Products", (string)null);
+                });
+
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Shops.ShopSettings", b =>
                 {
                     b.Property<Guid>("Id")
@@ -547,6 +604,15 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Products.Product", b =>
+                {
+                    b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
+                        .WithMany("Products")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Shops.ShopSettings", b =>
                 {
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
@@ -842,6 +908,8 @@ namespace Botify.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
                 {
                     b.Navigation("Bots");
+
+                    b.Navigation("Products");
 
                     b.Navigation("ShopSettings");
                 });
