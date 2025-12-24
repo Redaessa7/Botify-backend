@@ -195,38 +195,83 @@ namespace Botify.Infrastructure.Persistence.Initialisation
 
             var bot = botResult.Value;
 
-            // Question
-            var customerInfoResult = CustomerInfo.Create(
-                "Test Customer",
-                "customer@example.com",
-                "telegramUser",
-                "whatsappUser",
-                "messengerUser"
-            );
-            if (customerInfoResult.IsError) return;
+            var questions = SeedQuestions(merchantId, bot).ToList();
 
-            var questionResult = Question.Create(
-                Guid.NewGuid(),
-                merchantId,
-                bot.Id,
-                bot.Name,
-                bot.Platform,
-                QuestionType.GENERAL,
-                customerInfoResult.Value,
-                "Hello, I need help with my order."
-            );
-            if (questionResult.IsError) return;
 
-            var question = questionResult.Value;
-
-            // Attach to merchant
-            merchant.Approve(); // optional: mark merchant approved
+            foreach (var q in questions)
+            {
+                merchant.AddQuestion(q); // if you expose such a method
+            }
+                                         // Attach to merchant
+                merchant.Approve(); // optional: mark merchant approved
             _context.UserProfiles.Add(profileResult.Value);
             _context.Merchants.Add(merchant);
             _context.Bots.Add(bot);
-            _context.Questions.Add(question);
+
+            _context.Questions.AddRange(questions);
+
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation($"Seeded merchant '{email}' with bot and question.");
         }
+        private IEnumerable<Question> SeedQuestions(Guid merchantId, Bot bot)
+        {
+            var fakeCustomers = new[]
+            {
+        new { Name = "John Smith", Email = "john.smith@example.com", Telegram = "john_smith_tg", Whatsapp = "johnsmith_wa", Messenger = "johnsmith_fb" },
+        new { Name = "Fatima Ali", Email = "fatima.ali@example.com", Telegram = "fatima_ali_tg", Whatsapp = "fatimaali_wa", Messenger = "fatimaali_fb" },
+        new { Name = "Carlos Mendes", Email = "carlos.mendes@example.com", Telegram = "carlos_mendes_tg", Whatsapp = "carlosmendes_wa", Messenger = "carlosmendes_fb" },
+        new { Name = "Aisha Khan", Email = "aisha.khan@example.com", Telegram = "aisha_khan_tg", Whatsapp = "aishakhan_wa", Messenger = "aishakhan_fb" },
+        new { Name = "David Lee", Email = "david.lee@example.com", Telegram = "david_lee_tg", Whatsapp = "davidlee_wa", Messenger = "davidlee_fb" }
+    };
+
+            var sampleMessages = new[]
+            {
+        "Hello, I need help with my order.",
+        "Can you tell me the delivery time?",
+        "Do you have discounts available?",
+        "I want to change my shipping address.",
+        "My payment failed, what should I do?",
+        "Can I return a product I bought?",
+        "Do you support international shipping?",
+        "How do I track my order?",
+        "Can I talk to a human agent?",
+        "Is there a warranty on this product?"
+    };
+
+            int i = 0;
+            foreach (var message in sampleMessages)
+            {
+                var customer = fakeCustomers[i % fakeCustomers.Length];
+
+                var customerInfoResult = CustomerInfo.Create(
+                    customer.Name,
+                    customer.Email,
+                    customer.Telegram,
+                    customer.Whatsapp,
+                    customer.Messenger
+                );
+
+                if (customerInfoResult.IsError)
+                    continue;
+
+                var questionResult = Question.Create(
+                    Guid.NewGuid(),
+                    merchantId,
+                    bot.Id,
+                    bot.Name,
+                    bot.Platform,
+                    QuestionType.GENERAL,
+                    customerInfoResult.Value,
+                    message
+                );
+
+                if (questionResult.IsSuccess)
+                    yield return questionResult.Value;
+
+                i++;
+            }
         }
+
     }
+}

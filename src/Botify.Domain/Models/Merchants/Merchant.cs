@@ -164,5 +164,13 @@ namespace Botify.Domain.Models.Merchants
         }
 
         #endregion
+
+        #region Question Management
+        public Result<Question> AddQuestion(Question question)
+        {
+            _questions.Add(question);
+            return question;
+        }
+        #endregion
     }
 }
