@@ -39,6 +39,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             // Tell EF to use the private field "_bots" for change tracking
             builder.Navigation(m => m.Bots)
                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+
             builder.HasOne(m => m.Profile)
                     .WithOne()
                     .HasForeignKey<Merchant>(m => m.UserProfileId)
@@ -52,6 +53,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
 
             builder.Navigation(m => m.Products)
                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasMany(x => x.Questions)
+                     .WithOne()
+                     .HasForeignKey(q => q.MerchantId)
+                     .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

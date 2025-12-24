@@ -16,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<IMerchantService, MerchantService>();
         services.AddScoped<IWebhookService, WebhookService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IQuestionService, QuestionService>();
         return services;
     }
 

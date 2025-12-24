@@ -33,6 +33,10 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -224,6 +228,63 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasIndex("MerchantId");
 
                     b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Questions.Question", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BotId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BotName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsResolved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MerchantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BotId");
+
+                    b.HasIndex("MerchantId");
+
+                    b.ToTable("Questions", (string)null);
                 });
 
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Shops.ShopSettings", b =>
@@ -613,6 +674,58 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Questions.Question", b =>
+                {
+                    b.HasOne("Botify.Domain.Models.Merchants.Bots.Bot", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("BotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Botify.Domain.Models.Merchants.ValueObjects.CustomerInfo", "Customer", b1 =>
+                        {
+                            b1.Property<Guid>("QuestionId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Email")
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Messenger")
+                                .HasMaxLength(100)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Telegram")
+                                .HasMaxLength(100)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Whatsapp")
+                                .HasMaxLength(100)
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("QuestionId");
+
+                            b1.ToTable("Questions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("QuestionId");
+                        });
+
+                    b.Navigation("Customer")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Shops.ShopSettings", b =>
                 {
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
@@ -905,11 +1018,18 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.Merchants.Bots.Bot", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
                 {
                     b.Navigation("Bots");
 
                     b.Navigation("Products");
+
+                    b.Navigation("Questions");
 
                     b.Navigation("ShopSettings");
                 });

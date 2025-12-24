@@ -1,4 +1,5 @@
-﻿using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Domain.Models.Merchants.Questions;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 
 namespace Botify.Domain.Models.Merchants.Bots;
@@ -14,7 +15,8 @@ public sealed class Bot : AuditableEntity
     public bool PlatformVerified { get; private set; }
     public bool IsPrimary { get; private set; }
     public string? WebhookUrl { get; private set; }
-
+    private readonly List<Question> _questions = [];
+    public IReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
     private Bot() { }
 
     private Bot(Guid id, Guid merchantId, string name, string token, BotPlatform platform, string secret) : base(id)

@@ -8,6 +8,7 @@ using Botify.Infrastructure.CrossCutting.Services.FileServices;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Identity.Authentication;
 using Botify.Infrastructure.Persistence;
+using Botify.Infrastructure.Persistence.Initialisation;
 using Botify.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +38,7 @@ public static class DependencyInjection
         services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+        services.AddScoped<ApplicationDbContextInitializer>();
 
         // Authentication
         services.AddAuthenticationJwtToken(configuration);

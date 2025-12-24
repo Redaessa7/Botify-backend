@@ -24,6 +24,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
                     o => o.ToString().ToUpperInvariant(),          
                     c => Enum.Parse<BotPlatform>(c, true)          
                 );
+
+            builder.HasMany(x => x.Questions)
+                .WithOne()
+                .HasForeignKey(q => q.BotId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 
