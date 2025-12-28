@@ -2,6 +2,7 @@
 using Botify.Domain.Identity.Enums;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
+using Botify.Domain.Models.Merchants.Products;
 using Botify.Domain.Models.Merchants.Questions;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Infrastructure.Identity;
@@ -210,6 +211,8 @@ namespace Botify.Infrastructure.Persistence.Initialisation
 
             _context.Questions.AddRange(questions);
 
+            await SeedProductsAsync(merchant.Id);
+
             await _context.SaveChangesAsync();
 
             _logger.LogInformation($"Seeded merchant '{email}' with bot and question.");
@@ -272,6 +275,41 @@ namespace Botify.Infrastructure.Persistence.Initialisation
                 i++;
             }
         }
+        private async Task SeedProductsAsync(Guid merchantId) 
+        { 
+            if (await _context.Products.AnyAsync(p => p.MerchantId == merchantId))
+                return; 
+            
+            var productsData = new[] 
+                { 
+                    new { 
+                        Name = "Wireless Headphones", 
+                        Description = "Noise-cancelling over-ear headphones with Bluetooth connectivity.", 
+                        Price = 199.99m, ImageUrl = "https://example.com/images/headphones.png",
+                        Category = "Electronics", StockQuantity = 50 }, 
+                    new { 
+                        Name = "Smart Watch",
+                            Description = "Fitness tracking smartwatch with heart rate monitor.", 
+                        Price = 149.99m, 
+                        ImageUrl = "https://example.com/images/smartwatch.png", 
+                        Category = "Wearables",
+                        StockQuantity = 30 }, new { Name = "Coffee Maker", 
+                            Description = "Automatic drip coffee maker with programmable timer.",
+                            Price = 89.99m, ImageUrl = "https://example.com/images/coffeemaker.png", 
+                            Category = "Home Appliances", StockQuantity = 20 } }; 
 
+            foreach (var data in productsData) 
+            { 
+                var productResult = Product.Create(Guid.NewGuid(), merchantId, data.Name, data.Price, data.ImageUrl, data.Category, data.StockQuantity, data.Description); 
+                if (productResult.IsSuccess) 
+                {
+                    _context.Products.Add(productResult.Value); 
+                }
+                else 
+                { 
+                    _logger.LogWarning($"Failed to seed product '{data.Name}': {string.Join(", ", productResult.Errors)}"); 
+                }
+            } 
+        }
     }
 }

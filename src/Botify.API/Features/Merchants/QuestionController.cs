@@ -50,6 +50,20 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
         var result = await _questionService.GetQuestionsAsync(merchantId, cursor, limit, search, ct);
         return result.Match(Ok, Problem);
     }
+    #region Stats
+
+    /// <summary>
+    /// Retrieves question statistics (total, pending, customer service).
+    /// </summary>
+    [HttpGet("stats")]
+    [Authorize]
+    public async Task<IActionResult> GetQuestionStatsAsync(Guid merchantId, CancellationToken ct = default)
+    {
+        var result = await _questionService.GetStatsAsync(merchantId, ct);
+        return result.Match(Ok,Problem);
+    }
+
+    #endregion
 
     #endregion
 
