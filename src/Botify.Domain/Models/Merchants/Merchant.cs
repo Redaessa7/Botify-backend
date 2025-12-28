@@ -1,6 +1,7 @@
 ﻿using Botify.Domain.Events;
 using Botify.Domain.Events.Merchants;
 using Botify.Domain.Identity;
+using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.Products;
@@ -19,6 +20,8 @@ namespace Botify.Domain.Models.Merchants
 
         public MerchantSubscription Subscription { get; private set; }
         public ShopSettings? ShopSettings { get; private set; }
+
+        public AIConfiguration  AIConfiguration { get; private set; }
 
         private readonly List<Bot> _bots = new();
         private readonly List<Product> _products = new();

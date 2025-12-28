@@ -1,7 +1,12 @@
 using Botify.Application.CrossCutting.Interfaces;
+using Botify.Application.Features.AI.Interfaces;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Services.Auths;
 using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Infrastructure.AIServices;
+using Botify.Infrastructure.AIServices.AIConnectors.Connectors;
+using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
+using Botify.Infrastructure.AIServices.Plugins.Types;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 using Botify.Infrastructure.CrossCutting.Services.Commons;
 using Botify.Infrastructure.CrossCutting.Services.FileServices;
@@ -17,130 +22,153 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 using System.Text;
-namespace Microsoft.Extensions.DependencyInjection;
 
-
-public static class DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static class DependencyInjection
     {
-        // Persistence
-        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
-        });
-        services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+            services.AddPersistence(configuration);
+            services.AddIdentityServices();
+            services.AddAuthenticationJwtToken(configuration);
+            services.AddFileServices();
+            services.AddBotPlatformServices(configuration);
+            services.AddAIServices();
 
-        // Identity
-        services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-        services.AddScoped<ApplicationDbContextInitializer>();
-
-        // Authentication
-        services.AddAuthenticationJwtToken(configuration);
-        services.AddScoped<ITokenProvider, JwtTokenProvider>();
-        services.AddScoped<IAuthServices, AuthService>();
-
-        // File services
-        services.AddFileService();
-
-        // Bot platform services
-        services.AddBotsPlatformServices(configuration);
-
-        return services;
-    }
-
-    #region Authentication
-    private static IServiceCollection AddAuthenticationJwtToken(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
-                {
-                    var token = context.Request.Cookies["access_token"];
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        context.Token = token;
-                    }
-                    return Task.CompletedTask;
-                }
-            };
-
-            var jwtOptions = configuration.GetSection("JWTOptions");
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtOptions["Issuer"],
-                ValidAudience = jwtOptions["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtOptions["SecurityKey"]!)
-                )
-            };
-        });
-
-        return services;
-    }
-    #endregion
-
-    #region File Services
-    private static IServiceCollection AddFileService(this IServiceCollection services)
-    {
-        services.AddSingleton<IFileValidator, FileValidator>();
-        services.AddScoped<IFileService>(sp =>
-            new LocalFileService(
-                rootPath: "wwwroot/uploads",
-                validator: sp.GetRequiredService<IFileValidator>(),
-                logger: sp.GetRequiredService<ILogger<LocalFileService>>()
-            )
-        );
-        return services;
-    }
-    #endregion
-
-    #region Bot Platform Services
-    private static IServiceCollection AddBotsPlatformServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddSingleton<IBotSecretGenerator, BotSecretGenerator>();
-
-        // Register keyed services for each platform
-        services.AddHttpClient<TelegramBotService>();
-        services.AddKeyedScoped<IBotPlatformService, TelegramBotService>(BotPlatform.TELEGRAM.AsString());
-        services.Configure<WebhookOptions>(configuration.GetSection("WebhookOptions"));
-        // Future platforms can be added here:
-        // services.AddHttpClient<WhatsAppBotService>();
-        // services.AddKeyedScoped<IBotPlatformService, WhatsAppBotService>("whatsapp");
-
-        return services;
-    }
-    #endregion
-
-    #region Seed Roles
-    public static async Task SeedRolesAsync(this IServiceProvider serviceProvider)
-    {
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        string[] roles = { "MERCHANT", "ADMIN", "USER" };
-
-        foreach (var role in roles)
-        {
-            if (!await roleManager.RoleExistsAsync(role))
-            {
-                await roleManager.CreateAsync(new IdentityRole(role));
-            }
+            return services;
         }
+
+        #region Persistence
+        private static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
+            {
+                options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+                options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+            });
+            services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+            services.AddScoped<ApplicationDbContextInitializer>();
+            return services;
+        }
+        #endregion
+
+        #region Identity
+        private static IServiceCollection AddIdentityServices(this IServiceCollection services)
+        {
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                    .AddEntityFrameworkStores<ApplicationDbContext>()
+                    .AddDefaultTokenProviders();
+            services.AddScoped<IAuthServices, AuthService>();
+            services.AddScoped<ITokenProvider, JwtTokenProvider>();
+            return services;
+        }
+        #endregion
+
+        #region Authentication
+        private static IServiceCollection AddAuthenticationJwtToken(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var token = context.Request.Cookies["access_token"];
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            context.Token = token;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+
+                var jwtOptions = configuration.GetSection("JWTOptions");
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtOptions["Issuer"],
+                    ValidAudience = jwtOptions["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions["SecurityKey"]!)
+                    )
+                };
+            });
+
+            return services;
+        }
+        #endregion
+
+        #region File Services
+        private static IServiceCollection AddFileServices(this IServiceCollection services)
+        {
+            services.AddSingleton<IFileValidator, FileValidator>();
+            services.AddScoped<IFileService>(sp =>
+                new LocalFileService(
+                    rootPath: "wwwroot/uploads",
+                    validator: sp.GetRequiredService<IFileValidator>(),
+                    logger: sp.GetRequiredService<ILogger<LocalFileService>>()
+                )
+            );
+            return services;
+        }
+        #endregion
+
+        #region Bot Platform Services
+        private static IServiceCollection AddBotPlatformServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSingleton<IBotSecretGenerator, BotSecretGenerator>();
+
+            // Register keyed services for each platform
+            services.AddHttpClient<TelegramBotService>();
+            services.AddKeyedScoped<IBotPlatformService, TelegramBotService>(BotPlatform.TELEGRAM.AsString());
+
+            services.Configure<WebhookOptions>(configuration.GetSection("WebhookOptions"));
+
+            // Future platforms can be added here:
+            // services.AddHttpClient<WhatsAppBotService>();
+            // services.AddKeyedScoped<IBotPlatformService, WhatsAppBotService>("whatsapp");
+
+            return services;
+        }
+        #endregion
+
+        #region AI Services
+        private static IServiceCollection AddSemanticKernelPlugins(
+        this IServiceCollection services)
+        {
+            var assembly = typeof(IPlugin).Assembly;
+
+            var pluginTypes = assembly.GetTypes()
+                .Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+
+            foreach (var type in pluginTypes)
+            {
+                services.AddKeyedScoped(typeof(IPlugin), type.Name, type);
+            }
+
+            return services;
+        }
+        private static IServiceCollection AddAIServices(this IServiceCollection services)
+        {
+            services.AddKernel();
+            services.AddSemanticKernelPlugins();
+            services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
+            services.AddScoped<IAIConnectorStrategy, GoogleConnectorStrategy>();
+            services.AddScoped<IKernelExecutionService, SemanticKernelService>();
+            return services;
+        }
+        #endregion
     }
-    #endregion
 }
