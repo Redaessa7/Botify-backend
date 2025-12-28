@@ -24,10 +24,6 @@ namespace Botify.Infrastructure.Persistence.Configurations
                     o => o.ToString().ToUpperInvariant(),          
                     c => Enum.Parse<BotPlatform>(c, true)          
                 );
-            builder.Property(q => q.CreatedAtUtc)
-        .HasConversion(
-                v => v.UtcDateTime,
-                v => new DateTimeOffset(v));
 
             builder.HasMany(x => x.Questions)
                 .WithOne()

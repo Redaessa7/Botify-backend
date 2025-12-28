@@ -14,8 +14,8 @@ namespace Botify.Application.Features.Merchants.Responses
         public int StockQuantity { get; init; }
         public bool IsActive { get; init; }
 
-        public DateTimeOffset CreateAt { get; init; }
-        public DateTimeOffset UpdateAt { get; init; }
+        public DateTime CreateAt { get; init; }
+        public DateTime UpdateAt { get; init; }
 
         public static ProductResponse FromDomain(Product product)
         {

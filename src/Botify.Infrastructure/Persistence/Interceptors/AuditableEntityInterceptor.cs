@@ -36,7 +36,7 @@ public class AuditableEntityInterceptor(IUser user, TimeProvider dateTime) : Sav
         {
             if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
             {
-                var utcNow = _dateTime.GetUtcNow();
+                var utcNow = _dateTime.GetUtcNow().DateTime;
 
                 if (entry.State == EntityState.Added)
                 {
