@@ -47,6 +47,7 @@ public sealed class MerchantService : IMerchantService
             request.IdentityUserId,
             request.Profile.FirstName,
             request.Profile.LastName,
+            request.Profile.Email,
             request.Profile.Bio,
             request.Profile.ProfileImageUrl,
             request.Profile.Language

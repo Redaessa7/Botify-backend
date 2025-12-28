@@ -5,7 +5,7 @@ using System.Linq;
 namespace Botify.Application.CrossCutting.Responses
 {
     /// <summary>
-    /// Represents a paginated result set with metadata about pagination.
+    /// Represents a paginated result set using cursor-based pagination.
     /// </summary>
     /// <typeparam name="T">The type of items in the result set.</typeparam>
     public sealed class PaginatedResult<T>
@@ -16,51 +16,44 @@ namespace Botify.Application.CrossCutting.Responses
         public IReadOnlyList<T> Items { get; }
 
         /// <summary>
-        /// The current page number (1-based).
-        /// </summary>
-        public int Page { get; }
-
-        /// <summary>
-        /// The number of items per page.
+        /// The number of items requested per page.
         /// </summary>
         public int Limit { get; }
 
         /// <summary>
-        /// The total number of items across all pages.
+        /// The total number of items across the entire dataset.
         /// </summary>
         public int TotalCount { get; }
 
         /// <summary>
-        /// The total number of pages.
+        /// The opaque cursor string pointing to the next page, or null if there is no next page.
         /// </summary>
-        public int TotalPages => (int)Math.Ceiling((double)TotalCount / Limit);
-
-        /// <summary>
-        /// Indicates whether there is a previous page.
-        /// </summary>
-        public bool HasPreviousPage => Page > 1;
-
-        /// <summary>
-        /// Indicates whether there is a next page.
-        /// </summary>
-        public bool HasNextPage => Page < TotalPages;
-
-        public PaginatedResult(IEnumerable<T> items, int page, int limit, int totalCount)
+        public string? NextCursor { get; }
+        public bool HasNext => !string.IsNullOrEmpty(NextCursor);
+        public PaginatedResult(
+            IEnumerable<T> items,
+            int limit,
+            int totalCount,
+            string? nextCursor)
         {
             Items = items.ToList().AsReadOnly();
-            Page = page;
             Limit = limit;
             TotalCount = totalCount;
+            NextCursor = nextCursor;
         }
 
         /// <summary>
         /// Creates a paginated result from a source collection.
+        /// Note: This is only for in-memory collections; in production use EF queries with cursor filters.
         /// </summary>
-        public static PaginatedResult<T> Create(IEnumerable<T> source, int page, int limit)
+        public static PaginatedResult<T> Create(
+            IEnumerable<T> source,
+            int limit,
+            string? nextCursor)
         {
+            var items = source.Take(limit).ToList();
             var totalCount = source.Count();
-            var items = source.Skip((page - 1) * limit).Take(limit).ToList();
-            return new PaginatedResult<T>(items, page, limit, totalCount);
+            return new PaginatedResult<T>(items, limit, totalCount, nextCursor);
         }
     }
 }

@@ -121,6 +121,7 @@ public class AuthService(
             new CreateUserProfileRequest(
                 request.FirstName,
                 request.LastName,
+                request.Email,
                 request.Bio,
                 request.ProfileImageUrl,
                 request.Language
@@ -135,7 +136,7 @@ public class AuthService(
         }
 
         // 4. Assign role
-        await _userManager.AddToRoleAsync(user, Roles.Merchant.ToString());
+        await _userManager.AddToRoleAsync(user, Roles.MERCHANT.ToString());
 
         var roles = await _userManager.GetRolesAsync(user);
 

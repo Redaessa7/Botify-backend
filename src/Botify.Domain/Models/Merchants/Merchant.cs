@@ -4,6 +4,7 @@ using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.Products;
+using Botify.Domain.Models.Merchants.Questions;
 using Botify.Domain.Models.Merchants.Shops;
 using Botify.Domain.ResultPattern;
 
@@ -21,6 +22,8 @@ namespace Botify.Domain.Models.Merchants
 
         private readonly List<Bot> _bots = new();
         private readonly List<Product> _products = new();
+        private readonly List<Question> _questions = [];
+        public IReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
 
         public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
         public IReadOnlyCollection<Bot> Bots => _bots.AsReadOnly();
@@ -160,6 +163,14 @@ namespace Botify.Domain.Models.Merchants
             return Result.Success;
         }
 
+        #endregion
+
+        #region Question Management
+        public Result<Question> AddQuestion(Question question)
+        {
+            _questions.Add(question);
+            return question;
+        }
         #endregion
     }
 }

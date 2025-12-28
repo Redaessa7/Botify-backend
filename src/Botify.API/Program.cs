@@ -1,6 +1,7 @@
 using Botify.API.CrossCutting.Constants;
 using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Setup;
+using Botify.Infrastructure.Persistence.Initialisation;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,9 +42,10 @@ app.MapControllers();
 
 #endregion
 
-using (var scope = app.Services.CreateScope())
-{
-    await scope.ServiceProvider.SeedRolesAsync();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    await scope.ServiceProvider.SeedRolesAsync();
+//}
+await app.InitialiseDatabaseAsync();
 
 app.Run();

@@ -1,8 +1,10 @@
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Domain.Identity;
+using Botify.Domain.Models;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Products;
+using Botify.Domain.Models.Merchants.Questions;
 using Botify.Domain.Models.Merchants.Shops;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -15,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Merchant> Merchants =>  Set<Merchant>();
     public DbSet<Bot> Bots => Set<Bot>();
+    public DbSet<Question> Questions => Set<Question>();
     public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
@@ -30,6 +33,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
         base.OnModelCreating(builder);
     }
 }

@@ -6,9 +6,9 @@ namespace Botify.Domain.Identity;
 public sealed class UserProfile : AuditableEntity
 {
     public string IdentityUserId { get; private set; } = null!;
-
     public string FirstName { get; private set; } = null!;
     public string LastName { get; private set; } = null!;
+    public string Email { get; private set; } = null!;
     public string? ProfileImageUrl { get; private set; }
     public string? Bio { get; private set; }
     public string? Language { get; private set; }
@@ -21,8 +21,9 @@ public sealed class UserProfile : AuditableEntity
         string identityUserId,
         string firstName,
         string lastName,
+        string email,
         string? bio,
-        string profileImageUrl,
+        string? profileImageUrl,
         string? language,
         string? timeZone
     ) : base(id)
@@ -30,6 +31,7 @@ public sealed class UserProfile : AuditableEntity
         IdentityUserId = identityUserId;
         FirstName = firstName;
         LastName = lastName;
+        Email = email;
         Bio = bio;
         Language = language;
         TimeZone = timeZone;
@@ -41,6 +43,7 @@ public sealed class UserProfile : AuditableEntity
         string identityUserId,
         string firstName,
         string lastName,
+        string email,
         string? bio = null,
         string? profileImageUrl = null,
         string? language = null,
@@ -56,11 +59,15 @@ public sealed class UserProfile : AuditableEntity
         if (string.IsNullOrWhiteSpace(lastName))
             return UserProfileErrors.LastNameRequired;
 
+        if (string.IsNullOrWhiteSpace(email))
+            return UserProfileErrors.EmailRequired;
+
         var profile = new UserProfile(
             id,
             identityUserId,
             firstName,
             lastName,
+            email,
             bio,
             profileImageUrl ?? string.Empty,
             language,
@@ -80,36 +87,39 @@ public sealed class UserProfile : AuditableEntity
 
         FirstName = firstName;
         LastName = lastName;
-        
+        return Result.Success;
+    }
 
+    public Result<Success> UpdateEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return UserProfileErrors.EmailRequired;
+
+        Email = email;
         return Result.Success;
     }
 
     public Result<Success> UpdateBio(string? bio)
     {
         Bio = bio?.Trim();
-        
         return Result.Success;
     }
 
     public Result<Success> UpdateProfileImage(string? imageUrl)
     {
         ProfileImageUrl = imageUrl;
-        
         return Result.Success;
     }
 
     public Result<Success> UpdateLanguage(string? language)
     {
         Language = language;
-        
         return Result.Success;
     }
 
     public Result<Success> UpdateTimeZone(string? timeZone)
     {
         TimeZone = timeZone;
-        
         return Result.Success;
     }
 }

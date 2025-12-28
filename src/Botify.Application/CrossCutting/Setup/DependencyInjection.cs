@@ -1,3 +1,4 @@
+using Botify.Application.CrossCutting.Options;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Services;
 using Botify.Application.Features.Webhooks;
@@ -13,9 +14,12 @@ public static class DependencyInjection
     {
         // Register domain event handlers
         DomainEventDispatcher.Register(MerchantEventHandlers.Handle);
+        // Bind PaginationOptions from configuration
+        services.Configure<PaginationOptions>(_ => configuration.GetSection("Pagination"));
         services.AddScoped<IMerchantService, MerchantService>();
         services.AddScoped<IWebhookService, WebhookService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IQuestionService, QuestionService>();
         return services;
     }
 

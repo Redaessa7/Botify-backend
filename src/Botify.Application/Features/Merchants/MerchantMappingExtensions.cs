@@ -29,7 +29,7 @@ namespace Botify.Application.Services.Merchants
 
                 FirstName = merchant.Profile.FirstName,
                 LastName = merchant.Profile.LastName,
-                Email = merchant.Profile.IdentityUserId, // or actual email if stored separately
+                Email = merchant.Profile.Email,
                 ProfileImageUrl = merchant.Profile.ProfileImageUrl,
                 Bio = merchant.Profile.Bio,
                 Language = merchant.Profile.Language,
