@@ -45,9 +45,9 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
     /// </summary>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetQuestionsAsync(Guid merchantId, [FromQuery] int page = 1, [FromQuery] int limit = 10, [FromQuery] string? search = null, CancellationToken ct = default)
+    public async Task<IActionResult> GetQuestionsAsync(Guid merchantId, [FromQuery]string? cursor, [FromQuery] int limit = 10, [FromQuery] string? search = null, CancellationToken ct = default)
     {
-        var result = await _questionService.GetQuestionsAsync(merchantId, page, limit, search, ct);
+        var result = await _questionService.GetQuestionsAsync(merchantId, cursor, limit, search, ct);
         return result.Match(Ok, Problem);
     }
 

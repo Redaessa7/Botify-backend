@@ -67,9 +67,9 @@ public class ProductController(IProductService productService) : ApiController
     /// </summary>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetProductsAsync(Guid merchantId, [FromQuery]int page = 1,[FromQuery] int limit = 10,[FromQuery] string? search = null, CancellationToken ct = default)
+    public async Task<IActionResult> GetProductsAsync(Guid merchantId, [FromQuery] string? cursor, [FromQuery] int limit = 10, [FromQuery] string? search = null, CancellationToken ct = default)
     {
-        var result = await _productService.GetProductsAsync(merchantId, page, limit, search, ct);
+        var result = await _productService.GetProductsAsync(merchantId, cursor, limit, search, ct);
         return result.Match(Ok, Problem);
     }
 

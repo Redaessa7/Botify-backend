@@ -32,7 +32,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
         /// </summary>
         Task<Result<PaginatedResult<ProductResponse>>> GetProductsAsync(
             Guid merchantId,
-            int page = 1,
+            string? cursor,
             int limit = 10,
             string? search = null,
             CancellationToken cancellationToken = default);

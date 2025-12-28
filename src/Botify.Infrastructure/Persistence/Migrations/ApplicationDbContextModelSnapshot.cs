@@ -716,7 +716,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("QuestionId");
 
-                            b1.ToTable("Questions");
+                            b1.ToTable("Questions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("QuestionId");
@@ -741,7 +741,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShopSettingsId");
 
-                            b1.ToTable("ShopSettings");
+                            b1.ToTable("ShopSettings", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ShopSettingsId");
@@ -762,7 +762,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -784,7 +784,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -806,7 +806,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -828,7 +828,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -850,7 +850,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -872,7 +872,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -894,7 +894,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings");
+                                    b2.ToTable("ShopSettings", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -946,7 +946,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShopSettingsId");
 
-                            b1.ToTable("ShopSettings");
+                            b1.ToTable("ShopSettings", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ShopSettingsId");

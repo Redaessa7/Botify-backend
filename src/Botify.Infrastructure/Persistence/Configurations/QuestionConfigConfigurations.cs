@@ -37,6 +37,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
                 )
                 .IsRequired();
 
+            builder.Property(q => q.CreatedAtUtc)
+                    .HasConversion(
+                            v => v.UtcDateTime,           
+                            v => new DateTimeOffset(v));  
+
             builder.Property(q => q.ResolvedAt);
 
             // ✅ Configure CustomerInfo as an owned entity
