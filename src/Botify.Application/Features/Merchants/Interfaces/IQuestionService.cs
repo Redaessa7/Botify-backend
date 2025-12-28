@@ -20,6 +20,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
                int limit = 10,
                string? search = null,
                CancellationToken cancellationToken = default);
+        Task<Result<QuestionStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default);
         Task<Result<Success>> ToggleStatusAsync(Guid merchantId, Guid questionId, CancellationToken cancellationToken = default);
 
     }

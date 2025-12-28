@@ -72,7 +72,16 @@ public class ProductController(IProductService productService) : ApiController
         var result = await _productService.GetProductsAsync(merchantId, cursor, limit, search, ct);
         return result.Match(Ok, Problem);
     }
-
+    /// <summary> 
+    /// Retrieves product statistics (total, active, out of stock). 
+    /// </summary> 
+    [HttpGet("stats")] 
+    [Authorize] 
+    public async Task<IActionResult> GetProductStatsAsync(Guid merchantId, CancellationToken ct = default) 
+    { 
+        var result = await _productService.GetStatsAsync(merchantId, ct);
+        return result.Match(Ok, Problem);
+    }
     #endregion
 
     #region Status

@@ -147,6 +147,22 @@ public sealed class QuestionService : IQuestionService
         return result;
     }
 
+    public async Task<Result<QuestionStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default)
+    {
+        var total = await _db.Questions
+            .CountAsync(q => q.MerchantId == merchantId, ct);
+
+        var pending = await _db.Questions
+            .CountAsync(q => q.MerchantId == merchantId && !q.IsResolved, ct);
+
+        var stats = new QuestionStatsResponse
+        {
+            Total = total,
+            Pending = pending
+        };
+
+        return stats;
+    }
     #endregion
 
     #region Status Management

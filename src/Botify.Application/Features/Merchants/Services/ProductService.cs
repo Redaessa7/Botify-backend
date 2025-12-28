@@ -216,5 +216,26 @@ public sealed class ProductService : IProductService
         return result;
     }
 
+    public async Task<Result<ProductStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default)
+    {
+        var total = await _db.Products
+            .CountAsync(p => p.MerchantId == merchantId, ct);
+
+        var active = await _db.Products
+            .CountAsync(p => p.MerchantId == merchantId && p.IsActive, ct);
+
+        var outOfStock = await _db.Products
+            .CountAsync(p => p.MerchantId == merchantId && p.StockQuantity == 0, ct);
+
+        var stats = new ProductStatsResponse
+        {
+            Total = total,
+            Active = active,
+            OutOfStock = outOfStock
+        };
+
+        return stats;
+    }
+
     #endregion
 }

@@ -36,7 +36,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
             int limit = 10,
             string? search = null,
             CancellationToken cancellationToken = default);
-
+        Task<Result<ProductStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default);
         /// <summary>
         /// Toggles product active/inactive status.
         /// </summary>
