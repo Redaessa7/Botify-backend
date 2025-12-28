@@ -27,7 +27,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -54,7 +54,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
@@ -87,7 +87,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -99,7 +99,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("MerchantId")
@@ -144,7 +144,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -153,7 +153,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
@@ -184,7 +184,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -206,7 +206,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("MerchantId")
@@ -244,7 +244,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -256,7 +256,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("MerchantId")
@@ -310,7 +310,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -346,7 +346,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LogoImageUrl")
@@ -580,7 +580,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CreatedBy")
@@ -595,7 +595,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("LastModifiedUtc")
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Token")
@@ -716,7 +716,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("QuestionId");
 
-                            b1.ToTable("Questions", (string)null);
+                            b1.ToTable("Questions");
 
                             b1.WithOwner()
                                 .HasForeignKey("QuestionId");
@@ -741,7 +741,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShopSettingsId");
 
-                            b1.ToTable("ShopSettings", (string)null);
+                            b1.ToTable("ShopSettings");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShopSettingsId");
@@ -762,7 +762,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -784,7 +784,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -806,7 +806,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -828,7 +828,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -850,7 +850,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -872,7 +872,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -894,7 +894,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                                     b2.HasKey("OpeningHoursShopSettingsId");
 
-                                    b2.ToTable("ShopSettings", (string)null);
+                                    b2.ToTable("ShopSettings");
 
                                     b2.WithOwner()
                                         .HasForeignKey("OpeningHoursShopSettingsId");
@@ -946,7 +946,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShopSettingsId");
 
-                            b1.ToTable("ShopSettings", (string)null);
+                            b1.ToTable("ShopSettings");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShopSettingsId");

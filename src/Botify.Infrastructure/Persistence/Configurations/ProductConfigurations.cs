@@ -39,10 +39,6 @@ namespace Botify.Infrastructure.Persistence.Configurations
 
             builder.Property(p => p.StockQuantity)
                    .IsRequired();
-            builder.Property(q => q.CreatedAtUtc)
-        .HasConversion(
-                v => v.UtcDateTime,
-                v => new DateTimeOffset(v));
 
             builder.Property(p => p.IsActive)
                    .IsRequired();

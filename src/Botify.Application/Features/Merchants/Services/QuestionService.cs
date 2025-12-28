@@ -87,6 +87,7 @@ public sealed class QuestionService : IQuestionService
         string? search = null,
         CancellationToken cancellationToken = default)
     {
+        // enforce limits
         if (limit <= 0) limit = _paginationOptions.DefaultLimit;
         limit = Math.Min(limit, _paginationOptions.MaxLimit);
 
@@ -94,7 +95,7 @@ public sealed class QuestionService : IQuestionService
         CursorHelper.CursorPayload? payload = null;
         if (!string.IsNullOrEmpty(cursor))
         {
-            payload = CursorHelper.Decode(cursor, _paginationOptions.CursorHmacSecret);
+            payload = CursorHelper.Decode(cursor);
             if (payload == null)
                 return Error.Validation("Invalid cursor");
         }
@@ -112,17 +113,19 @@ public sealed class QuestionService : IQuestionService
         }
 
         // order newest-first
-        query = query.OrderByDescending(p => p.CreatedAtUtc)
-                     .ThenByDescending(p => p.Id);
+        query = query.OrderByDescending(q => q.CreatedAtUtc)
+                     .ThenByDescending(q => q.Id);
+
         // total count for metadata
         var totalCount = await query.CountAsync(cancellationToken);
-        // apply cursor filter
+
         if (payload != null)
         {
             query = query.Where(q =>
                 q.CreatedAtUtc < payload.CreatedAt ||
                 (q.CreatedAtUtc == payload.CreatedAt && q.Id.CompareTo(payload.Id) < 0));
         }
+
 
         // fetch one extra to detect next page
         var items = await query
@@ -140,12 +143,13 @@ public sealed class QuestionService : IQuestionService
         {
             var last = items.Last();
             var nextPayload = new CursorHelper.CursorPayload(last.Id, last.CreatedAt);
-            nextCursor = CursorHelper.Encode(nextPayload, _paginationOptions.CursorHmacSecret);
+            nextCursor = CursorHelper.Encode(nextPayload);
         }
 
         var result = new PaginatedResult<QuestionResponse>(items, limit, totalCount, nextCursor);
         return result;
     }
+
 
     public async Task<Result<QuestionStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default)
     {

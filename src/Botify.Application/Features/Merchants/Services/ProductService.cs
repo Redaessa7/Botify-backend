@@ -125,7 +125,7 @@ public sealed class ProductService : IProductService
         CursorHelper.CursorPayload? payload = null;
         if (!string.IsNullOrEmpty(cursor))
         {
-            payload = CursorHelper.Decode(cursor, _paginationOptions.CursorHmacSecret);
+            payload = CursorHelper.Decode(cursor);
             if (payload == null)
                 return Error.Validation("Invalid cursor");
         }
@@ -141,18 +141,19 @@ public sealed class ProductService : IProductService
         }
 
         // order newest-first
-        query = query.OrderByDescending(p => p.CreatedAtUtc)
-                     .ThenByDescending(p => p.Id);
+        query = query.OrderByDescending(q => q.CreatedAtUtc)
+                     .ThenByDescending(q => q.Id);
+
         // total count for metadata
         var totalCount = await query.CountAsync(cancellationToken);
 
-        // apply cursor filter
         if (payload != null)
         {
-            query = query.Where(p =>
-                p.CreatedAtUtc < payload.CreatedAt ||
-                (p.CreatedAtUtc == payload.CreatedAt && p.Id.CompareTo(payload.Id) < 0));
+            query = query.Where(q =>
+                q.CreatedAtUtc < payload.CreatedAt ||
+                (q.CreatedAtUtc == payload.CreatedAt && q.Id.CompareTo(payload.Id) < 0));
         }
+
 
         // fetch one extra to detect next page
         var items = await query
@@ -183,7 +184,7 @@ public sealed class ProductService : IProductService
         {
             var last = items.Last();
             var nextPayload = new CursorHelper.CursorPayload(last.Id, last.CreateAt);
-            nextCursor = CursorHelper.Encode(nextPayload, _paginationOptions.CursorHmacSecret);
+            nextCursor = CursorHelper.Encode(nextPayload);
         }
 
         var result = new PaginatedResult<ProductResponse>(items, limit, totalCount, nextCursor);

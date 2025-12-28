@@ -15,7 +15,6 @@ public static class DependencyInjection
         // Register domain event handlers
         DomainEventDispatcher.Register(MerchantEventHandlers.Handle);
         // Bind PaginationOptions from configuration
-        services.Configure<PaginationOptions>(_ => configuration.GetSection("Pagination"));
         services.AddScoped<IMerchantService, MerchantService>();
         services.AddScoped<IWebhookService, WebhookService>();
         services.AddScoped<IProductService, ProductService>();

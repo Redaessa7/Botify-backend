@@ -1,8 +1,10 @@
 using Botify.API.CrossCutting.Constants;
 using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Setup;
+using Botify.Application.CrossCutting.Options;
 using Botify.Infrastructure.Persistence.Initialisation;
 using Scalar.AspNetCore;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +18,8 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 #endregion
-
+builder.Services.AddOptions<PaginationOptions>()
+    .Bind(builder.Configuration.GetSection("PaginationOptions"));
 #region DI Container
 builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment);
 #endregion
