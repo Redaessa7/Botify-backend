@@ -1,12 +1,15 @@
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.Features.AI.Interfaces;
+using Botify.Application.Features.AI.Strategies;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Services.Auths;
+using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Infrastructure.AIServices;
 using Botify.Infrastructure.AIServices.AIConnectors.Connectors;
 using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
 using Botify.Infrastructure.AIServices.Plugins.Types;
+using Botify.Infrastructure.AIServices.Strategies;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 using Botify.Infrastructure.CrossCutting.Services.Commons;
 using Botify.Infrastructure.CrossCutting.Services.FileServices;
@@ -167,6 +170,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GoogleConnectorStrategy>();
             services.AddScoped<IKernelExecutionService, SemanticKernelService>();
+
+            services.AddHttpClient<GeminiStrategy>();
+            services.AddKeyedScoped<IAIPlatformStrategy, GeminiStrategy>(AIPlatform.GooglePaLM.ToString().ToUpperInvariant());
+
             return services;
         }
         #endregion

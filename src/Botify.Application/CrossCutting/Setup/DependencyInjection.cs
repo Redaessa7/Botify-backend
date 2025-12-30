@@ -1,27 +1,33 @@
-using Botify.Application.CrossCutting.Options;
+using Botify.Application.Features.AI.Interfaces;
+using Botify.Application.Features.AI.Services;
+using Botify.Application.Features.AI.Strategies;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Services;
 using Botify.Application.Features.Webhooks;
 using Botify.Domain.Events;
 using Botify.Domain.Events.Merchants;
+using Botify.Domain.Models.AI.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-namespace Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
-
-public static class DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+    public static class DependencyInjection
     {
-        // Register domain event handlers
-        DomainEventDispatcher.Register(MerchantEventHandlers.Handle);
-        // Bind PaginationOptions from configuration
-        services.AddScoped<IMerchantService, MerchantService>();
-        services.AddScoped<IWebhookService, WebhookService>();
-        services.AddScoped<IProductService, ProductService>();
-        services.AddScoped<IQuestionService, QuestionService>();
-        return services;
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Register domain event handlers
+            DomainEventDispatcher.Register(MerchantEventHandlers.Handle);
+
+            // Merchant services
+            services.AddScoped<IMerchantService, MerchantService>();
+            services.AddScoped<IWebhookService, WebhookService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IQuestionService, QuestionService>();
+            services.AddScoped<IAIConfigurationService, AIConfigurationService>();
+
+            return services;
+        }
     }
-
-
 }
-
