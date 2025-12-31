@@ -7,6 +7,7 @@ using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Features.Merchants.Responses;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Questions;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -85,6 +86,8 @@ public sealed class QuestionService : IQuestionService
         string? cursor,
         int limit = 10,
         string? search = null,
+            bool? isResolve = null,
+        BotPlatform? botPlatform = null,
         CancellationToken cancellationToken = default)
     {
         // enforce limits
@@ -110,6 +113,16 @@ public sealed class QuestionService : IQuestionService
             query = query.Where(q =>
                 q.Customer.Name.Contains(s) ||
                 q.Message.Contains(s));
+        }
+
+        if (isResolve.HasValue)
+        {
+            query = query.Where(q => q.IsResolved == isResolve.Value);
+        }
+
+        if (botPlatform.HasValue)
+        {
+            query = query.Where(q => q.Platform == botPlatform.Value);
         }
 
         // order newest-first
