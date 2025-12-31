@@ -50,7 +50,7 @@ namespace Botify.Domain.Models.AI
 
             return new AIConfiguration(id, systemPrompt, modelName, apiKey, platform, temperature, maxTokens, merchantId);
         }
-        public void Update(string systemPrompt, string modelName, string apiKey, AIPlatform platform, double temperature, int maxTokens)
+        public Result<Updated> Update(string systemPrompt, string modelName, string apiKey, AIPlatform platform, double temperature, int maxTokens)
         {
             SystemPrompt = systemPrompt;
             ModelName = modelName;
@@ -58,6 +58,8 @@ namespace Botify.Domain.Models.AI
             Platform = platform;
             Temperature = temperature;
             MaxTokens = maxTokens;
+
+            return Result.Updated;
         }
 
 

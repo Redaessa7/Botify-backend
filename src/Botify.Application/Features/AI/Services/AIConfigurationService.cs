@@ -61,24 +61,52 @@ public sealed class AIConfigurationService : IAIConfigurationService
 
     public async Task<Result<Success>> UpdateAsync(
         Guid merchantId,
-        Guid configId,
-        UpdateAIConfigurationRequest request,
+        SetAIConfigurationRequest request,
         CancellationToken cancellationToken = default)
     {
-        var config = await _db.AIConfigurations
-            .FirstOrDefaultAsync(c => c.MerchantId == merchantId && c.Id == configId, cancellationToken);
+        var merchant = await _db.Merchants.Include(x => x.AIConfiguration)
+            .FirstOrDefaultAsync(c => c.Id == merchantId, cancellationToken);
 
-        if (config is null)
-            return AIConfigurationErrors.NotFound;
+
+        if (merchant is null)
+            return MerchantErrors.NotFound;
         var platform = Enum.Parse<AIPlatform>(request.Platform, true);
-        // Apply updates
-        config.Update(
-            request.SystemPrompt,
-            request.ModelName,
-            request.ApiKey,
-            platform,
-            request.Temperature,
-            request.MaxTokens);
+
+        if (merchant.AIConfiguration is not null)
+        {
+                            var configResult = merchant.AIConfiguration.Update(
+                request.SystemPrompt,
+                request.ModelName,
+                request.ApiKey,
+                platform,
+                request.Temperature,
+                request.MaxTokens);
+           if(!configResult.IsSuccess)
+                return configResult.Errors;
+
+        }
+        else
+        {
+            var configResult = AIConfiguration.Create(
+                Guid.NewGuid(),
+                request.SystemPrompt,
+                request.ModelName,
+                request.ApiKey,
+                platform,
+                request.Temperature,
+                request.MaxTokens,
+                merchantId);
+            if (!configResult.IsSuccess)
+                return configResult.Errors;
+            var config = configResult.Value;
+
+            var merchatLogic = merchant.AddConfigureAI(config);
+
+            if (!merchatLogic.IsSuccess)
+                return merchatLogic.Errors;
+
+            _db.AIConfigurations.Add(config);
+        }
 
         await _db.SaveChangesAsync(cancellationToken);
         return Result.Success;

@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Botify.Api.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("api/merchants/{merchantId:guid}/ai-configurations")]
+    [Route("api/merchants/{merchantId:guid}/ai-configurations/")]
     public sealed class AIConfigurationController : ApiController
     {
         private readonly IAIConfigurationService _service;
@@ -25,25 +25,14 @@ namespace Botify.Api.Controllers
 
         #region CRUD Endpoints
 
-        [HttpPost]
+        [HttpPut("set")]
         [Authorize]
-        public async Task<IActionResult> Create(
+        public async Task<IActionResult> Set(
             Guid merchantId,
-            [FromBody] CreateAIConfigurationRequest request,
+            [FromBody] SetAIConfigurationRequest request,
             CancellationToken cancellationToken)
         {
-            var result = await _service.CreateAsync(merchantId, request, cancellationToken);
-            return result.Match(Ok, Problem);
-        }
-
-        [HttpPut("{configId:guid}")]
-        public async Task<IActionResult> Update(
-            Guid merchantId,
-            Guid configId,
-            [FromBody] UpdateAIConfigurationRequest request,
-            CancellationToken cancellationToken)
-        {
-            var result = await _service.UpdateAsync(merchantId, configId, request, cancellationToken);
+            var result = await _service.UpdateAsync(merchantId,request, cancellationToken);
             return result.Match(_ => Ok(new { }), Problem);
         }
 
@@ -75,6 +64,7 @@ namespace Botify.Api.Controllers
         #region Queries
 
         [HttpGet("{configId:guid}")]
+        [Authorize]
         public async Task<IActionResult> GetById(
             Guid merchantId,
             Guid configId,
@@ -85,6 +75,7 @@ namespace Botify.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetConfigurations(
             Guid merchantId,
             [FromQuery] string? cursor,

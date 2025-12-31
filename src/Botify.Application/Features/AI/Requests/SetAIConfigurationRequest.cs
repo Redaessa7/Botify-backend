@@ -4,7 +4,7 @@ using Botify.Domain.ResultPattern;
 
 namespace Botify.Application.Features.AI.Requests
 {
-    public sealed class UpdateAIConfigurationRequest
+    public sealed class SetAIConfigurationRequest
     {
         public string SystemPrompt { get; init; } = string.Empty;
         public string ModelName { get; init; } = string.Empty;
