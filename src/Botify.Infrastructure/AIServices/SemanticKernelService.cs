@@ -19,25 +19,39 @@ namespace Botify.Infrastructure.AIServices
         private readonly IServiceProvider _serviceProvider = serviceProvider;
         public virtual async Task<Result<string>> ExecuteAsync(string prompt, AIConfiguration config, PluginTier pluginTier, CancellationToken cancellationToken)
         {
+            Console.WriteLine("In AiModel ,Enter prompt");
 
             var kernel = BuildKernel(config);
 
+            Console.WriteLine("In AiModel ,Create Kernal Success");
+
             var pluginTierMapping = new Dictionary<PluginTier, List<string>>
             {
-                { PluginTier.Free, new List<string> { "FreePlugin" } },
-                { PluginTier.Premium, new List<string> { "FreePlugin", "PremiumPlugin" } },
-                { PluginTier.Enterprise, new List<string> { "FreePlugin", "PremiumPlugin", "EnterprisePlugin" } }
+                { PluginTier.Free, new List<string> { "FreePlugins" } },
+                { PluginTier.Premium, new List<string> { "FreePlugins", "PremiumPlugins" } },
+                { PluginTier.Enterprise, new List<string> { "FreePlugins", "PremiumPlugins", "EnterprisePlugins" } }
             };
 
             LoadPlugins(kernel, pluginTierMapping[pluginTier]);
 
+            Console.WriteLine("In AiModel ,Load Plugins success");
+
             // 3. تنفيذ Prompt (قد تحتاج لعمل Prompt مسبق أو تنفيذه مباشرة كـ Input)
-            var result = await kernel.InvokePromptAsync(
-                "",
-                new KernelArguments { { "input", prompt } }
+            var chat = kernel.GetRequiredService<IChatCompletionService>();
+
+            var history = new ChatHistory();
+            history.AddSystemMessage(config.SystemPrompt);
+            history.AddUserMessage(prompt);
+
+            var result = await chat.GetChatMessageContentAsync(
+                history,
+                cancellationToken: cancellationToken
             );
 
-            return result.GetValue<string>();
+            Console.WriteLine("In AiModel ,ai result");
+            return result.Content;
+
+            // return result.GetValue<string>();
 
         }
 
@@ -56,11 +70,14 @@ namespace Botify.Infrastructure.AIServices
             {
                 // 3. تحميل الـ Plugin في Semantic Kernel
                 // يجب التأكد من أن pluginInstance هو Type مناسب للاستخدام مع ImportPlugin
-                
+
                 // SK تتطلب نسخة الكلاس (Instance) واسم مجموعة الـ Plugin
-                kernel.ImportPluginFromType<IPlugin>(pluginName); 
-                
-                Console.WriteLine($"Keyed Plugin '{pluginName}' loaded successfully.");
+               if (pluginInstance != null)
+                {
+                    kernel.ImportPluginFromObject(pluginInstance, pluginName);
+                    Console.WriteLine($"Keyed Plugin '{pluginName}' loaded successfully.");
+                }
+
             }
             else
             {

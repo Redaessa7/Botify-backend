@@ -1,44 +1,35 @@
 using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Features.Webhooks;
+using Botify.Application.Features.Webhooks.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Telegram.Bot.Types;
 
 namespace Botify.API.Features.Webhooks;
 
-[Route("api/webhook/bot")]
+[Route("api/webhook/")]
 [ApiVersion("1.0")]
 public class WebhooksController(IWebhookService webhookService) : ApiController
 {
     private readonly IWebhookService webhookService = webhookService;
 
+        // /api/webhook/telegram/6eee19ac-554c-436d-a6c5-179b0ee8b25d
     // POST api/webhook/bot/{platform}/{botId}
     [HttpPost("{platform}/{botId}")]
     public async Task<IActionResult> ReceiveAsync(
         string platform,
         Guid botId,
-        object payload)
+        [FromBody] Update update)
     {
+        Console.WriteLine($"Received update {update}");
         if (string.IsNullOrWhiteSpace(platform))
             return BadRequest("Platform is required.");
 
         if (!HttpContext.Request.Headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var headerVals))
             return Unauthorized();
 
-        var result = await webhookService.AuthenticateAsync(botId, headerVals!, default);
+        var request = new TelegramRequest(botId,headerVals!, update.Message.Text);
+        var result = await webhookService.HandleAsync(request, CancellationToken.None);
 
-        if (!result.Value)
-            return Unauthorized();
-
-        //TODO: send payload to handler 
-
-        await webhookService.HandleAsync(platform, botId, payload, default);
-        
-        Console.WriteLine(new
-        {
-            Platform = platform,
-            BotId = botId,
-            Time = DateTime.UtcNow
-        });
-
-        return Ok();
+        return result.Match(Ok, Problem);
     }
 }

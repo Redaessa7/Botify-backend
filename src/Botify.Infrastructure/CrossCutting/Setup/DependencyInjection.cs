@@ -151,15 +151,18 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection AddSemanticKernelPlugins(
         this IServiceCollection services)
         {
-            var assembly = typeof(IPlugin).Assembly;
+            // var assembly = typeof(IPlugin).Assembly;
 
-            var pluginTypes = assembly.GetTypes()
-                .Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+            // var pluginTypes = assembly.GetTypes()
+            //     .Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
 
-            foreach (var type in pluginTypes)
-            {
-                services.AddKeyedScoped(typeof(IPlugin), type.Name, type);
-            }
+            // foreach (var type in pluginTypes)
+            // {
+            //     services.AddKeyedScoped(typeof(IPlugin), type.Name, type);
+            // }
+            services.AddKeyedScoped<IPlugin,FreePlugins>("FreePlugins");
+            services.AddKeyedScoped<IPlugin,PremiumPlugins>("PremiumPlugins");
+            services.AddKeyedScoped<IPlugin,EnterprisePlugins>("EnterprisePlugins");
 
             return services;
         }
