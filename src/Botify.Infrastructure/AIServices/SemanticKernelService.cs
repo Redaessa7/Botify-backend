@@ -7,23 +7,35 @@ using Botify.Infrastructure.AIServices.Plugins.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using Microsoft.SemanticKernel.Connectors.Google;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Botify.Infrastructure.AIServices
 {
-    public class SemanticKernelService(IServiceProvider serviceProvider, IEnumerable<IAIConnectorStrategy> connectorStrategies) : IKernelExecutionService
+    public class SemanticKernelService : IKernelExecutionService
     {
-        private readonly IEnumerable<IAIConnectorStrategy> _connectorStrategies = connectorStrategies;
-        private readonly IServiceProvider _serviceProvider = serviceProvider;
-        public virtual async Task<Result<string>> ExecuteAsync(string prompt, AIConfiguration config, PluginTier pluginTier, CancellationToken cancellationToken)
+        private readonly IEnumerable<IAIConnectorStrategy> _connectorStrategies;
+        private readonly IServiceProvider _serviceProvider;
+
+        public SemanticKernelService(IServiceProvider serviceProvider, IEnumerable<IAIConnectorStrategy> connectorStrategies)
         {
-            Console.WriteLine("In AiModel ,Enter prompt");
+            _serviceProvider = serviceProvider;
+            _connectorStrategies = connectorStrategies;
+        }
 
+        public async Task<Result<string>> ExecuteAsync(
+            string prompt,
+            AIConfiguration config,
+            PluginTier pluginTier,
+            CancellationToken cancellationToken)
+        {
             var kernel = BuildKernel(config);
-
-            Console.WriteLine("In AiModel ,Create Kernal Success");
 
             var pluginTierMapping = new Dictionary<PluginTier, List<string>>
             {
@@ -34,69 +46,47 @@ namespace Botify.Infrastructure.AIServices
 
             LoadPlugins(kernel, pluginTierMapping[pluginTier]);
 
-            Console.WriteLine("In AiModel ,Load Plugins success");
-
-            // 3. تنفيذ Prompt (قد تحتاج لعمل Prompt مسبق أو تنفيذه مباشرة كـ Input)
             var chat = kernel.GetRequiredService<IChatCompletionService>();
 
             var history = new ChatHistory();
             history.AddSystemMessage(config.SystemPrompt);
             history.AddUserMessage(prompt);
 
+            var settings = GetExecutionSettings(config);
+
             var result = await chat.GetChatMessageContentAsync(
                 history,
-                cancellationToken: cancellationToken
-            );
+                settings,
+                kernel: kernel,
+                cancellationToken: cancellationToken);
 
-            Console.WriteLine("In AiModel ,ai result");
             return result.Content;
-
-            // return result.GetValue<string>();
-
         }
 
-       private void LoadPlugins(Kernel kernel, List<string> requiredPluginNames)
-    {
-        foreach (var pluginName in requiredPluginNames)
+        private void LoadPlugins(Kernel kernel, IEnumerable<string> requiredPluginNames)
         {
-                // 1. محاولة استرجاع نسخة الـ Plugin من الـ DI Container باستخدام المفتاح (Key)
-
-                // بما أنك سجلتها بـ Service Type هو IPlugin، سنستخدم هذا النوع
-                using var scope = _serviceProvider.CreateScope(); 
-
-                var pluginInstance = scope.ServiceProvider.GetKeyedService<IPlugin>(pluginName);
-                // 2. التحقق من وجود النسخة المحملة
-                if (pluginInstance != null)
+            foreach (var pluginName in requiredPluginNames)
             {
-                // 3. تحميل الـ Plugin في Semantic Kernel
-                // يجب التأكد من أن pluginInstance هو Type مناسب للاستخدام مع ImportPlugin
+                using var scope = _serviceProvider.CreateScope();
+                var pluginInstance = scope.ServiceProvider.GetKeyedService<IPlugin>(pluginName);
 
-                // SK تتطلب نسخة الكلاس (Instance) واسم مجموعة الـ Plugin
-               if (pluginInstance != null)
+                if (pluginInstance != null)
                 {
                     kernel.ImportPluginFromObject(pluginInstance, pluginName);
-                    Console.WriteLine($"Keyed Plugin '{pluginName}' loaded successfully.");
                 }
-
-            }
-            else
-            {
-                // إذا لم يتم العثور على المفتاح، قد يعني ذلك أن التاجر طلب Plugin غير مسجلة
-                Console.WriteLine($"Error: Keyed Plugin '{pluginName}' not found or resolved.");
+                else
+                {
+                    Console.WriteLine($"Error: Keyed Plugin '{pluginName}' not found or resolved.");
+                }
             }
         }
-    }
-
 
         private Kernel BuildKernel(AIConfiguration config)
         {
             var builder = Kernel.CreateBuilder();
-            ChatHistory history = new ChatHistory();
-
-            history.AddSystemMessage(config.SystemPrompt);
 
             var connectorStrategy = _connectorStrategies
-                        .FirstOrDefault(s => s.PlatformKey.Equals(config.Platform.ToString(), StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(s => s.PlatformKey.Equals(config.Platform.ToString(), StringComparison.OrdinalIgnoreCase));
 
             if (connectorStrategy == null)
             {
@@ -106,6 +96,33 @@ namespace Botify.Infrastructure.AIServices
             connectorStrategy.ConfigureBuilder(builder, config);
 
             return builder.Build();
+        }
+
+        private PromptExecutionSettings GetExecutionSettings(AIConfiguration config)
+        {
+            return config.Platform switch
+            {
+                AIPlatform.OpenAI => new OpenAIPromptExecutionSettings
+                {
+                    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+                    Temperature = config.Temperature,
+                    MaxTokens = config.MaxTokens
+                },
+                AIPlatform.AzureOpenAI => new AzureOpenAIPromptExecutionSettings
+                {
+                    ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+                    Temperature = config.Temperature,
+                    MaxTokens = config.MaxTokens
+                },
+                AIPlatform.GooglePaLM => new GeminiPromptExecutionSettings
+                {
+                    ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions,
+                    Temperature = config.Temperature,
+                    MaxTokens = config.MaxTokens
+                },
+                _ => throw new NotSupportedException(
+                    $"AI Platform '{config.Platform}' is not supported for execution settings.")
+            };
         }
     }
 }

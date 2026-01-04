@@ -11,8 +11,9 @@ namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
     {
         public string PlatformKey => AIPlatform.GooglePaLM.ToString();
 
-        public void ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
+        public async Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
         {
+
             builder.AddGoogleAIGeminiChatCompletion(
                         modelId: config.ModelName,
                         apiKey: config.ApiKey);

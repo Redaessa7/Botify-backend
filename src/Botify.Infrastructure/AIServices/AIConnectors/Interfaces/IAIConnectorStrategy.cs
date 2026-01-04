@@ -11,6 +11,6 @@ namespace Botify.Infrastructure.AIServices.AIConnectors.Interfaces
         /// <summary>
         /// يقوم بإضافة إعدادات الموصل (مثل Model, API Key) إلى KernelBuilder.
         /// </summary>
-        void ConfigureBuilder(IKernelBuilder builder, AIConfiguration config);
+        Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config);
     }
 }

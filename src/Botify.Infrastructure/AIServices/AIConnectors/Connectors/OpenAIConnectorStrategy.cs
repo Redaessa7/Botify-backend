@@ -3,6 +3,7 @@
 using Botify.Domain.Models.AI;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
@@ -12,11 +13,14 @@ namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
     {
         public string PlatformKey => AIPlatform.OpenAI.ToString();
 
-        public void ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
+        public async Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
         {
+            var endpoint = new Uri("https://models.github.ai/inference");
+
             // Register OpenAI chat completion
             builder.AddOpenAIChatCompletion(
                 modelId: config.ModelName,
+                endpoint,
                 apiKey: config.ApiKey);
 
             // Configure execution settings
@@ -27,6 +31,7 @@ namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
                 MaxTokens = config.MaxTokens
             };
 
+           
             // You can pass these settings when invoking chat completions later
         }
     }

@@ -2,6 +2,6 @@
 {
     public interface IAIPlatformStrategy
     {
-        Task<bool> ValidateTokenAsync(string apiKey, string? baseUrl = null);
+        Task<bool> ValidateTokenAsync(string apiKey, string? model = null, string? baseUrl = null);
     }
 }
