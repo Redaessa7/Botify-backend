@@ -2,6 +2,7 @@ using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Features.Webhooks;
 using Botify.Application.Features.Webhooks.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace Botify.API.Features.Webhooks;
@@ -27,7 +28,7 @@ public class WebhooksController(IWebhookService webhookService) : ApiController
         if (!HttpContext.Request.Headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var headerVals))
             return Unauthorized();
 
-        var request = new TelegramRequest(botId,headerVals!, update.Message.Text);
+        var request = new TelegramRequest(botId,headerVals!,update.Message.Chat.Id, update.Message.Text);
         var result = await webhookService.HandleAsync(request, CancellationToken.None);
 
         return result.Match(Ok, Problem);

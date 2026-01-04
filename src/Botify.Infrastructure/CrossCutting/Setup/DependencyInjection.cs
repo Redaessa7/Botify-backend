@@ -2,6 +2,7 @@ using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.Features.AI.Interfaces;
 using Botify.Application.Features.AI.Strategies;
 using Botify.Application.Features.Merchants.Interfaces;
+using Botify.Application.Features.Webhooks;
 using Botify.Application.Services.Auths;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
@@ -40,7 +41,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddFileServices();
             services.AddBotPlatformServices(configuration);
             services.AddAIServices();
-
             return services;
         }
 
