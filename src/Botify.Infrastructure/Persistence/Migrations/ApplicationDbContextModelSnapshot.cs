@@ -89,6 +89,11 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("AutoEscalateEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
@@ -112,9 +117,24 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("OrderProcessingEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Platform")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("ProductRecommendationsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("SmallTalkEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("SystemPrompt")
                         .IsRequired()
@@ -1089,8 +1109,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
                 {
-                    b.Navigation("AIConfiguration")
-                        .IsRequired();
+                    b.Navigation("AIConfiguration");
 
                     b.Navigation("Bots");
 

@@ -41,6 +41,21 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(ai => ai.MerchantId)
                    .IsRequired();
 
+                    builder.Property(ai => ai.OrderProcessingEnabled)
+               .IsRequired()
+               .HasDefaultValue(true);
+
+            builder.Property(ai => ai.ProductRecommendationsEnabled)
+                   .IsRequired()
+                   .HasDefaultValue(true);
+
+            builder.Property(ai => ai.SmallTalkEnabled)
+                   .IsRequired()
+                   .HasDefaultValue(true);
+
+            builder.Property(ai => ai.AutoEscalateEnabled)
+                   .IsRequired()
+                   .HasDefaultValue(true);
             // Relationships
             builder.HasOne<Merchant>() 
                    .WithOne(x => x.AIConfiguration) 

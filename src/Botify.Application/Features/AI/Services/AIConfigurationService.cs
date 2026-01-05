@@ -59,7 +59,7 @@ public sealed class AIConfigurationService : IAIConfigurationService
         return AIConfigurationResponse.FromDomain(config);
     }
 
-    public async Task<Result<Success>> UpdateAsync(
+    public async Task<Result<AIConfigurationResponse>> UpdateAsync(
         Guid merchantId,
         SetAIConfigurationRequest request,
         CancellationToken cancellationToken = default)
@@ -72,6 +72,7 @@ public sealed class AIConfigurationService : IAIConfigurationService
             return MerchantErrors.NotFound;
         var platform = Enum.Parse<AIPlatform>(request.Platform, true);
 
+        AIConfiguration? aIConfiguration = null;
         if (merchant.AIConfiguration is not null)
         {
                             var configResult = merchant.AIConfiguration.Update(
@@ -80,9 +81,15 @@ public sealed class AIConfigurationService : IAIConfigurationService
                 request.ApiKey,
                 platform,
                 request.Temperature,
-                request.MaxTokens);
+                request.MaxTokens,
+                request.OrderProcessingEnabled,
+                request.ProductRecommendationsEnabled,
+                request.SmallTalkEnabled,
+                request.AutoEscalateEnabled
+                );
            if(!configResult.IsSuccess)
                 return configResult.Errors;
+            aIConfiguration = merchant.AIConfiguration;
 
         }
         else
@@ -95,7 +102,11 @@ public sealed class AIConfigurationService : IAIConfigurationService
                 platform,
                 request.Temperature,
                 request.MaxTokens,
-                merchantId);
+                merchantId,
+                request.OrderProcessingEnabled,
+                request.ProductRecommendationsEnabled,
+                request.SmallTalkEnabled,
+                request.AutoEscalateEnabled);
             if (!configResult.IsSuccess)
                 return configResult.Errors;
             var config = configResult.Value;
@@ -105,11 +116,12 @@ public sealed class AIConfigurationService : IAIConfigurationService
             if (!merchatLogic.IsSuccess)
                 return merchatLogic.Errors;
 
+            aIConfiguration = config;
             _db.AIConfigurations.Add(config);
         }
 
         await _db.SaveChangesAsync(cancellationToken);
-        return Result.Success;
+        return AIConfigurationResponse.FromDomain(aIConfiguration);
     }
     #endregion
 

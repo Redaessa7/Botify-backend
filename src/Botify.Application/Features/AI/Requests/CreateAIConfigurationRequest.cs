@@ -1,5 +1,6 @@
 ﻿using Botify.Domain.Models.AI;
 using Botify.Domain.Models.AI.Enums;
+using System;
 
 namespace Botify.Application.Features.AI.Requests
 {
@@ -8,13 +9,20 @@ namespace Botify.Application.Features.AI.Requests
         public string SystemPrompt { get; init; } = string.Empty;
         public string ModelName { get; init; } = string.Empty;
         public string ApiKey { get; init; } = string.Empty;
-        public string Platform { get; init; }
+        public string Platform { get; init; } = string.Empty;
         public double Temperature { get; init; } = 0.7;
         public int MaxTokens { get; init; }
+
+        // Feature flags
+        public bool OrderProcessingEnabled { get; init; }
+        public bool ProductRecommendationsEnabled { get; init; }
+        public bool SmallTalkEnabled { get; init; }
+        public bool AutoEscalateEnabled { get; init; }
 
         public AIConfiguration ToDomain(Guid merchantId)
         {
             var platform = Enum.Parse<AIPlatform>(Platform, true);
+
             return AIConfiguration.Create(
                 Guid.NewGuid(),
                 SystemPrompt,
@@ -23,7 +31,11 @@ namespace Botify.Application.Features.AI.Requests
                 platform,
                 Temperature,
                 MaxTokens,
-                merchantId
+                merchantId,
+                OrderProcessingEnabled,
+                ProductRecommendationsEnabled,
+                SmallTalkEnabled,
+                AutoEscalateEnabled
             ).Value;
         }
     }

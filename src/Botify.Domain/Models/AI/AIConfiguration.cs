@@ -1,5 +1,6 @@
 ﻿using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.ResultPattern;
+using System;
 
 namespace Botify.Domain.Models.AI
 {
@@ -11,6 +12,13 @@ namespace Botify.Domain.Models.AI
         public AIPlatform Platform { get; private set; }
         public double Temperature { get; private set; } = 0.7;
         public int MaxTokens { get; private set; }
+
+        // Feature flags
+        public bool OrderProcessingEnabled { get; private set; } = true;
+        public bool ProductRecommendationsEnabled { get; private set; } = true;
+        public bool SmallTalkEnabled { get; private set; } = true;
+        public bool AutoEscalateEnabled { get; private set; } = true;
+
         public Guid MerchantId { get; private set; }
 
         private AIConfiguration() { }
@@ -23,7 +31,11 @@ namespace Botify.Domain.Models.AI
             AIPlatform platform,
             double temperature,
             int maxTokens,
-            Guid merchantId) : base(id)
+            Guid merchantId,
+            bool orderProcessingEnabled,
+            bool productRecommendationsEnabled,
+            bool smallTalkEnabled,
+            bool autoEscalateEnabled) : base(id)
         {
             SystemPrompt = systemPrompt;
             ModelName = modelName;
@@ -32,6 +44,11 @@ namespace Botify.Domain.Models.AI
             Temperature = temperature;
             MaxTokens = maxTokens;
             MerchantId = merchantId;
+
+            OrderProcessingEnabled = orderProcessingEnabled;
+            ProductRecommendationsEnabled = productRecommendationsEnabled;
+            SmallTalkEnabled = smallTalkEnabled;
+            AutoEscalateEnabled = autoEscalateEnabled;
         }
 
         public static Result<AIConfiguration> Create(
@@ -42,15 +59,42 @@ namespace Botify.Domain.Models.AI
             AIPlatform platform,
             double temperature,
             int maxTokens,
-            Guid merchantId)
+            Guid merchantId,
+            bool orderProcessingEnabled = false,
+            bool productRecommendationsEnabled = false,
+            bool smallTalkEnabled = false,
+            bool autoEscalateEnabled = false)
         {
             var validation = ValidateInputs(id, systemPrompt, modelName, apiKey, platform, temperature, maxTokens, merchantId);
             if (!validation.IsSuccess)
                 return validation.Errors;
 
-            return new AIConfiguration(id, systemPrompt, modelName, apiKey, platform, temperature, maxTokens, merchantId);
+            return new AIConfiguration(
+                id,
+                systemPrompt,
+                modelName,
+                apiKey,
+                platform,
+                temperature,
+                maxTokens,
+                merchantId,
+                orderProcessingEnabled,
+                productRecommendationsEnabled,
+                smallTalkEnabled,
+                autoEscalateEnabled);
         }
-        public Result<Updated> Update(string systemPrompt, string modelName, string apiKey, AIPlatform platform, double temperature, int maxTokens)
+
+        public Result<Updated> Update(
+            string systemPrompt,
+            string modelName,
+            string apiKey,
+            AIPlatform platform,
+            double temperature,
+            int maxTokens,
+            bool orderProcessingEnabled,
+            bool productRecommendationsEnabled,
+            bool smallTalkEnabled,
+            bool autoEscalateEnabled)
         {
             SystemPrompt = systemPrompt;
             ModelName = modelName;
@@ -59,9 +103,13 @@ namespace Botify.Domain.Models.AI
             Temperature = temperature;
             MaxTokens = maxTokens;
 
+            OrderProcessingEnabled = orderProcessingEnabled;
+            ProductRecommendationsEnabled = productRecommendationsEnabled;
+            SmallTalkEnabled = smallTalkEnabled;
+            AutoEscalateEnabled = autoEscalateEnabled;
+
             return Result.Updated;
         }
-
 
         #region Validation
 

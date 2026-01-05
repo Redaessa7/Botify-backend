@@ -14,7 +14,7 @@ namespace Botify.Application.Features.AI.Interfaces
             CreateAIConfigurationRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<Result<Success>> UpdateAsync(
+        Task<Result<AIConfigurationResponse>> UpdateAsync(
             Guid merchantId,
             SetAIConfigurationRequest request,
             CancellationToken cancellationToken = default);

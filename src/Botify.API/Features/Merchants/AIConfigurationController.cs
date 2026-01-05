@@ -33,7 +33,7 @@ namespace Botify.Api.Controllers
             CancellationToken cancellationToken)
         {
             var result = await _service.UpdateAsync(merchantId,request, cancellationToken);
-            return result.Match(_ => Ok(new { }), Problem);
+            return result.Match(Ok, Problem);
         }
 
         #endregion

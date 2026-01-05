@@ -1,4 +1,5 @@
 ﻿using Botify.Domain.Models.AI;
+using System;
 
 namespace Botify.Application.Features.AI.Responses
 {
@@ -12,6 +13,13 @@ namespace Botify.Application.Features.AI.Responses
         public string Platform { get; init; } = string.Empty;
         public double Temperature { get; init; }
         public int MaxTokens { get; init; }
+
+        // Feature flags
+        public bool OrderProcessingEnabled { get; init; }
+        public bool ProductRecommendationsEnabled { get; init; }
+        public bool SmallTalkEnabled { get; init; }
+        public bool AutoEscalateEnabled { get; init; }
+
         public DateTime CreateAt { get; init; }
         public DateTime? UpdateAt { get; init; }
 
@@ -27,6 +35,10 @@ namespace Botify.Application.Features.AI.Responses
                 Platform = config.Platform.ToString(),
                 Temperature = config.Temperature,
                 MaxTokens = config.MaxTokens,
+                OrderProcessingEnabled = config.OrderProcessingEnabled,
+                ProductRecommendationsEnabled = config.ProductRecommendationsEnabled,
+                SmallTalkEnabled = config.SmallTalkEnabled,
+                AutoEscalateEnabled = config.AutoEscalateEnabled,
                 CreateAt = config.CreatedAtUtc,
                 UpdateAt = config.LastModifiedUtc
             };
