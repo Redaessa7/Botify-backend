@@ -78,11 +78,9 @@ namespace Botify.Api.Controllers
         [Authorize]
         public async Task<IActionResult> GetConfigurations(
             Guid merchantId,
-            [FromQuery] string? cursor,
-            [FromQuery] int limit = 10,
             CancellationToken cancellationToken = default)
         {
-            var result = await _service.GetConfigurationsAsync(merchantId, cursor, limit, cancellationToken);
+            var result = await _service.GetConfigurationsAsync(merchantId, cancellationToken);
             return result.Match(Ok, Problem);
         }
 

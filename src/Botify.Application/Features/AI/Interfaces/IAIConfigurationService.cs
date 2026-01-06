@@ -27,10 +27,8 @@ namespace Botify.Application.Features.AI.Interfaces
             Guid configId,
             CancellationToken cancellationToken = default);
 
-        Task<Result<PaginatedResult<AIConfigurationResponse>>> GetConfigurationsAsync(
+        Task<Result<AIConfigurationResponse>> GetConfigurationsAsync(
             Guid merchantId,
-            string? cursor,
-            int limit = 10,
             CancellationToken cancellationToken = default);
 
         #endregion
