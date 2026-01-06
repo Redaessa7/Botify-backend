@@ -14,5 +14,7 @@ namespace Botify.Domain.Models.Merchants
             AIConfiguration = aiConfiguration;
             return Result.Created;
         }
+
+
     }
 }

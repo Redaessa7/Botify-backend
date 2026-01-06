@@ -5,6 +5,7 @@ using Botify.Application.Features.Merchants.Responses;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Identity;
+using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Shops;
@@ -72,6 +73,10 @@ public sealed class MerchantService : IMerchantService
 
         merchant.AssignShop(shop);
         
+        var aiConfigResult = AIConfiguration.CreateDefault(merchant.Id);
+
+        merchant.AddConfigureAI(aiConfigResult.Value);
+
         _db.Merchants.Add(merchantResult.Value);
 
         await _db.SaveChangesAsync(cancellationToken);

@@ -111,6 +111,38 @@ namespace Botify.Domain.Models.AI
             return Result.Updated;
         }
 
+        public static Result<AIConfiguration> CreateDefault(Guid merchantId)
+        {
+            var id = Guid.NewGuid();
+
+            // Realistic placeholders
+            var systemPrompt = "You are a helpful AI assistant.";
+            var modelName = "gpt-4o"; // default model placeholder
+            var apiKey = "YOUR_API_KEY_HERE"; // placeholder to be replaced with merchant's actual key
+            var platform = AIPlatform.OpenAI; // sensible default platform
+            var temperature = 0.7;
+            var maxTokens = 800;
+
+            var validation = ValidateInputs(id, systemPrompt, modelName, apiKey, platform, temperature, maxTokens, merchantId);
+            if (!validation.IsSuccess)
+                return validation.Errors;
+
+            return new AIConfiguration(
+                id,
+                systemPrompt,
+                modelName,
+                apiKey,
+                platform,
+                temperature,
+                maxTokens,
+                merchantId,
+                orderProcessingEnabled: true,
+                productRecommendationsEnabled: true,
+                smallTalkEnabled: true,
+                autoEscalateEnabled: true
+            );
+        }
+
         #region Validation
 
         private static Result<Success> ValidateInputs(
