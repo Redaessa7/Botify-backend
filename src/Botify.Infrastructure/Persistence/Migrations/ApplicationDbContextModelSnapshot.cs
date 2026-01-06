@@ -78,6 +78,81 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.ToTable("UserProfiles", (string)null);
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.AI.AIConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ApiKey")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AutoEscalateEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MaxTokens")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("MerchantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("OrderProcessingEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ProductRecommendationsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("SmallTalkEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("SystemPrompt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("Temperature")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("REAL")
+                        .HasDefaultValue(0.69999999999999996);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId")
+                        .IsUnique();
+
+                    b.ToTable("AIConfigurations", (string)null);
+                });
+
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Bots.Bot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -623,6 +698,15 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Botify.Domain.Models.AI.AIConfiguration", b =>
+                {
+                    b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
+                        .WithOne("AIConfiguration")
+                        .HasForeignKey("Botify.Domain.Models.AI.AIConfiguration", "MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Bots.Bot", b =>
                 {
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
@@ -1025,6 +1109,8 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Botify.Domain.Models.Merchants.Merchant", b =>
                 {
+                    b.Navigation("AIConfiguration");
+
                     b.Navigation("Bots");
 
                     b.Navigation("Products");

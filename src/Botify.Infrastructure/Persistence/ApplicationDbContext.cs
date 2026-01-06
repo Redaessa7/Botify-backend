@@ -1,6 +1,7 @@
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Domain.Identity;
 using Botify.Domain.Models;
+using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Products;
@@ -16,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
 
     public DbSet<Merchant> Merchants =>  Set<Merchant>();
+    public DbSet<AIConfiguration> AIConfigurations => Set<AIConfiguration>();
     public DbSet<Bot> Bots => Set<Bot>();
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();

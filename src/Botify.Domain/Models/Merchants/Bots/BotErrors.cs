@@ -11,6 +11,12 @@ public static class BotErrors
     public static Error MerchantIdRequired =>
         Error.Validation("Bot.MerchantId.Required", "Merchant ID is required.");
 
+    public static Error SendMessageFailed =>
+    Error.Conflict(
+        "Bot.Message.SendFailed",
+        "Failed to send message to the bot platform."
+    );
+
     public static Error NameRequired =>
         Error.Validation("Bot.Name.Required", "Bot name is required.");
 
