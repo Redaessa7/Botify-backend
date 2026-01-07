@@ -22,6 +22,31 @@ public sealed class TelegramBotService : IBotPlatformService
 
         return Result.Success;
     }
+    public async Task<Result<Success>> SendMessageAsync(
+ string apiToken,
+ long chatId,
+ string message,
+ CancellationToken ct = default)
+    {
+        var url = $"https://api.telegram.org/bot{apiToken}/sendMessage";
+
+        var payload = new TelegramSendMessageRequest(chatId, message);
+
+        var resp = await _http.PostAsJsonAsync(url, payload, ct);
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            var body = await resp.Content.ReadAsStringAsync(ct);
+            Console.WriteLine($"Telegram sendMessage failed: {body}");
+            return BotErrors.SendMessageFailed;
+        }
+
+        var result = await resp.Content.ReadFromJsonAsync<TelegramSendMessageResponse>(cancellationToken: ct);
+
+        return result?.Ok == true
+            ? Result.Success
+            : BotErrors.SendMessageFailed;
+    }
 
     public async Task<Result<string>> SetWebhookAsync(string apiToken, string webhookUrl, string secretToken, CancellationToken ct = default)
     {

@@ -1,4 +1,5 @@
 ﻿using Botify.Domain.Identity;
+using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Products;
@@ -12,6 +13,7 @@ namespace Botify.Application.CrossCutting.Interfaces
     {
         public DbSet<Merchant> Merchants { get; }
         public DbSet<UserProfile> UserProfiles { get; }
+        public DbSet<AIConfiguration> AIConfigurations { get; }
         public DbSet<ShopSettings> ShopSettings { get; }
         public DbSet<Question> Questions { get; }
         public DbSet<Bot> Bots { get; } 

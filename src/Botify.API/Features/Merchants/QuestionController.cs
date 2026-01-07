@@ -1,6 +1,7 @@
 ﻿using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Requests;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,9 +46,26 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
     /// </summary>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetQuestionsAsync(Guid merchantId, [FromQuery]string? cursor, [FromQuery] int limit = 10, [FromQuery] string? search = null, CancellationToken ct = default)
+    public async Task<IActionResult> GetQuestionsAsync(Guid merchantId,
+                                                       [FromQuery] string? cursor,
+                                                       [FromQuery] int limit = 10,
+                                                       [FromQuery] string? search = null,
+                                                       [FromQuery] bool? isResolved = null,
+                                                       [FromQuery] string? botPlatform = null,
+                                                       CancellationToken ct = default)
     {
-        var result = await _questionService.GetQuestionsAsync(merchantId, cursor, limit, search, ct);
+
+        BotPlatform? parsedPlatform =  null;
+        if(!string.IsNullOrEmpty(botPlatform))
+        {
+            var parseResult = BotPlatform.TryParse(botPlatform, true, out BotPlatform platform);
+            if(!parseResult)
+            {
+                return Problem($"Invalid bot platform: {botPlatform}");
+            }
+            parsedPlatform = platform;
+        }
+         var result = await _questionService.GetQuestionsAsync(merchantId, cursor, limit, search, isResolved, parsedPlatform, ct);
         return result.Match(Ok, Problem);
     }
     #region Stats
