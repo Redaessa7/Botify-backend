@@ -30,7 +30,9 @@ namespace Botify.Application.Features.AI.Interfaces
         Task<Result<AIConfigurationResponse>> GetConfigurationsAsync(
             Guid merchantId,
             CancellationToken cancellationToken = default);
-
+        Task<Result<bool>> IsAIConfigExistsAsync(
+        Guid merchantId,
+        CancellationToken cancellationToken = default);
         #endregion
     }
 }
