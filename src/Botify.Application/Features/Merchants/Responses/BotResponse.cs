@@ -1,4 +1,5 @@
 ﻿using Botify.Domain.Models.Merchants.Bots;
+using Botify.Domain.Models.Merchants.ValueObjects;
 
 namespace Botify.Application.Features.Merchants.Responses
 {
@@ -9,7 +10,7 @@ namespace Botify.Application.Features.Merchants.Responses
     {
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
-        public string Platform { get; init; } = string.Empty;
+        public BotPlatform Platform { get; init; } 
         public string? ApiToken { get; init; }
         public bool IsActive { get; init; }
         public DateTimeOffset CreatedAt { get; init; }
@@ -24,7 +25,7 @@ namespace Botify.Application.Features.Merchants.Responses
         {
             Id = bot.Id,
             Name = bot.Name,
-            Platform = bot.Platform.ToString(),
+            Platform = bot.Platform,
             ApiToken = bot.Token,
             IsActive = bot.Active,
             CreatedAt = bot.CreatedAtUtc,

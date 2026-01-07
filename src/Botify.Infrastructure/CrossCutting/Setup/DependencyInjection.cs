@@ -135,7 +135,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Register keyed services for each platform
             services.AddHttpClient<TelegramBotService>();
-            services.AddKeyedScoped<IBotPlatformService, TelegramBotService>(BotPlatform.TELEGRAM.AsString());
+            services.AddKeyedScoped<IBotPlatformService, TelegramBotService>(BotPlatform.TELEGRAM.AsKey());
 
             services.Configure<WebhookOptions>(configuration.GetSection("WebhookOptions"));
 
@@ -168,17 +168,33 @@ namespace Microsoft.Extensions.DependencyInjection
         }
         private static IServiceCollection AddAIServices(this IServiceCollection services)
         {
+            // Semantic Kernel setup
             services.AddKernel();
             services.AddSemanticKernelPlugins();
             services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GoogleConnectorStrategy>();
             services.AddScoped<IKernelExecutionService, SemanticKernelService>();
 
+            // AI Platform Strategies
             services.AddHttpClient<GeminiStrategy>();
-            services.AddKeyedScoped<IAIPlatformStrategy, GeminiStrategy>(AIPlatform.GooglePaLM.ToString().ToUpperInvariant());
+            services.AddHttpClient<OpenAIStrategy>();
+            services.AddHttpClient<GitHubInferenceStrategy>();
+
+            services.AddKeyedScoped<IAIPlatformStrategy, GeminiStrategy>(
+                AIPlatform.GooglePaLM.AsKey()
+            );
+
+            services.AddKeyedScoped<IAIPlatformStrategy, OpenAIStrategy>(
+                AIPlatform.OpenAI.AsKey()
+            );
+
+            services.AddKeyedScoped<IAIPlatformStrategy, GitHubInferenceStrategy>(
+                AIPlatform.GitHub.AsKey()
+            );
 
             return services;
         }
+
         #endregion
     }
 }

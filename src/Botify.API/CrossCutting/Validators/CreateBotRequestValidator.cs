@@ -21,11 +21,5 @@ public class CreateBotRequestValidator : AbstractValidator<CreateBotRequest>
         RuleFor(x => x.ApiToken)
             .RequiredField(BotErrors.TokenRequired);
 
-        RuleFor(x => x.Platform)
-            .RequiredField(BotErrors.PlatformRequired)
-            .Must(p => BotPlatformExtensions.From(p).IsSuccess)
-                .WithMessage(BotErrors.PlatformInvalid.Description)
-                .WithErrorCode(BotErrors.PlatformInvalid.Code)
-                .WithState(_ => BotErrors.PlatformInvalid);
     }
 }

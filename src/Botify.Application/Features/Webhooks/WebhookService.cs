@@ -43,7 +43,7 @@ public class WebhookService(IApplicationDbContext context, IKernelExecutionServi
 
         var bot = merchant.Bots.First(b => b.Id == telegramRequest.BotId);
 
-        var _botPlatformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(bot.Platform.AsString());
+        var _botPlatformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(bot.Platform.AsKey());
         Console.WriteLine("Now Enter to Ai Model.");
         try
         {

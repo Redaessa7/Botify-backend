@@ -8,8 +8,8 @@ namespace Botify.Application.Features.Merchants.Requests
     {
         public Guid BotId { get; init; }
         public string BotName { get; init; } = string.Empty;
-        public string Platform { get; init; } = string.Empty;
-        public string Type { get; init; } = string.Empty;
+        public BotPlatform Platform { get; init; } 
+        public QuestionType Type { get; init; } 
         public string CustomerName { get; init; } = string.Empty;
         public string? Email { get; init; }
         public string? Telegram { get; init; }
@@ -19,15 +19,7 @@ namespace Botify.Application.Features.Merchants.Requests
 
         public Result<Question> ToQuestion(Guid merchantId)
         {
-            // Convert platform string to enum
-            var platformResult = BotPlatformExtensions.From(Platform);
-            if (!platformResult.IsSuccess)
-                return platformResult.Errors;
 
-            // Convert type string to enum
-            var typeResult = QuestionTypeExtensions.From(Type);
-            if (!typeResult.IsSuccess)
-                return typeResult.Errors;
 
             // Build CustomerInfo value object
             var customerResult = CustomerInfo.Create(CustomerName, Email, Telegram, Whatsapp, Messenger);
@@ -40,8 +32,8 @@ namespace Botify.Application.Features.Merchants.Requests
                 merchantId,
                 BotId,
                 BotName,
-                platformResult.Value,
-                typeResult.Value,
+              Platform,
+              Type,
                 customerResult.Value,
                 Message
             );

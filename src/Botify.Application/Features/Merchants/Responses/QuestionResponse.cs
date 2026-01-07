@@ -9,8 +9,8 @@ namespace Botify.Application.Features.Merchants.Responses
         public Guid MerchantId { get; init; }
         public Guid BotId { get; init; }
         public string BotName { get; init; } = string.Empty;
-        public string Platform { get; init; } = string.Empty;
-        public string Type { get; init; } = string.Empty;
+        public BotPlatform Platform { get; init; } 
+        public QuestionType Type { get; init; }
         public ContactInfoResponse ContactInfo { get; init; } = null!;
         public string Message { get; init; } = string.Empty;
         public bool IsResolved { get; init; }
@@ -24,8 +24,8 @@ namespace Botify.Application.Features.Merchants.Responses
                 MerchantId = question.MerchantId,
                 BotId = question.BotId,
                 BotName = question.BotName,
-                Platform = question.Platform.AsString(),
-                Type = question.Type.AsString(),
+                Platform = question.Platform,
+                Type = question.Type,
                 ContactInfo = ContactInfoResponse.FromDomain(question.Customer),
                 Message = question.Message,
                 IsResolved = question.IsResolved,

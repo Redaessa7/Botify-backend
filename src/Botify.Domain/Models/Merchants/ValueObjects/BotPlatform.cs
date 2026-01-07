@@ -1,7 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.Bots;
-using Botify.Domain.ResultPattern;
-
-namespace Botify.Domain.Models.Merchants.ValueObjects
+﻿namespace Botify.Domain.Models.Merchants.ValueObjects
 {
     public enum BotPlatform
     {
@@ -12,21 +9,10 @@ namespace Botify.Domain.Models.Merchants.ValueObjects
 
     public static class BotPlatformExtensions
     {
-        public static Result<BotPlatform> From(string platform)
-        {
-            if (string.IsNullOrWhiteSpace(platform))
-                return BotErrors.PlatformRequired;
-
-            return platform.ToUpperInvariant() switch
-            {
-                "TELEGRAM" => BotPlatform.TELEGRAM,
-                "WHATSAPP" => BotPlatform.WHATSAPP,
-                "MESSENGER" => BotPlatform.MESSENGER,
-                _ => BotErrors.PlatformInvalid
-            };
-        }
-
-        public static string AsString(this BotPlatform platform) =>
-            platform.ToString(); // returns uppercase string by default
+        /// <summary>
+        /// Convert the enum value into a consistent uppercase string key.
+        /// </summary>
+        public static string AsKey(this BotPlatform platform) =>
+            platform.ToString().ToUpperInvariant();
     }
 }

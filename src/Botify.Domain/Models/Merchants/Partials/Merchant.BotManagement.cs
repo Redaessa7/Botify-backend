@@ -2,6 +2,7 @@
 using Botify.Domain.Events.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Enums;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 
 namespace Botify.Domain.Models.Merchants
@@ -11,13 +12,13 @@ namespace Botify.Domain.Models.Merchants
         private readonly List<Bot> _bots = new();
         public IReadOnlyCollection<Bot> Bots => _bots.AsReadOnly();
 
-        public Result<Bot> AddBot(Guid botId, string name, string token, string platform, string secret, string baseWebhookUrl)
+        public Result<Bot> AddBot(Guid botId, string name, string token, BotPlatform platform, string secret, string baseWebhookUrl)
         {
             var botResult = Bot.Create(botId, Id, name, token, platform, secret);
             if (!botResult.IsSuccess) return botResult.Errors;
 
             var bot = botResult.Value;
-            var webhookUrl = $"{baseWebhookUrl.TrimEnd('/')}/{platform.ToLowerInvariant()}/{botId}?secret={secret}";
+            var webhookUrl = $"{baseWebhookUrl.TrimEnd('/')}/{platform.ToString().ToLowerInvariant()}/{botId}?secret={secret}";
             var setWebhookResult = bot.SetWebhook(webhookUrl);
             if (!setWebhookResult.IsSuccess) return setWebhookResult.Errors;
 

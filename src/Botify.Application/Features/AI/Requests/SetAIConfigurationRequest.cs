@@ -9,7 +9,7 @@ namespace Botify.Application.Features.AI.Requests
         public string SystemPrompt { get; init; } = string.Empty;
         public string ModelName { get; init; } = string.Empty;
         public string ApiKey { get; init; } = string.Empty;
-        public string Platform { get; init; } = string.Empty;
+        public AIPlatform Platform { get; init; } 
         public double Temperature { get; init; } = 0.7;
         public int MaxTokens { get; init; }
 
@@ -21,17 +21,13 @@ namespace Botify.Application.Features.AI.Requests
 
         public Result<Success> ApplyTo(AIConfiguration config)
         {
-            var parsed = Enum.TryParse<AIPlatform>(Platform, true, out var parsedPlatform);
-            if (!parsed)
-            {
-                return AIConfigurationErrors.PlatformRequired;
-            }
+
 
             config.Update(
                 SystemPrompt,
                 ModelName,
                 ApiKey,
-                parsedPlatform,
+                Platform,
                 Temperature,
                 MaxTokens,
                 OrderProcessingEnabled,

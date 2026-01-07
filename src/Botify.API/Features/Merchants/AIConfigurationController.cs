@@ -43,10 +43,8 @@ namespace Botify.Api.Controllers
         [HttpPost("/api/ai-validate-token")]
         public async Task<IActionResult> ValidateAIToken(TokenValidationRequest request)
         {
-            if(!Enum.IsDefined(typeof(AIPlatform), request.Platform))
-                return Problem($"Platform {request.Platform} not supported");
 
-            var strategy = _provider.GetKeyedService<IAIPlatformStrategy>(request.Platform.ToUpperInvariant());
+            var strategy = _provider.GetKeyedService<IAIPlatformStrategy>(request.Platform.AsKey());
 
             if (strategy is null)
                 return Problem($"Platform {request.Platform} not supported");
@@ -75,7 +73,7 @@ namespace Botify.Api.Controllers
         }
 
         [HttpGet("exists")]
-        public async Task<IActionResult> CheckShopExistsAsync(Guid merchantId, CancellationToken cancellationToken)
+        public async Task<IActionResult> IsAIConfigExistsAsync(Guid merchantId, CancellationToken cancellationToken)
         {
             var result = await _service.IsAIConfigExistsAsync(merchantId, cancellationToken);
             return result.Match(result => Ok(new { exists = result }), Problem);
