@@ -74,6 +74,12 @@ namespace Botify.Api.Controllers
             return result.Match(Ok, Problem);
         }
 
+        [HttpGet("exists")]
+        public async Task<IActionResult> CheckShopExistsAsync(Guid merchantId, CancellationToken cancellationToken)
+        {
+            var result = await _service.IsAIConfigExistsAsync(merchantId, cancellationToken);
+            return result.Match(result => Ok(new { exists = result }), Problem);
+        }
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetConfigurations(

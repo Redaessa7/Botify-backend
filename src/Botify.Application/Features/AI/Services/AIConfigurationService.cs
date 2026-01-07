@@ -59,6 +59,14 @@ public sealed class AIConfigurationService : IAIConfigurationService
         return AIConfigurationResponse.FromDomain(config);
     }
 
+    public async Task<Result<bool>> IsAIConfigExistsAsync(
+        Guid merchantId,
+        CancellationToken cancellationToken = default)
+    {
+        var exists = await _db.AIConfigurations
+            .AnyAsync(c => c.MerchantId == merchantId, cancellationToken);
+        return exists;
+    }
     public async Task<Result<AIConfigurationResponse>> UpdateAsync(
         Guid merchantId,
         SetAIConfigurationRequest request,
