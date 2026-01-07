@@ -126,15 +126,15 @@ public sealed class MerchantService : IMerchantService
                 return defaultShopResult.Errors;
             }
             shopSettings = defaultShopResult.Value;
-
+            var assignResult = merchant.AssignShop(shopSettings);
+            if(!assignResult.IsSuccess)
+                return assignResult.Errors;
             _db.ShopSettings.Add(shopSettings);
         }
         else
         {
             // Create ShopSettings via domain factory
-            var settingsResult = ShopSettings.Set(
-        merchant.ShopSettings.Id,
-        merchantId: merchantId,
+            var settingsResult = merchant.ShopSettings.Update(
         name: request.ShopName,
         currency: request.Currency,
         language: request.Language,
@@ -158,15 +158,9 @@ public sealed class MerchantService : IMerchantService
 
             if (!settingsResult.IsSuccess) 
                 return settingsResult.Errors;
-
-            shopSettings = settingsResult.Value;
-
+            shopSettings = merchant.ShopSettings!;
         }
 
-        var assignResult = merchant.AssignShop(shopSettings);
-
-        if (!assignResult.IsSuccess) 
-            return assignResult.Errors;
 
         await _db.SaveChangesAsync(cancellationToken);
 

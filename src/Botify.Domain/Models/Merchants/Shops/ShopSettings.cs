@@ -181,22 +181,63 @@ namespace Botify.Domain.Models.Merchants.Shops
             
             return shopSettings; 
         }
-      
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            public static ShopSettings CreateDefault(Guid merchantId)
+
+        public Result<Success> Update(
+            string? name = null,
+            string? currency = null,
+            string? language = null,
+            string? address = null,
+            string? industryName = null,
+            string? businessEmail = null,
+            string? businessPhoneNumber = null,
+            SocialMediaLinks? socialMediaLinks = null,
+            string? logoImageUrl = null,
+            string? coverImageUrl = null,
+            decimal? taxRate = null,
+            string? description = null,
+            string? timezone = null,
+            bool? deliveryEnabled = null,
+            bool? pickupEnabled = null,
+            decimal? minimumOrder = null,
+            decimal? deliveryFee = null,
+            bool? isOpen = null,
+            OpeningHours? openingHours = null)
+        {
+            // Validate required fields only if they are being updated
+            if (name is not null && string.IsNullOrWhiteSpace(name))
+                return ShopErrors.NameRequired;
+            if (currency is not null && string.IsNullOrWhiteSpace(currency))
+                return ShopErrors.CurrencyRequired;
+            if (language is not null && string.IsNullOrWhiteSpace(language))
+                return ShopErrors.LanguageRequired;
+            if (address is not null && string.IsNullOrWhiteSpace(address))
+                return ShopErrors.AddressRequired;
+
+            // Apply updates
+            Name = name ?? Name;
+            Currency = currency ?? Currency;
+            Language = language ?? Language;
+            Address = address ?? Address;
+            IndustryName = industryName ?? IndustryName;
+            BusinessEmail = businessEmail ?? BusinessEmail;
+            BusinessPhoneNumber = businessPhoneNumber ?? BusinessPhoneNumber;
+            SocialMediaLinks = socialMediaLinks ?? SocialMediaLinks;
+            LogoImageUrl = logoImageUrl ?? LogoImageUrl;
+            CoverImageUrl = coverImageUrl ?? CoverImageUrl;
+            TaxRate = taxRate ?? TaxRate;
+            Description = description ?? Description;
+            Timezone = timezone ?? Timezone;
+            DeliveryEnabled = deliveryEnabled ?? DeliveryEnabled;
+            PickupEnabled = pickupEnabled ?? PickupEnabled;
+            MinimumOrder = minimumOrder ?? MinimumOrder;
+            DeliveryFee = deliveryFee ?? DeliveryFee;
+            IsOpen = isOpen ?? IsOpen;
+            OpeningHours = openingHours ?? OpeningHours;
+
+            return Result.Success;
+        }
+
+        public static ShopSettings CreateDefault(Guid merchantId)
         {
             // Define default day opening hours
             var monday = DayOpeningHours.Create(new TimeOnly(9, 0), new TimeOnly(17, 0), true);
