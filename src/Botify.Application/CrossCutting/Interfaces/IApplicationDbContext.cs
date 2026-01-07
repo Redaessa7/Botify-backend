@@ -3,6 +3,7 @@ using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Products;
 using Botify.Domain.Models.Merchants.Questions;
+using Botify.Domain.Models.Merchants.Shops;
 using Microsoft.EntityFrameworkCore;
 
 namespace Botify.Application.CrossCutting.Interfaces
@@ -11,7 +12,7 @@ namespace Botify.Application.CrossCutting.Interfaces
     {
         public DbSet<Merchant> Merchants { get; }
         public DbSet<UserProfile> UserProfiles { get; }
-
+        public DbSet<ShopSettings> ShopSettings { get; }
         public DbSet<Question> Questions { get; }
         public DbSet<Bot> Bots { get; } 
         public DbSet<Product> Products { get; }

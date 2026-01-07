@@ -30,8 +30,8 @@ namespace Botify.Application.Features.Merchants.Responses
         public decimal? DeliveryFee { get; init; }
         public bool IsOpen { get; init; }
         public OpeningHours? OpeningHours { get; init; }
-        public DateTimeOffset CreatedAt { get; init; }
-        public DateTimeOffset LastUpdated { get; init; }
+        public DateTime CreatedAt { get; init; }
+        public DateTime LastUpdated { get; init; }
 
         // Factory method to map from domain ShopSettings entity
         public static ShopResponse FromDomain(ShopSettings shop) => new()

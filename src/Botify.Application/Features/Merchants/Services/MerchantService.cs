@@ -68,9 +68,6 @@ public sealed class MerchantService : IMerchantService
             return merchantResult.Errors;
 
         var merchant = merchantResult.Value;
-        var shop = ShopSettings.CreateDefault(merchant.Id);
-
-        merchant.AssignShop(shop);
         
         _db.Merchants.Add(merchantResult.Value);
 
@@ -113,40 +110,71 @@ public sealed class MerchantService : IMerchantService
         var merchant = await _db.Merchants.Include(x=> x.ShopSettings).FirstOrDefaultAsync(x=> x.Id == merchantId, cancellationToken);
         if (merchant is null) return MerchantErrors.NotFound;
 
+        ShopSettings? shopSettings = null;
+        if (merchant.ShopSettings is null)
+        {
+            var openHours = request?.OpeningHours?.ToDomain() ?? null;
+            // Initialize default shop settings if none exist
+            var defaultShopResult = ShopSettings.Create(merchantId, request.ShopName,request.Currency,request.Language,request.Address,request.IndustryName,request.BusinessEmail,request.BusinessPhoneNumber,request.SocialMediaLinks,request.LogoImageUrl,request.CoverImageUrl,request.TaxRate,request.Description,request.Timezone,request.DeliveryEnabled,request.PickupEnabled,request.MinimumOrder,request.DeliveryFee,request.IsOpen, openHours);
+           if(!defaultShopResult.IsSuccess)
+            {
+                return defaultShopResult.Errors;
+            }
+            shopSettings = defaultShopResult.Value;
 
-        // Create ShopSettings via domain factory
-        var settingsResult = ShopSettings.Set(
-    merchant.ShopSettings.Id,
-    merchantId: merchantId,
-    name: request.ShopName,
-    currency: request.Currency,
-    language: request.Language,
-    address: request.Address,
-    industryName: request.IndustryName,
-    businessEmail: request.BusinessEmail,
-    businessPhoneNumber: request.BusinessPhoneNumber,
-    socialMediaLinks: request.SocialMediaLinks,
-    logoImageUrl: request.LogoImageUrl,
-    coverImageUrl: request.CoverImageUrl,
-    taxRate: request.TaxRate,
-    description: request.Description,
-    timezone: request.Timezone,
-    deliveryEnabled: request.DeliveryEnabled,
-    pickupEnabled: request.PickupEnabled,
-    minimumOrder: request.MinimumOrder,
-    deliveryFee: request.DeliveryFee,
-    isOpen: request.IsOpen,
-    openingHours: request?.OpeningHours?.ToDomain() ?? null
-);
+            _db.ShopSettings.Add(shopSettings);
+        }
+        else
+        {
+            // Create ShopSettings via domain factory
+            var settingsResult = ShopSettings.Set(
+        merchant.ShopSettings.Id,
+        merchantId: merchantId,
+        name: request.ShopName,
+        currency: request.Currency,
+        language: request.Language,
+        address: request.Address,
+        industryName: request.IndustryName,
+        businessEmail: request.BusinessEmail,
+        businessPhoneNumber: request.BusinessPhoneNumber,
+        socialMediaLinks: request.SocialMediaLinks,
+        logoImageUrl: request.LogoImageUrl,
+        coverImageUrl: request.CoverImageUrl,
+        taxRate: request.TaxRate,
+        description: request.Description,
+        timezone: request.Timezone,
+        deliveryEnabled: request.DeliveryEnabled,
+        pickupEnabled: request.PickupEnabled,
+        minimumOrder: request.MinimumOrder,
+        deliveryFee: request.DeliveryFee,
+        isOpen: request.IsOpen,
+        openingHours: request?.OpeningHours?.ToDomain() ?? null
+    );
 
-        if (!settingsResult.IsSuccess) return settingsResult.Errors;
-        var shop = settingsResult.Value;
-        // Apply domain operation
-        var assignResult = merchant.AssignShop(shop);
-        if (!assignResult.IsSuccess) return assignResult.Errors;
+            if (!settingsResult.IsSuccess) 
+                return settingsResult.Errors;
+
+            shopSettings = settingsResult.Value;
+
+        }
+
+        var assignResult = merchant.AssignShop(shopSettings);
+
+        if (!assignResult.IsSuccess) 
+            return assignResult.Errors;
 
         await _db.SaveChangesAsync(cancellationToken);
-        return ShopResponse.FromDomain(shop);
+
+        return ShopResponse.FromDomain(shopSettings);
+    }
+
+
+    public async Task<Result<bool>> CheckShopExistsAsync(Guid merchantId, CancellationToken cancellationToken = default)
+    {
+       var exists = await _db.Merchants
+            .AnyAsync(m => m.Id == merchantId && m.ShopSettings != null, cancellationToken);
+
+        return exists;
     }
 
     #endregion

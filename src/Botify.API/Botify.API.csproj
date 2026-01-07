@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="CrossCutting\Commons\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

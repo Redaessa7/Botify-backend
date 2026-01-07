@@ -165,8 +165,38 @@ namespace Botify.Domain.Models.Merchants.Shops
 
             return Result.Success;
         }
-
-        public static ShopSettings CreateDefault(Guid merchantId)
+ public static Result<ShopSettings> Create( Guid merchantId, string name, string currency, string language, string address, string? industryName = null, string? businessEmail = null, string? businessPhoneNumber = null, SocialMediaLinks? socialMediaLinks = null, string? logoImageUrl = null, string? coverImageUrl = null, decimal? taxRate = null, string? description = null, string? timezone = null, bool deliveryEnabled = false, bool pickupEnabled = false, decimal? minimumOrder = null, decimal? deliveryFee = null, bool isOpen = false, OpeningHours? openingHours = null)
+        { 
+            if (merchantId == Guid.Empty)
+                return ShopErrors.MerchantIdRequired;
+            if (string.IsNullOrWhiteSpace(name)) 
+                return ShopErrors.NameRequired; 
+            if (string.IsNullOrWhiteSpace(currency))
+                return ShopErrors.CurrencyRequired; 
+            if (string.IsNullOrWhiteSpace(language)) 
+                return ShopErrors.LanguageRequired;
+            if (string.IsNullOrWhiteSpace(address)) 
+                return ShopErrors.AddressRequired;
+            var shopSettings = new ShopSettings(Guid.NewGuid(), merchantId, name, currency, language, address) { IndustryName = industryName, BusinessEmail = businessEmail, BusinessPhoneNumber = businessPhoneNumber, SocialMediaLinks = socialMediaLinks, LogoImageUrl = logoImageUrl, CoverImageUrl = coverImageUrl, TaxRate = taxRate, Description = description, Timezone = timezone, DeliveryEnabled = deliveryEnabled, PickupEnabled = pickupEnabled, MinimumOrder = minimumOrder, DeliveryFee = deliveryFee, IsOpen = isOpen, OpeningHours = openingHours };
+            
+            return shopSettings; 
+        }
+      
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            public static ShopSettings CreateDefault(Guid merchantId)
         {
             // Define default day opening hours
             var monday = DayOpeningHours.Create(new TimeOnly(9, 0), new TimeOnly(17, 0), true);

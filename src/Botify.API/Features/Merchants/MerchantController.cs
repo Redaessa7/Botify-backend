@@ -41,13 +41,6 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         return result.Match(Ok, Problem);
     }
 
-    [HttpGet("{merchantId:guid}/shops")]
-    [Authorize]
-    public async Task<IActionResult> GetShopAsync(Guid merchantId)
-    {
-        var result = await _merchantService.GetShopAsync(merchantId, HttpContext.RequestAborted);
-        return result.Match(Ok, Problem);
-    }
 
     [HttpPost("bots/check-token")]
     [Authorize] 
