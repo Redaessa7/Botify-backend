@@ -37,13 +37,13 @@ public sealed class AIConfigurationService : IAIConfigurationService
 
         if (merchant is null)
             return MerchantErrors.NotFound;
-        var platform = Enum.Parse<AIPlatform>(request.Platform, true);
+
         var configResult = AIConfiguration.Create(
             Guid.NewGuid(),
             request.SystemPrompt,
             request.ModelName,
             request.ApiKey,
-            platform,
+            request.Platform,
             request.Temperature,
             request.MaxTokens,
             merchantId);
@@ -78,7 +78,6 @@ public sealed class AIConfigurationService : IAIConfigurationService
 
         if (merchant is null)
             return MerchantErrors.NotFound;
-        var platform = Enum.Parse<AIPlatform>(request.Platform, true);
 
         AIConfiguration? aIConfiguration = null;
         if (merchant.AIConfiguration is not null)
@@ -87,7 +86,7 @@ public sealed class AIConfigurationService : IAIConfigurationService
                 request.SystemPrompt,
                 request.ModelName,
                 request.ApiKey,
-                platform,
+                request.Platform,
                 request.Temperature,
                 request.MaxTokens,
                 request.OrderProcessingEnabled,
@@ -107,7 +106,7 @@ public sealed class AIConfigurationService : IAIConfigurationService
                 request.SystemPrompt,
                 request.ModelName,
                 request.ApiKey,
-                platform,
+                request.Platform,
                 request.Temperature,
                 request.MaxTokens,
                 merchantId,

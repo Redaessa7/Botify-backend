@@ -31,7 +31,7 @@ public sealed class Bot : AuditableEntity
         IsPrimary = false;
     }
 
-    internal static Result<Bot> Create(Guid id, Guid merchantId, string name, string token, string platform, string secret)
+    internal static Result<Bot> Create(Guid id, Guid merchantId, string name, string token, BotPlatform platform, string secret)
     {
         if (id == Guid.Empty) return BotErrors.IdRequired;
         if (merchantId == Guid.Empty) return BotErrors.MerchantIdRequired;
@@ -40,10 +40,7 @@ public sealed class Bot : AuditableEntity
         if (string.IsNullOrWhiteSpace(token)) return BotErrors.TokenRequired;
         if (string.IsNullOrWhiteSpace(secret)) return BotErrors.SecretRequired;
 
-        var platformResult = BotPlatformExtensions.From(platform);
-        if (!platformResult.IsSuccess) return platformResult.Errors;
-
-        return new Bot(id, merchantId, name.Trim(), token.Trim(), platformResult.Value, secret.Trim());
+        return new Bot(id, merchantId, name.Trim(), token.Trim(), platform, secret.Trim());
     }
 
     internal Result<Success> SetWebhook(string webhookUrl)

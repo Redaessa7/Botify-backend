@@ -1,5 +1,6 @@
 ﻿using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Features.Merchants.Interfaces;
+using Botify.Application.Features.Merchants.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,14 @@ namespace Botify.API.Features.Merchants
         public ShopController(IMerchantService merchantService)
         {
             _merchantService = merchantService;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> SetShopAsync(Guid merchantId, SetShopRequest request)
+        {
+            var result = await _merchantService.SetShopAsync(merchantId, request, HttpContext.RequestAborted);
+            return result.Match(Ok, Problem);
         }
 
         // GET: api/merchants/{merchantId}/shops

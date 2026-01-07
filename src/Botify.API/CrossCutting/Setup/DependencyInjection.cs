@@ -2,6 +2,7 @@
 using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Filters;
 using Botify.API.CrossCutting.OpenApi;
+using Botify.API.CrossCutting.Policies;
 using Botify.API.Validators;
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Options;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Options;
 using System.IO.Compression;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -101,7 +103,11 @@ internal static class DependencyInjection
             options.Filters.Add<EnvelopeResultFilter>();
         }).AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(new UpperCaseNamingPolicy(), allowIntegerValues: false));
+            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+
         });
 
         return services;

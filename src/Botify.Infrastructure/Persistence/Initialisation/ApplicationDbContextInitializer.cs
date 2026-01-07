@@ -188,7 +188,7 @@ namespace Botify.Infrastructure.Persistence.Initialisation
                 botId,
                 "Default Telegram Bot",
                 "seed-token",
-                "TELEGRAM",
+                BotPlatform.TELEGRAM,
                 "seed-secret",
                 "https://webhook.botify.com"
             );

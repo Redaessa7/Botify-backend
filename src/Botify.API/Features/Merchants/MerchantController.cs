@@ -4,7 +4,9 @@ using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
+using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Merchants.Bots;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,21 +35,13 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         return result.Match(Ok, Problem);
     }
 
-    [HttpPut("{merchantId:guid}/shops")]
-    [Authorize]
-    public async Task<IActionResult> SetShopAsync(Guid merchantId, SetShopRequest request)
-    {
-        var result = await _merchantService.SetShopAsync(merchantId, request, HttpContext.RequestAborted);
-        return result.Match(Ok, Problem);
-    }
 
 
     [HttpPost("bots/check-token")]
     [Authorize] 
     public async Task<IActionResult> CheckValidToken(CheckTokenRequest request, CancellationToken ct)
     {
-        // Resolve platform service via KeyedServices
-        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.Platform.ToUpperInvariant());
+        var platformService = _serviceProvider.GetKeyedService<IBotPlatformService>(request.BotPlatform.AsKey());
         if (platformService is null)
             return Problem([BotErrors.PlatformInvalid]);
         var result = await platformService.ValidateTokenAsync(request.ApiToken, ct);
