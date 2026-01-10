@@ -58,6 +58,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
                      .WithOne()
                      .HasForeignKey(q => q.MerchantId)
                      .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasMany(x => x.Orders)
+                     .WithOne()
+                     .HasForeignKey(q => q.MerchantId)
+                     .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
