@@ -70,9 +70,6 @@ public sealed class MerchantService : IMerchantService
 
         var merchant = merchantResult.Value;
         
-        var aiConfigResult = AIConfiguration.CreateDefault(merchant.Id);
-
-        merchant.AddConfigureAI(aiConfigResult.Value);
 
         _db.Merchants.Add(merchantResult.Value);
 

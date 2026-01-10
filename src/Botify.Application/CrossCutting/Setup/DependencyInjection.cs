@@ -3,6 +3,8 @@ using Botify.Application.Features.AI.Services;
 using Botify.Application.Features.AI.Strategies;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Services;
+using Botify.Application.Features.Orders.Interfaces;
+using Botify.Application.Features.Orders.Services;
 using Botify.Application.Features.Webhooks;
 using Botify.Domain.Events;
 using Botify.Domain.Events.Merchants;
@@ -26,6 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IAIConfigurationService, AIConfigurationService>();
+            services.AddScoped<IOrderService, OrderService>();
 
             return services;
         }
