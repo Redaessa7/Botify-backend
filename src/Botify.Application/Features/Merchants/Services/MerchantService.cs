@@ -265,6 +265,8 @@ public sealed class MerchantService : IMerchantService
     public async Task<Result<CurrentMerchantResponse>> GetCurrentMerchantAsync(CancellationToken cancellationToken = default)
     {
         var merchant = await _db.Merchants
+            .Include(m => m.ShopSettings)
+            .Include(m => m.AIConfiguration)
             .Include(m => m.Profile)
             .Include(m => m.Subscription)
             .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);

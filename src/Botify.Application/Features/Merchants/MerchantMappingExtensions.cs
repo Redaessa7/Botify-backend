@@ -19,24 +19,6 @@ namespace Botify.Application.Services.Merchants
                 dto.Sunday != null ? DayOpeningHours.Create(TimeOnly.Parse(dto.Sunday.Open!), TimeOnly.Parse(dto.Sunday.Close!), dto.Sunday.IsOpen) : DayOpeningHours.Create(new TimeOnly(0, 0), new TimeOnly(0, 0), false)
             );
         }
-        public static CurrentMerchantResponse ToCurrentResponse(this Merchant merchant)
-        {
-            return new CurrentMerchantResponse
-            {
-                merchantId = merchant.Id,
-                Status = merchant.Status,
-                VerifiedAt = merchant.VerifiedAt,
-
-                FirstName = merchant.Profile.FirstName,
-                LastName = merchant.Profile.LastName,
-                Email = merchant.Profile.Email,
-                ProfileImageUrl = merchant.Profile.ProfileImageUrl,
-                Bio = merchant.Profile.Bio,
-                Language = merchant.Profile.Language,
-
-                CurrentPlan = merchant.Subscription.CurrentPlan,
-                ExpiryDate = merchant.Subscription.ExpiryDate
-            };
-        }
+    
     }
 }
