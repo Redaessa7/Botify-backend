@@ -1,8 +1,7 @@
 ﻿using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
-using System;
 
-namespace Botify.Domain.Models.Merchants.Questions
+namespace Botify.Domain.Models.Questions
 {
     public sealed class Question : AuditableEntity
     {

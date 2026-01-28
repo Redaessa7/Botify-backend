@@ -1,9 +1,9 @@
 ﻿using Botify.Application.Services.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using FluentValidation;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.API.CrossCutting.Extensions;
+using Botify.Domain.Models.Bots;
 
 namespace Botify.API.CrossCutting.Validators;
 

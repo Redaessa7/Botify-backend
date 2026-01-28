@@ -1,4 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.Products;
+﻿using Botify.Domain.Models.Products;
 
 namespace Botify.Application.Features.Merchants.Responses
 {

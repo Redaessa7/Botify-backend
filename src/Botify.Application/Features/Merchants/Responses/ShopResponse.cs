@@ -1,6 +1,6 @@
 ﻿using System;
-using Botify.Domain.Models.Merchants.Shops;
 using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Shops;
 
 namespace Botify.Application.Features.Merchants.Responses
 {

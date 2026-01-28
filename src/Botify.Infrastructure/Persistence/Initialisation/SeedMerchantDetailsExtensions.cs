@@ -1,10 +1,9 @@
 ﻿using Botify.Domain.Identity;
 using Botify.Domain.Identity.Enums;
+using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
-using Botify.Domain.Models.Merchants.Products;
-using Botify.Domain.Models.Merchants.Questions;
 using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Questions;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;

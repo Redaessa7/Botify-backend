@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants.Bots;
+namespace Botify.Domain.Models.Bots;
 
 public static class BotErrors
 {

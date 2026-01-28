@@ -1,8 +1,8 @@
 ﻿using Botify.Application.Features.Merchants.Interfaces;
-using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.ResultPattern;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram.Models;
 using System.Net.Http.Json;
+using Botify.Domain.Models.Bots;
 
 namespace Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 public sealed class TelegramBotService : IBotPlatformService

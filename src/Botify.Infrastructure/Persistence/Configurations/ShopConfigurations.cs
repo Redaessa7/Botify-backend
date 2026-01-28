@@ -1,5 +1,5 @@
 ﻿using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Shops;
+using Botify.Domain.Models.Shops;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

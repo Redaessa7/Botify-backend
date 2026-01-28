@@ -1,8 +1,7 @@
-﻿using System;
-using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants.Shops
+namespace Botify.Domain.Models.Shops
 {
     public sealed class ShopSettings : AuditableEntity
     {

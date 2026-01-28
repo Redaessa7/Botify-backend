@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants.Shops
+namespace Botify.Domain.Models.Shops
 {
     public static class ShopErrors
     {

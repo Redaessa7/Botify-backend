@@ -6,7 +6,7 @@ using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Features.Merchants.Responses;
 using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Products;
+using Botify.Domain.Models.Products;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

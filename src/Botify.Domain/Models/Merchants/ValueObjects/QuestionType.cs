@@ -1,4 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.Questions;
+﻿using Botify.Domain.Models.Questions;
 using Botify.Domain.ResultPattern;
 
 namespace Botify.Domain.Models.Merchants.ValueObjects

@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.ResultPattern;
-using Botify.Domain.Models.Merchants.Products;
 using System;
+using Botify.Domain.Models.Products;
 
 namespace Botify.Application.Features.Merchants.Requests
 {

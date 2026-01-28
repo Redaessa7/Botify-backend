@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.Events;
 using Botify.Domain.Events.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
+using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;

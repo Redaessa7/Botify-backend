@@ -1,5 +1,5 @@
-﻿using Botify.Domain.Models.Merchants.Questions;
-using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Questions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

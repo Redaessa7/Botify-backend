@@ -1,5 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.Products;
-using Botify.Domain.ResultPattern;
+﻿using Botify.Domain.ResultPattern;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Botify.Domain.Models.Orders
