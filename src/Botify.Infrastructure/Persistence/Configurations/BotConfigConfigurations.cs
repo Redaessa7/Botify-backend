@@ -1,4 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.Bots;
+﻿using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

@@ -1,6 +1,6 @@
 ﻿using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants.Questions;
+namespace Botify.Domain.Models.Questions;
 
 public static class QuestionErrors
 {

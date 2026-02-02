@@ -1,4 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.Products;
+﻿using Botify.Domain.Models.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

@@ -3,8 +3,6 @@ using Botify.Application.Features.Merchants.Responses;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
-using Botify.Domain.Models.Merchants.Shops;
 using Botify.Domain.ResultPattern;
 using static Botify.Application.Features.Merchants.Services.MerchantService;
 

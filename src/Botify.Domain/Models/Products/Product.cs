@@ -1,7 +1,6 @@
 ﻿using Botify.Domain.ResultPattern;
-using System;
 
-namespace Botify.Domain.Models.Merchants.Products
+namespace Botify.Domain.Models.Products
 {
     public sealed class Product : AuditableEntity
     {

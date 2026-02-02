@@ -5,7 +5,7 @@ using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.AI.Enums;
-using Botify.Domain.Models.Merchants.Bots;
+using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

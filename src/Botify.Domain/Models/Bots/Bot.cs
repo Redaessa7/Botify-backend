@@ -1,8 +1,8 @@
-﻿using Botify.Domain.Models.Merchants.Questions;
-using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Questions;
 using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Merchants.Bots;
+namespace Botify.Domain.Models.Bots;
 
 public sealed class Bot : AuditableEntity
 {

@@ -4,7 +4,6 @@ using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Webhooks.Requests;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
 using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;

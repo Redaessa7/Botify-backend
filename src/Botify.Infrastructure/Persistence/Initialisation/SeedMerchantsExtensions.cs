@@ -1,6 +1,4 @@
 ﻿using Botify.Domain.Models.Merchants;
-using Botify.Domain.Models.Merchants.Bots;
-using Botify.Domain.Models.Merchants.Questions;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
