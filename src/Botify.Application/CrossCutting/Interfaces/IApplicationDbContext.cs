@@ -1,6 +1,7 @@
 ﻿using Botify.Domain.Identity;
 using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Bots;
+using Botify.Domain.Models.Customers;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Products;
@@ -13,6 +14,7 @@ namespace Botify.Application.CrossCutting.Interfaces
     public interface IApplicationDbContext
     {
         public DbSet<Merchant> Merchants { get; }
+        public DbSet<Customer> Customers { get; }
         public DbSet<Order> Orders { get; }
         public DbSet<UserProfile> UserProfiles { get; }
         public DbSet<AIConfiguration> AIConfigurations { get; }
