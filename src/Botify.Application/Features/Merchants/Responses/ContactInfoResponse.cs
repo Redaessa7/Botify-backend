@@ -7,11 +7,6 @@ namespace Botify.Application.Features.Merchants.Responses
     {
         public string CustomerName { get; init; } = string.Empty;
         public string? PlatformContact { get; init; }
-        public static ContactInfoResponse FromDomain(Customer customer) =>
-            new()
-            {
-                CustomerName = customer.Name,
-                PlatformContact = customer.Contact
-            };
+     
     }
 }

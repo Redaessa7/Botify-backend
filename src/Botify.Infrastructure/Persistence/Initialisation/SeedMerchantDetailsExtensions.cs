@@ -47,7 +47,7 @@ public static class SeedMerchantDetailsExtensions
 
         var merchant = merchantResult.Value;
 
-        var botResult = merchant.AddBot(Guid.NewGuid(), "Default Telegram Bot", "seed-token", BotPlatform.TELEGRAM, "seed-secret", "https://webhook.botify.com");
+        var botResult = merchant.AddBot(SeedIds.BotDefaultTelegram, name: "Default Telegram Bot", "seed-token", BotPlatform.TELEGRAM, "seed-secret", "https://webhook.botify.com");
         if (!botResult.IsSuccess) return;
 
         var bot = botResult.Value;

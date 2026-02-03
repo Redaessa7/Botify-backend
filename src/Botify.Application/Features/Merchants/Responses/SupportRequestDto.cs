@@ -10,30 +10,39 @@ namespace Botify.Application.Features.Merchants.Responses
         public Guid MerchantId { get; init; }
         public Guid BotId { get; init; }
         public string BotName { get; init; } = string.Empty;
-        public BotPlatform Platform { get; init; } 
+        public BotPlatform Platform { get; init; }
         public SupportRequestType Type { get; init; }
         public RequestReason Reason { get; init; }
+
+        // ✅ Contact info grouped
         public ContactInfoResponse ContactInfo { get; init; } = null!;
+
         public string Message { get; init; } = string.Empty;
         public bool IsResolved { get; init; }
         public DateTime CreatedAt { get; init; }
         public DateTime? ResolvedAt { get; init; }
 
-        public static SupportRequestDto FromDomain(SupportRequest question) =>
+        public static SupportRequestDto FromDomain(SupportRequest supportRequest) =>
             new()
             {
-                Id = question.Id,
-                MerchantId = question.MerchantId,
-                BotId = question.BotId,
-                BotName = question.BotName,
-                Platform = question.Platform,
-                Type = question.Type,
-                ContactInfo = ContactInfoResponse.FromDomain(question.Customer),
-                Message = question.Message,
-                IsResolved = question.IsResolved,
-                CreatedAt = question.CreatedAtUtc,
-                Reason = question.Reason,
-                ResolvedAt = question.ResolvedAt
+                Id = supportRequest.Id,
+                MerchantId = supportRequest.MerchantId,
+                BotId = supportRequest.BotId,
+                BotName = supportRequest.BotName,
+                Platform = supportRequest.Platform,
+                Type = supportRequest.Type,
+                Reason = supportRequest.Reason,
+                ContactInfo = new ContactInfoResponse
+                {
+                    CustomerName = supportRequest.CustomerName,
+                    PlatformContact = supportRequest.PlatformContact
+                },
+                Message = supportRequest.Message,
+                IsResolved = supportRequest.IsResolved,
+                CreatedAt = supportRequest.CreatedAtUtc,
+                ResolvedAt = supportRequest.ResolvedAt
             };
     }
 }
+
+

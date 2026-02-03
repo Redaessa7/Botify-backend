@@ -20,6 +20,9 @@ public static class SupportRequestErrors
     public static Error PlatformRequired =>
         Error.Validation("SupportRequest.General.Platform.Required", "Platform is required.");
 
+    public static Error PlatformContactRequired =>
+        Error.Validation("SupportRequest.General.PlatformContact.Required", "Platform contact is required.");
+
     public static Error TypeRequired =>
         Error.Validation("SupportRequest.General.Type.Required", "SupportRequest type is required.");
 
@@ -31,6 +34,9 @@ public static class SupportRequestErrors
 
     public static Error ReasonInvalid =>
         Error.Validation("SupportRequest.General.Reason.Invalid", "SupportRequest reason must be ClientRequest or AiEscalated.");
+
+    public static Error CustomerIdRequired =>
+        Error.Validation("SupportRequest.General.CustomerId.Required", "Customer ID is required.");
 
     public static Error CustomerNameRequired =>
         Error.Validation("SupportRequest.General.CustomerName.Required", "Customer name is required.");
