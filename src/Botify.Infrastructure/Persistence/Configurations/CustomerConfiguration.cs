@@ -10,20 +10,56 @@ namespace Botify.Infrastructure.Persistence.Configurations
         {
             builder.ToTable("Customers");
 
+            // Primary Key
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Id).ValueGeneratedNever();
 
+            // External UUID
+            builder.Property(c => c.Uuid)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            builder.HasIndex(c => c.Uuid)
+                .IsUnique();
+
+            // MerchantId
             builder.Property(c => c.MerchantId)
                 .IsRequired();
 
+            // Name
             builder.Property(c => c.Name)
                 .HasMaxLength(200)
                 .IsRequired();
 
-            builder.Property(c => c.Contact)
-                .HasMaxLength(200)
+            // PhoneNumber
+            builder.Property(c => c.PhoneNumber)
+                .HasMaxLength(50)
                 .IsRequired();
 
+            // Email
+            builder.Property(c => c.Email)
+                .HasMaxLength(200);
+
+            builder.HasIndex(c => c.Email);
+
+            // Social Profiles (flattened)
+            builder.OwnsOne(c => c.Telegram, telegram =>
+            {
+                telegram.Property(t => t.Link).HasMaxLength(200);
+                telegram.Property(t => t.ChatId).HasMaxLength(100);
+            });
+
+            builder.OwnsOne(c => c.WhatsApp, whatsapp =>
+            {
+                whatsapp.Property(w => w.Link).HasMaxLength(200);
+                whatsapp.Property(w => w.ChatId).HasMaxLength(100);
+            });
+
+            builder.OwnsOne(c => c.Messenger, messenger =>
+            {
+                messenger.Property(m => m.Link).HasMaxLength(200);
+                messenger.Property(m => m.ChatId).HasMaxLength(100);
+            });
         }
     }
 }

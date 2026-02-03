@@ -1,4 +1,8 @@
 ﻿using Botify.Domain.Models.Customers;
+using Botify.Domain.Models.Customers.ValueObjects;
+using Botify.Domain.Models.SupportRequests;
+using Botify.Domain.Models.SupportRequests.Enums;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Botify.Infrastructure.Persistence.Initialisation;
@@ -12,17 +16,74 @@ public static class SeedCustomersExtensions
 
         var customers = new[]
         {
-        new { Id = SeedIds.CustomerJohnDoe,   Name = "John Doe",   Contact = "john@example.com" },
-        new { Id = SeedIds.CustomerFatimaAli, Name = "Fatima Ali", Contact = "fatima@example.com" },
-        new { Id = SeedIds.CustomerCarlos,    Name = "Carlos Mendes", Contact = "carlos@example.com" }
-    };
+            new
+            {
+                Id = SeedIds.CustomerJohnDoe,
+                Uuid = "uuid-john-doe",
+                Name = "John Doe",
+                PhoneNumber = "+1555000001",
+                Email = "john@example.com",
+                Telegram = new TelegramProfile { Link = "https://t.me/john_doe", ChatId = "123456" },
+                Messenger = new MessengerProfile { Link = "https://facebook.com/john.doe", ChatId = "fb-123456" }
+            },
+            new
+            {
+                Id = SeedIds.CustomerFatimaAli,
+                Uuid = "uuid-fatima-ali",
+                Name = "Fatima Ali",
+                PhoneNumber = "+1555000002",
+                Email = "fatima@example.com",
+                Telegram = new TelegramProfile { Link = "https://t.me/fatima_ali", ChatId = "654321" },
+                Messenger = new MessengerProfile { Link = "https://facebook.com/fatima.ali", ChatId = "fb-654321" }
+            },
+            new
+            {
+                Id = SeedIds.CustomerCarlos,
+                Uuid = "uuid-carlos",
+                Name = "Carlos Mendes",
+                PhoneNumber = "+1555000003",
+                Email = "carlos@example.com",
+                Telegram = new TelegramProfile { Link = "https://t.me/carlos_mendes", ChatId = "789012" },
+                Messenger = new MessengerProfile { Link = "https://facebook.com/carlos.mendes", ChatId = "fb-789012" }
+            }
+        };
 
         foreach (var data in customers)
         {
-            var result = Customer.Create(data.Id, merchantId, data.Name, data.Contact);
-            if (result.IsSuccess)
-                context.Customers.Add(result.Value);
+            var customerResult = Customer.Create(
+                data.Id,
+                merchantId,
+                data.Uuid,
+                data.Name,
+                data.PhoneNumber,
+                data.Email,
+                telegram: data.Telegram,
+                messenger: data.Messenger
+            );
+
+            if (customerResult.IsSuccess)
+            {
+                var customer = customerResult.Value;
+                context.Customers.Add(customer);
+
+                // ✅ Add a SupportRequest for each customer
+                var supportRequestResult = SupportRequest.Create(
+                    Guid.NewGuid(),                // SupportRequest ID
+                    merchantId,                    // MerchantId
+                    SeedIds.BotDefaultTelegram,            // Example BotId (replace with your actual bot seed ID)
+                    "Default Bot",                 // BotName
+                    BotPlatform.TELEGRAM,          // Platform (example: Telegram)
+                    data.Telegram?.ChatId ?? "",   // PlatformContact
+                    data.Name,                     // CustomerName
+                    SupportRequestType.GENERAL,    // Type
+                    RequestReason.CLIENT_REQUEST,   // Reason
+                    data.Id,                       // CustomerId
+                    $"Initial support request for {data.Name}" // Message
+                );
+
+                if (supportRequestResult.IsSuccess)
+                    context.SupportRequests.Add(supportRequestResult.Value);
+            }
         }
     }
-
 }
