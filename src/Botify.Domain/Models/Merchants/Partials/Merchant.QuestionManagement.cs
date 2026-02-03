@@ -1,14 +1,14 @@
-﻿using Botify.Domain.Models.Questions;
+﻿using Botify.Domain.Models.SupportRequests;
 using Botify.Domain.ResultPattern;
 
 namespace Botify.Domain.Models.Merchants
 {
     public sealed partial class Merchant
     {
-        private readonly List<Question> _questions = new();
-        public IReadOnlyCollection<Question> Questions => _questions.AsReadOnly();
+        private readonly List<SupportRequest> _questions = new();
+        public IReadOnlyCollection<SupportRequest> Questions => _questions.AsReadOnly();
 
-        public Result<Question> AddQuestion(Question question)
+        public Result<SupportRequest> AddQuestion(SupportRequest question)
         {
             _questions.Add(question);
             return question;

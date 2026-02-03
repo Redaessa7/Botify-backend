@@ -6,16 +6,13 @@ using Botify.Domain.ResultPattern;
 
 namespace Botify.Application.Features.Merchants.Interfaces
 {
-    public interface IQuestionService
+    public interface ISupportRequestService
     {
-        Task<Result<QuestionResponse>> CreateAsync(Guid merchantId, CreateQuestionRequest request, CancellationToken cancellationToken = default);
-
-
         Task<Result<Success>> DeleteAsync(Guid merchantId, Guid questionId, CancellationToken cancellationToken = default);
 
-        Task<Result<QuestionResponse>> GetByIdAsync(Guid merchantId, Guid questionId, CancellationToken cancellationToken = default);
+        Task<Result<SupportRequestDto>> GetByIdAsync(Guid merchantId, Guid questionId, CancellationToken cancellationToken = default);
 
-        Task<Result<PaginatedResult<QuestionResponse>>> GetQuestionsAsync(
+        Task<Result<PaginatedResult<SupportRequestDto>>> GetAllAsync(
                Guid merchantId,
                string? cursor,
                int limit = 10,
@@ -23,7 +20,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
                 bool? isResolve = null,
                 BotPlatform? botPlatform = null,
                CancellationToken cancellationToken = default);
-        Task<Result<QuestionStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default);
+        Task<Result<SupportRequestStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default);
         Task<Result<Success>> ToggleStatusAsync(Guid merchantId, Guid questionId, CancellationToken cancellationToken = default);
 
     }

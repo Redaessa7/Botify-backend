@@ -4,8 +4,8 @@ using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Products;
-using Botify.Domain.Models.Questions;
 using Botify.Domain.Models.Shops;
+using Botify.Domain.Models.SupportRequests;
 using Microsoft.EntityFrameworkCore;
 
 namespace Botify.Application.CrossCutting.Interfaces
@@ -17,7 +17,7 @@ namespace Botify.Application.CrossCutting.Interfaces
         public DbSet<UserProfile> UserProfiles { get; }
         public DbSet<AIConfiguration> AIConfigurations { get; }
         public DbSet<ShopSettings> ShopSettings { get; }
-        public DbSet<Question> Questions { get; }
+        public DbSet<SupportRequest> SupportRequests { get; }
         public DbSet<Bot> Bots { get; } 
         public DbSet<Product> Products { get; }
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

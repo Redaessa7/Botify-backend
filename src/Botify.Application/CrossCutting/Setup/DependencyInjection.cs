@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IMerchantService, MerchantService>();
             services.AddScoped<IWebhookService, WebhookService>();
             services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IQuestionService, QuestionService>();
+            services.AddScoped<ISupportRequestService, SupportRequestService>();
             services.AddScoped<IAIConfigurationService, AIConfigurationService>();
             services.AddScoped<IOrderService, OrderService>();
 

@@ -1,28 +1,30 @@
 ﻿using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Requests;
+using Botify.Application.Features.Merchants.Responses;
 using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.SupportRequests.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Botify.API.Features.Merchants;
 
 [ApiVersion("1.0")]
-[Route("api/merchants/{merchantId:guid}/questions")]
-public class QuestionController(IQuestionService questionService) : ApiController
+[Route("api/merchants/{merchantId:guid}/support-requests")]
+public class SupportRequestController(ISupportRequestService service) : ApiController
 {
-    private readonly IQuestionService _questionService = questionService;
+    private readonly ISupportRequestService _service = service;
 
     #region Question Lifecycle
 
     /// <summary>
     /// Deletes a question.
     /// </summary>
-    [HttpDelete("{questionId:guid}")]
+    [HttpDelete("{supportRequestId:guid}")]
     [Authorize]
-    public async Task<IActionResult> DeleteAsync(Guid merchantId, Guid questionId, CancellationToken ct = default)
+    public async Task<IActionResult> DeleteAsync(Guid merchantId, Guid supportRequestId, CancellationToken ct = default)
     {
-        var result = await _questionService.DeleteAsync(merchantId, questionId, ct);
+        var result = await _service.DeleteAsync(merchantId, supportRequestId, ct);
         return result.Match(_ => Ok(new { }), Problem);
     }
 
@@ -33,11 +35,11 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
     /// <summary>
     /// Retrieves a question by ID.
     /// </summary>
-    [HttpGet("{questionId:guid}")]
+    [HttpGet("{supportRequestId:guid}")]
     [Authorize]
-    public async Task<IActionResult> GetByIdAsync(Guid merchantId, Guid questionId, CancellationToken ct = default)
+    public async Task<IActionResult> GetByIdAsync(Guid merchantId, Guid supportRequestId, CancellationToken ct = default)
     {
-        var result = await _questionService.GetByIdAsync(merchantId, questionId, ct);
+        var result = await _service.GetByIdAsync(merchantId, supportRequestId, ct);
         return result.Match(Ok, Problem);
     }
 
@@ -65,7 +67,7 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
             }
             parsedPlatform = platform;
         }
-         var result = await _questionService.GetQuestionsAsync(merchantId, cursor, limit, search, isResolved, parsedPlatform, ct);
+         var result = await _service.GetAllAsync(merchantId, cursor, limit, search, isResolved, parsedPlatform, ct);
         return result.Match(Ok, Problem);
     }
     #region Stats
@@ -77,7 +79,7 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
     [Authorize]
     public async Task<IActionResult> GetQuestionStatsAsync(Guid merchantId, CancellationToken ct = default)
     {
-        var result = await _questionService.GetStatsAsync(merchantId, ct);
+        var result = await _service.GetStatsAsync(merchantId, ct);
         return result.Match(Ok,Problem);
     }
 
@@ -90,11 +92,11 @@ public class QuestionController(IQuestionService questionService) : ApiControlle
     /// <summary>
     /// Toggles question resolved/unresolved status.
     /// </summary>
-    [HttpPatch("{questionId:guid}/toggle")]
+    [HttpPatch("{supportRequestId:guid}/toggle")]
     [Authorize]
-    public async Task<IActionResult> ToggleStatusAsync(Guid merchantId, Guid questionId, CancellationToken ct = default)
+    public async Task<IActionResult> ToggleStatusAsync(Guid merchantId, Guid supportRequestId, CancellationToken ct = default)
     {
-        var result = await _questionService.ToggleStatusAsync(merchantId, questionId, ct);
+        var result = await _service.ToggleStatusAsync(merchantId, supportRequestId, ct);
         return result.Match(_ => Ok(new { }), Problem);
     }
 

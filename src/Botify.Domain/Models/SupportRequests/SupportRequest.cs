@@ -1,30 +1,36 @@
-﻿using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Domain.Models.Customers;
+using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.SupportRequests.Enums;
 using Botify.Domain.ResultPattern;
 
-namespace Botify.Domain.Models.Questions
+namespace Botify.Domain.Models.SupportRequests
 {
-    public sealed class Question : AuditableEntity
+    public sealed class SupportRequest : AuditableEntity
     {
         public Guid MerchantId { get; private set; }
         public Guid BotId { get; private set; }
+        public Guid CustomerId { get; private set; }
         public string BotName { get; private set; } = string.Empty;
         public BotPlatform Platform { get; private set; }
-        public QuestionType Type { get; private set; }
-        public CustomerInfo Customer { get; private set; }   // ✅ unified customer info
+        public SupportRequestType Type { get; private set; }
+        public RequestReason Reason { get; private set; }
+
+        public Customer Customer { get;}   
         public string Message { get; private set; } = string.Empty;
         public bool IsResolved { get; private set; } = false;
         public DateTime? ResolvedAt { get; private set; }
 
-        private Question() { }
+        private SupportRequest() { }
 
-        private Question(
+        private SupportRequest(
             Guid id,
             Guid merchantId,
             Guid botId,
             string botName,
             BotPlatform platform,
-            QuestionType type,
-            CustomerInfo customer,
+            SupportRequestType type,
+            RequestReason reason,
+            Guid customerId,
             string message)
             : base(id)
         {
@@ -33,39 +39,45 @@ namespace Botify.Domain.Models.Questions
             BotName = botName;
             Platform = platform;
             Type = type;
-            Customer = customer;
+            Reason = reason;
+            CustomerId = customerId;
             Message = message;
             IsResolved = false;
             ResolvedAt = null;
         }
 
+
         #region Factory
 
-        public static Result<Question> Create(
+        public static Result<SupportRequest> Create(
             Guid id,
             Guid merchantId,
             Guid botId,
             string botName,
             BotPlatform platform,
-            QuestionType type,
-            CustomerInfo customer,
+            SupportRequestType type,
+            RequestReason reason,
+            Guid customerId,
             string message)
+
         {
-            var validationResult = ValidateInputs(id, merchantId, botId, botName, platform, type, customer, message);
+            var validationResult = ValidateInputs(id, merchantId, botId, botName, platform, type, reason, customerId, message);
             if (!validationResult.IsSuccess)
                 return validationResult.Errors;
 
-            var question = new Question(
+            var supportRequest = new SupportRequest(
                 id,
                 merchantId,
                 botId,
                 botName,
                 platform,
                 type,
-                customer,
+                reason,
+                customerId,
                 message);
 
-            return question;
+            return supportRequest;
+
         }
 
         #endregion
@@ -75,7 +87,7 @@ namespace Botify.Domain.Models.Questions
         public Result<Success> Resolve()
         {
             if (IsResolved)
-                return QuestionErrors.AlreadyResolved;
+                return SupportRequestErrors.AlreadyResolved;
 
             IsResolved = true;
             ResolvedAt = DateTime.UtcNow;
@@ -85,7 +97,7 @@ namespace Botify.Domain.Models.Questions
         public Result<Success> Unresolve()
         {
             if (!IsResolved)
-                return QuestionErrors.NotResolved;
+                return SupportRequestErrors.NotResolved;
 
             IsResolved = false;
             ResolvedAt = null;
@@ -102,42 +114,44 @@ namespace Botify.Domain.Models.Questions
             Guid botId,
             string botName,
             BotPlatform platform,
-            QuestionType type,
-            CustomerInfo customer,
+            SupportRequestType type,
+            RequestReason reason,
+            Guid customerId,
             string message)
         {
             if (id == Guid.Empty)
-                return QuestionErrors.IdRequired;
+                return SupportRequestErrors.IdRequired;
 
             if (merchantId == Guid.Empty)
-                return QuestionErrors.MerchantIdRequired;
+                return SupportRequestErrors.MerchantIdRequired;
 
             if (botId == Guid.Empty)
-                return QuestionErrors.BotIdRequired;
+                return SupportRequestErrors.BotIdRequired;
 
             if (string.IsNullOrWhiteSpace(botName))
-                return QuestionErrors.BotNameRequired;
+                return SupportRequestErrors.BotNameRequired;
 
             if (!Enum.IsDefined(typeof(BotPlatform), platform))
-                return QuestionErrors.PlatformRequired;
+                return SupportRequestErrors.PlatformRequired;
 
-            if (!Enum.IsDefined(typeof(QuestionType), type))
-                return QuestionErrors.TypeRequired;
+            if (!Enum.IsDefined(typeof(SupportRequestType), type))
+                return SupportRequestErrors.TypeRequired;
 
-            if (customer is null)
-                return QuestionErrors.CustomerNameRequired;
+            if (!Enum.IsDefined(typeof(RequestReason), reason))
+                return SupportRequestErrors.ReasonRequired;
 
-            if (string.IsNullOrWhiteSpace(customer.Name))
-                return QuestionErrors.CustomerNameRequired;
+            if (customerId == Guid.Empty)
+                return SupportRequestErrors.CustomerNameRequired;
 
             if (string.IsNullOrWhiteSpace(message))
-                return QuestionErrors.EmptyMessage;
+                return SupportRequestErrors.EmptyMessage;
 
             if (message.Length > 1000)
-                return QuestionErrors.MessageTooLong;
+                return SupportRequestErrors.MessageTooLong;
 
             return Result.Success;
         }
+
 
         #endregion
     }

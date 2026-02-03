@@ -1,15 +1,16 @@
 ﻿using Botify.Domain.Models.Merchants.ValueObjects;
-using Botify.Domain.Models.Questions;
+using Botify.Domain.Models.SupportRequests;
+using Botify.Domain.Models.SupportRequests.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Botify.Infrastructure.Persistence.Configurations
 {
-    internal class QuestionConfigConfigurations : IEntityTypeConfiguration<Question>
+    internal class QuestionConfigConfigurations : IEntityTypeConfiguration<SupportRequest>
     {
-        public void Configure(EntityTypeBuilder<Question> builder)
+        public void Configure(EntityTypeBuilder<SupportRequest> builder)
         {
-            builder.ToTable("Questions");
+            builder.ToTable("SupportRequests");
             builder.HasKey(q => q.Id);
 
             builder.Property(q => q.BotName)
@@ -33,31 +34,16 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(q => q.Type)
                 .HasConversion(
                     o => o.ToString().ToUpperInvariant(),
-                    c => Enum.Parse<QuestionType>(c, true)
+                    c => Enum.Parse<SupportRequestType>(c, true)
                 )
                 .IsRequired();
 
             builder.Property(q => q.ResolvedAt);
 
-            // ✅ Configure CustomerInfo as an owned entity
-            builder.OwnsOne(q => q.Customer, customer =>
-            {
-                customer.Property(c => c.Name)
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                customer.Property(c => c.Email)
-                    .HasMaxLength(200);
-
-                customer.Property(c => c.Telegram)
-                    .HasMaxLength(100);
-
-                customer.Property(c => c.Whatsapp)
-                    .HasMaxLength(100);
-
-                customer.Property(c => c.Messenger)
-                    .HasMaxLength(100);
-            });
+         builder.HasOne(x => x.Customer)
+                .WithMany()
+                .HasForeignKey(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
