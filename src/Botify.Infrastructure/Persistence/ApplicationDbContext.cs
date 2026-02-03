@@ -7,8 +7,8 @@ using Botify.Domain.Models.Customers;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Products;
-using Botify.Domain.Models.Questions;
 using Botify.Domain.Models.Shops;
+using Botify.Domain.Models.SupportRequests;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<AIConfiguration> AIConfigurations => Set<AIConfiguration>();
     public DbSet<Bot> Bots => Set<Bot>();
-    public DbSet<Question> Questions => Set<Question>();
+    public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
     public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();

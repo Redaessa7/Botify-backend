@@ -7,19 +7,20 @@ using Botify.Application.Features.Merchants.Requests;
 using Botify.Application.Features.Merchants.Responses;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.ValueObjects;
-using Botify.Domain.Models.Questions;
+using Botify.Domain.Models.SupportRequests;
+using Botify.Domain.Models.SupportRequests.Enums;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Botify.Application.Features.Merchants.Services;
 
-public sealed class QuestionService : IQuestionService
+public sealed class SupportRequestService : ISupportRequestService
 {
     private readonly IApplicationDbContext _db;
     private readonly PaginationOptions _paginationOptions;
 
-    public QuestionService(IApplicationDbContext db, IOptions<PaginationOptions> options)
+    public SupportRequestService(IApplicationDbContext db, IOptions<PaginationOptions> options)
     {
         _db = db;
         _paginationOptions = options.Value;
@@ -27,36 +28,17 @@ public sealed class QuestionService : IQuestionService
 
     #region Question Lifecycle
 
-    public async Task<Result<QuestionResponse>> CreateAsync(
-        Guid merchantId,
-        CreateQuestionRequest request,
-        CancellationToken cancellationToken = default)
-    {
-        var merchant = await _db.Merchants
-            .FirstOrDefaultAsync(m => m.Id == merchantId, cancellationToken);
-        if (merchant is null) return MerchantErrors.NotFound;
-
-        var questionResult = request.ToQuestion(merchantId);
-        if (!questionResult.IsSuccess)
-            return questionResult.Errors;
-
-        var question = questionResult.Value;
-        _db.Questions.Add(question);
-
-        await _db.SaveChangesAsync(cancellationToken);
-        return QuestionResponse.FromDomain(question);
-    }
 
     public async Task<Result<Success>> DeleteAsync(
         Guid merchantId,
         Guid questionId,
         CancellationToken cancellationToken = default)
     {
-        var question = await _db.Questions
+        var question = await _db.SupportRequests
             .FirstOrDefaultAsync(q => q.MerchantId == merchantId && q.Id == questionId, cancellationToken);
-        if (question is null) return QuestionErrors.NotFound;
+        if (question is null) return SupportRequestErrors.NotFound;
 
-        _db.Questions.Remove(question);
+        _db.SupportRequests.Remove(question);
         await _db.SaveChangesAsync(cancellationToken);
 
         return Result.Success;
@@ -66,22 +48,107 @@ public sealed class QuestionService : IQuestionService
 
     #region Queries
 
-    public async Task<Result<QuestionResponse>> GetByIdAsync(
+    public async Task<Result<SupportRequestDto>> GetByIdAsync(
         Guid merchantId,
         Guid questionId,
         CancellationToken cancellationToken = default)
     {
-        var question = await _db.Questions
+        var question = await _db.SupportRequests
             .FirstOrDefaultAsync(q => q.MerchantId == merchantId && q.Id == questionId, cancellationToken);
-        if (question is null) return QuestionErrors.NotFound;
+        if (question is null) return SupportRequestErrors.NotFound;
 
-        return QuestionResponse.FromDomain(question);
+        return SupportRequestDto.FromDomain(question);
     }
+    //public async Task<Result<PaginatedResult<SupportRequestDto>>> GetAllAsync(
+    //Guid merchantId,
+    //string? cursor,
+    //int limit = 10,
+    //string? search = null,
+    //bool? isResolve = null,
+    //BotPlatform? botPlatform = null,
+    //CancellationToken cancellationToken = default)
+    //{
+    //    // --- FAKE DATA FOR TESTING ---
+    //    var fakeItems = new List<SupportRequestDto>
+    //{
+    //    new SupportRequestDto
+    //    {
+    //        Id = Guid.NewGuid(),
+    //        MerchantId = merchantId,
+    //        BotId = Guid.NewGuid(),
+    //        BotName = "SalesBot",
+    //        Platform = BotPlatform.TELEGRAM,
+    //        Type = SupportRequestType.GENERAL,
+    //        Reason = RequestReason.CLIENT_REQUEST,
+    //        ContactInfo = new ContactInfoResponse
+    //        {
+    //            CustomerName = "Mohammed Saif",
+    //            PlatformContact = "@mohammed_saif"
+    //        },
+    //        Message = "I need help with my subscription.",
+    //        IsResolved = false,
+    //        CreatedAt = DateTime.UtcNow,
+    //        ResolvedAt = null
+    //    },
+    //    new SupportRequestDto
+    //    {
+    //        Id = Guid.NewGuid(),
+    //        MerchantId = merchantId,
+    //        BotId = Guid.NewGuid(),
+    //        BotName = "SupportBot",
+    //        Platform = BotPlatform.WHATSAPP,
+    //        Type = SupportRequestType.COMPLAINT,
+    //        Reason = RequestReason.AI_ESCALATED,
+    //        ContactInfo = new ContactInfoResponse
+    //        {
+    //            CustomerName = "Ali Ahmed",
+    //            PlatformContact = "+967777654321"
+    //        },
+    //        Message = "The bot gave me the wrong answer.",
+    //        IsResolved = true,
+    //        CreatedAt = DateTime.UtcNow.AddDays(-2),
+    //        ResolvedAt = DateTime.UtcNow.AddDays(-1)
+    //    },
+    //    new SupportRequestDto
+    //    {
+    //        Id = Guid.NewGuid(),
+    //        MerchantId = merchantId,
+    //        BotId = Guid.NewGuid(),
+    //        BotName = "FeedbackBot",
+    //        Platform = BotPlatform.MESSENGER,
+    //        Type = SupportRequestType.FEEDBACK,
+    //        Reason = RequestReason.CLIENT_REQUEST,
+    //        ContactInfo = new ContactInfoResponse
+    //        {
+    //            CustomerName = "Sara Ali",
+    //            PlatformContact = "sara.ali.fb"
+    //        },
+    //        Message = "Great experience, but could be faster.",
+    //        IsResolved = false,
+    //        CreatedAt = DateTime.UtcNow.AddHours(-5),
+    //        ResolvedAt = null
+    //    }
+    //};
+
+    //    var result = new PaginatedResult<SupportRequestDto>(
+    //        fakeItems,
+    //        limit,
+    //        fakeItems.Count,
+    //        nextCursor: null
+    //    );
+
+    //    return result;
+
+    //    // --- END FAKE DATA ---
+
+    //    // If you want to switch back to DB query later, just comment out the fake block above
+    //    // and re-enable the EF Core query logic you already have.
+    //}
 
     /// <summary>
-    /// Get all questions with cursor-based pagination and optional search query.
+    /// Get all SupportRequests with cursor-based pagination and optional search query.
     /// </summary>
-    public async Task<Result<PaginatedResult<QuestionResponse>>> GetQuestionsAsync(
+    public async Task<Result<PaginatedResult<SupportRequestDto>>> GetAllAsync(
         Guid merchantId,
         string? cursor,
         int limit = 10,
@@ -104,7 +171,7 @@ public sealed class QuestionService : IQuestionService
         }
 
         // base query
-        var query = _db.Questions.AsNoTracking()
+        var query = _db.SupportRequests.AsNoTracking()
             .Where(q => q.MerchantId == merchantId);
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -143,7 +210,7 @@ public sealed class QuestionService : IQuestionService
         // fetch one extra to detect next page
         var items = await query
             .Take(limit + 1)
-            .Select(q => QuestionResponse.FromDomain(q))
+            .Select(q => SupportRequestDto.FromDomain(q))
             .ToListAsync(cancellationToken);
 
         var hasMore = items.Count > limit;
@@ -159,20 +226,20 @@ public sealed class QuestionService : IQuestionService
             nextCursor = CursorHelper.Encode(nextPayload);
         }
 
-        var result = new PaginatedResult<QuestionResponse>(items, limit, totalCount, nextCursor);
+        var result = new PaginatedResult<SupportRequestDto>(items, limit, totalCount, nextCursor);
         return result;
     }
 
 
-    public async Task<Result<QuestionStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default)
+    public async Task<Result<SupportRequestStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default)
     {
-        var total = await _db.Questions
+        var total = await _db.SupportRequests
             .CountAsync(q => q.MerchantId == merchantId, ct);
 
-        var pending = await _db.Questions
+        var pending = await _db.SupportRequests
             .CountAsync(q => q.MerchantId == merchantId && !q.IsResolved, ct);
 
-        var stats = new QuestionStatsResponse
+        var stats = new SupportRequestStatsResponse
         {
             Total = total,
             Pending = pending
@@ -192,9 +259,9 @@ public sealed class QuestionService : IQuestionService
         Guid questionId,
         CancellationToken cancellationToken = default)
     {
-        var question = await _db.Questions
+        var question = await _db.SupportRequests
             .FirstOrDefaultAsync(q => q.MerchantId == merchantId && q.Id == questionId, cancellationToken);
-        if (question is null) return QuestionErrors.NotFound;
+        if (question is null) return SupportRequestErrors.NotFound;
 
         var result = question.IsResolved ? question.Unresolve() : question.Resolve();
         if (!result.IsSuccess) return result;

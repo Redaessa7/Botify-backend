@@ -1,4 +1,4 @@
-﻿using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Domain.Models.Customers.ValueObjects;
 using Botify.Domain.ResultPattern;
 using System;
 
@@ -6,58 +6,64 @@ namespace Botify.Domain.Models.Customers
 {
     public sealed class Customer : AuditableEntity
     {
-        public string Name { get; private set; } = string.Empty;
-        public string Contact { get; private set; } = string.Empty;
+        public string Uuid { get; private set; } = string.Empty; // external UUID
 
-        public BotPlatform Platform { get; private set; }
+        // Core Info
+        public string Name { get; private set; } = string.Empty;
         public string PhoneNumber { get; private set; } = string.Empty;
         public Guid MerchantId { get; private set; }
- 
         public string? Email { get; private set; }
+
+        // Social Profiles (optional)
+        public TelegramProfile? Telegram { get; private set; }
+        public WhatsAppProfile? WhatsApp { get; private set; }
+        public MessengerProfile? Messenger { get; private set; }
 
         private Customer() { }
 
-        private Customer(Guid id, Guid merchantId, string name, string contact, string? email = null)
+        private Customer(
+            Guid id,
+            Guid merchantId,
+            string uuid,
+            string name,
+            string phoneNumber,
+            string? email = null,
+            TelegramProfile? telegram = null,
+            WhatsAppProfile? whatsapp = null,
+            MessengerProfile? messenger = null)
             : base(id)
         {
             MerchantId = merchantId;
+            Uuid = uuid;
             Name = name;
-            Contact = contact;
+            PhoneNumber = phoneNumber;
             Email = email;
+            Telegram = telegram;
+            WhatsApp = whatsapp;
+            Messenger = messenger;
         }
 
         public static Result<Customer> Create(
             Guid id,
             Guid merchantId,
+            string uuid,
             string name,
-            string contact,
-            string? email = null)
+            string phoneNumber,
+            string? email = null,
+            TelegramProfile? telegram = null,
+            WhatsAppProfile? whatsapp = null,
+            MessengerProfile? messenger = null)
         {
-            var validation = ValidateInputs(id, merchantId, name, contact);
+            var validation = ValidateInputs(id, merchantId, uuid, name, phoneNumber);
             if (!validation.IsSuccess)
                 return validation.Errors;
 
-            return new Customer(id, merchantId, name.Trim(), contact.Trim(), email?.Trim());
-        }
-
-        public Result<Updated> Update(string name, string contact, string? email = null)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return CustomerErrors.NameRequired;
-
-            if (string.IsNullOrWhiteSpace(contact))
-                return CustomerErrors.ContactRequired;
-
-            Name = name.Trim();
-            Contact = contact.Trim();
-            Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
-
-            return Result.Updated;
+            return new Customer(id, merchantId, uuid.Trim(), name.Trim(), phoneNumber.Trim(), email?.Trim(), telegram, whatsapp, messenger);
         }
 
         #region Validation
 
-        private static Result<Success> ValidateInputs(Guid id, Guid merchantId, string name, string contact)
+        private static Result<Success> ValidateInputs(Guid id, Guid merchantId, string uuid, string name, string phoneNumber)
         {
             if (id == Guid.Empty)
                 return CustomerErrors.IdRequired;
@@ -65,15 +71,19 @@ namespace Botify.Domain.Models.Customers
             if (merchantId == Guid.Empty)
                 return CustomerErrors.MerchantIdRequired;
 
+            if (string.IsNullOrWhiteSpace(uuid))
+                return CustomerErrors.UuidRequired;
+
             if (string.IsNullOrWhiteSpace(name))
                 return CustomerErrors.NameRequired;
 
-            if (string.IsNullOrWhiteSpace(contact))
-                return CustomerErrors.ContactRequired;
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return CustomerErrors.PhoneRequired;
 
             return Result.Success;
         }
 
         #endregion
     }
+
 }

@@ -3,7 +3,8 @@ using Botify.Domain.Identity.Enums;
 using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.ValueObjects;
-using Botify.Domain.Models.Questions;
+using Botify.Domain.Models.SupportRequests;
+using Botify.Domain.Models.SupportRequests.Enums;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -46,19 +47,16 @@ public static class SeedMerchantDetailsExtensions
 
         var merchant = merchantResult.Value;
 
-        var botResult = merchant.AddBot(Guid.NewGuid(), "Default Telegram Bot", "seed-token", BotPlatform.TELEGRAM, "seed-secret", "https://webhook.botify.com");
+        var botResult = merchant.AddBot(SeedIds.BotDefaultTelegram, name: "Default Telegram Bot", "seed-token", BotPlatform.TELEGRAM, "seed-secret", "https://webhook.botify.com");
         if (!botResult.IsSuccess) return;
 
         var bot = botResult.Value;
-        var questions = SeedQuestions(merchantId, bot).ToList();
-        foreach (var q in questions) merchant.AddQuestion(q);
 
         merchant.Approve();
 
         context.UserProfiles.Add(profileResult.Value);
         context.Merchants.Add(merchant);
         context.Bots.Add(bot);
-        context.Questions.AddRange(questions);
 
         await context.SeedLegacyProductsAsync(merchant.Id);
         await context.SeedCustomersAsync(merchant.Id);
@@ -68,32 +66,5 @@ public static class SeedMerchantDetailsExtensions
         logger.LogInformation($"Seeded merchant '{email}' with bot and questions.");
     }
 
-    private static IEnumerable<Question> SeedQuestions(Guid merchantId, Bot bot)
-    {
-        var customers = new[]
-        {
-            new { Name = "John Smith", Email = "john.smith@example.com", Telegram = "john_smith_tg", Whatsapp = "johnsmith_wa", Messenger = "johnsmith_fb" },
-            new { Name = "Fatima Ali", Email = "fatima.ali@example.com", Telegram = "fatima_ali_tg", Whatsapp = "fatimaali_wa", Messenger = "fatimaali_fb" }
-        };
 
-        var messages = new[]
-        {
-            "Hello, I need help with my order.",
-            "Can you tell me the delivery time?",
-            "Do you have discounts available?"
-        };
-
-        int i = 0;
-        foreach (var message in messages)
-        {
-            var customer = customers[i % customers.Length];
-            var customerInfoResult = CustomerInfo.Create(customer.Name, customer.Email, customer.Telegram, customer.Whatsapp, customer.Messenger);
-            if (customerInfoResult.IsError) continue;
-
-            var questionResult = Question.Create(Guid.NewGuid(), merchantId, bot.Id, bot.Name, bot.Platform, QuestionType.GENERAL, customerInfoResult.Value, message);
-            if (questionResult.IsSuccess) yield return questionResult.Value;
-
-            i++;
-        }
-    }
 }
