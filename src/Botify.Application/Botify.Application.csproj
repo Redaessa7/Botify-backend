@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="CrossCutting\Extensions\" />
+    <Folder Include="Features\Customers\Requests\" />
     <Folder Include="Features\Merchants\Validators\" />
   </ItemGroup>
 

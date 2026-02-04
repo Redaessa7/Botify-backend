@@ -1,6 +1,8 @@
 using Botify.Application.Features.AI.Interfaces;
 using Botify.Application.Features.AI.Services;
 using Botify.Application.Features.AI.Strategies;
+using Botify.Application.Features.Customers.Interfaces;
+using Botify.Application.Features.Customers.Services;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Services;
 using Botify.Application.Features.Orders.Interfaces;
@@ -29,6 +31,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ISupportRequestService, SupportRequestService>();
             services.AddScoped<IAIConfigurationService, AIConfigurationService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<ICustomerService, CustomerService>();
+
 
             return services;
         }
