@@ -1,5 +1,6 @@
 ﻿using Botify.API.CrossCutting.Controllers;
 using Botify.Application.Features.Customers.Interfaces;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,9 +25,17 @@ namespace Botify.API.Features.Merchants
             [FromQuery] string? cursor,
             [FromQuery] int limit = 10,
             [FromQuery] string? search = null,
+            [FromQuery] BotPlatform? botPlatform = null,
             CancellationToken cancellationToken = default)
         {
-            var result = await _customerService.GetAllAsync(cursor, limit, search, cancellationToken);
+            var result = await _customerService.GetAllAsync(cursor, limit, search, botPlatform, cancellationToken);
+            return result.Match(Ok, Problem);
+        }
+        [HttpGet("stats")]
+        public async Task<IActionResult> GetStatsAsync(
+    CancellationToken cancellationToken = default)
+        {
+            var result = await _customerService.GetStatsAsync(cancellationToken);
             return result.Match(Ok, Problem);
         }
 

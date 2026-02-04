@@ -6,6 +6,7 @@ using Botify.Application.Features.Customers.Interfaces;
 using Botify.Application.Features.Customers.Responses;
 using Botify.Domain.Models.Customers;
 using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -32,6 +33,7 @@ public sealed class CustomerService : ICustomerService
         string? cursor,
         int limit = 10,
         string? search = null,
+        BotPlatform? botPlatform = null,
         CancellationToken cancellationToken = default)
     {
         // enforce limits
@@ -57,6 +59,18 @@ public sealed class CustomerService : ICustomerService
         // base query
         var query = _db.Customers.AsNoTracking()
             .Where(c => c.MerchantId == merchant.Id);
+
+        // optional BotPlatform filter
+        if (botPlatform.HasValue)
+        {
+            query = botPlatform.Value switch
+            {
+                BotPlatform.TELEGRAM => query.Where(c => c.Telegram != null),
+                BotPlatform.WHATSAPP => query.Where(c => c.WhatsApp != null),
+                BotPlatform.MESSENGER => query.Where(c => c.Messenger != null),
+                _ => query // fallback: no filter
+            };
+        }
 
         // optional search filter
         if (!string.IsNullOrWhiteSpace(search))
@@ -126,4 +140,25 @@ public sealed class CustomerService : ICustomerService
 
         return CustomerDto.FromDomain(customer);
     }
-}
+
+        public async Task<Result<CustomersStatsResponse>> GetStatsAsync(CancellationToken cancellationToken = default)
+        {
+            var merchant = await _db.Merchants
+                .Include(m => m.Profile)
+                .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
+        if (merchant is null)
+            return MerchantErrors.NotFound;
+
+        var query = _db.Customers.AsNoTracking().Where(c => c.MerchantId == merchant.Id);
+
+            var total = await query.CountAsync(cancellationToken);
+  var telegram = await query.CountAsync(c => c.Telegram != null, cancellationToken); var whatsapp = await query.CountAsync(c => c.WhatsApp != null, cancellationToken); var messenger = await query.CountAsync(c => c.Messenger != null, cancellationToken);
+        return new CustomersStatsResponse
+            {
+                Total = total,
+                Telegram = telegram,
+                WhatsApp = whatsapp,
+                Messenger = messenger
+            };
+        }
+    }
