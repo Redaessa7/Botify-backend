@@ -136,8 +136,8 @@ public sealed class ProductService : IProductService
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var s = search.Trim();
-            query = query.Where(p => EF.Functions.Like(p.Name, $"%{s}%"));
+            var s = search.ToLower().Trim();
+            query = query.Where(p => p.Name.ToLower().Contains(s));
         }
 
         // order newest-first

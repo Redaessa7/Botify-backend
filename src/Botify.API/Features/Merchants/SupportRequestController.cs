@@ -48,26 +48,19 @@ public class SupportRequestController(ISupportRequestService service) : ApiContr
     /// </summary>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetQuestionsAsync(Guid merchantId,
+    public async Task<IActionResult> GetAllAsync(Guid merchantId,
                                                        [FromQuery] string? cursor,
                                                        [FromQuery] int limit = 10,
                                                        [FromQuery] string? search = null,
                                                        [FromQuery] bool? isResolved = null,
-                                                       [FromQuery] string? botPlatform = null,
+                                                       [FromQuery] BotPlatform? botPlatform = null,
+                                                       [FromQuery] RequestReason? reason = null,
+                                                       [FromQuery] SupportRequestType? type = null,
                                                        CancellationToken ct = default)
     {
 
-        BotPlatform? parsedPlatform =  null;
-        if(!string.IsNullOrEmpty(botPlatform))
-        {
-            var parseResult = BotPlatform.TryParse(botPlatform, true, out BotPlatform platform);
-            if(!parseResult)
-            {
-                return Problem($"Invalid bot platform: {botPlatform}");
-            }
-            parsedPlatform = platform;
-        }
-         var result = await _service.GetAllAsync(merchantId, cursor, limit, search, isResolved, parsedPlatform, ct);
+
+         var result = await _service.GetAllAsync(merchantId, cursor, limit, search, isResolved, botPlatform,reason, type, ct);
         return result.Match(Ok, Problem);
     }
     #region Stats
@@ -86,6 +79,7 @@ public class SupportRequestController(ISupportRequestService service) : ApiContr
     #endregion
 
     #endregion
+
 
     #region Status
 
