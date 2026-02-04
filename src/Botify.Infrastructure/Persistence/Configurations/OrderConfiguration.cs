@@ -13,6 +13,14 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.HasKey(o => o.Id);
             builder.Property(o => o.Id).ValueGeneratedNever();
 
+            // UUID string property
+            builder.Property(o => o.Uuid)
+                .HasMaxLength(255) // adjust length depending on your UUID format
+                .IsRequired();
+
+            builder.HasIndex(o => o.Uuid)
+                .IsUnique(); // enforce uniqueness at DB level
+
             builder.Property(o => o.MerchantId)
                 .IsRequired();
 

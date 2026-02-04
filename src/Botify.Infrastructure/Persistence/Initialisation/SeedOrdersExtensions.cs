@@ -1,6 +1,7 @@
-﻿using Botify.Domain.Models.Orders;
+﻿using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Orders.Enums;
-using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Orders.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Botify.Infrastructure.Persistence.Initialisation;
@@ -60,20 +61,24 @@ public static class SeedOrdersExtensions
 
         foreach (var data in orders)
         {
+            var uuid = OrderUuidGenerator.Generate(merchantId, data.CustomerId);
+
             var result = Order.Create(
-                data.Id,
-                merchantId,
-                data.CustomerId,
-                data.CustomerName,
-                data.CustomerContact,
-                data.Platform,
-                data.Items,
-                data.Items.Sum(i => i.LineTotal),
+                id: data.Id,
+                uuid: uuid, // meaningful UUID
+                merchantId: merchantId,
+                customerId: data.CustomerId,
+                customerName: data.CustomerName,
+                customerContact: data.CustomerContact,
+                platform: data.Platform,
+                items: data.Items,
+                totalAmount: data.Items.Sum(i => i.LineTotal),
                 currency: "USD",
                 status: data.Status,
                 deliveryAddress: "123 Test Street",
                 notes: "Seeded order"
             );
+
 
             if (result.IsSuccess)
                 context.Orders.Add(result.Value);

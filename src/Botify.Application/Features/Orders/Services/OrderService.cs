@@ -56,6 +56,7 @@ public sealed class OrderService : IOrderService
 
         var orderResult = Order.Create(
             request.OrderId,
+            "",
             merchantId,
             request.CustomerId,
             request.CustomerName,
@@ -158,16 +159,10 @@ public sealed class OrderService : IOrderService
         // base query
         var query = _db.Orders.AsNoTracking()
             .Include(o => o.Items)
+            .Include(o => o.Customer)
             .Where(o => o.MerchantId == merchantId);
 
-        // optional search filter (customer name/contact)
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var s = search.Trim();
-            query = query.Where(o =>
-                o.CustomerName.Contains(s) ||
-                o.CustomerContact.Contains(s));
-        }
+
 
         // optional status filter
         if (status.HasValue)
@@ -181,6 +176,15 @@ public sealed class OrderService : IOrderService
             query = query.Where(o => o.Platform == botPlatform.Value);
         }
 
+        // optional search filter (customer name/contact)
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.ToLower().Trim();
+            query = query.Where(o =>
+                o.Uuid.ToLower().Contains(s) ||
+                o.CustomerName.ToLower().Contains(s) ||
+                o.CustomerContact.ToLower().Contains(s));
+        }
         // order newest-first
         query = query.OrderByDescending(o => o.CreatedAtUtc)
                      .ThenByDescending(o => o.Id);
