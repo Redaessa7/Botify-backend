@@ -61,10 +61,10 @@ public sealed class CustomerService : ICustomerService
         // optional search filter
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var s = search.Trim();
+            var s = search.Trim().ToLower();
             query = query.Where(c =>
-                c.Name.Contains(s) ||
-                (c.Email != null && c.Email.Contains(s)) ||
+                c.Name.ToLower().Contains(s) ||
+                (c.Email != null && c.Email.ToLower().Contains(s)) ||
                 c.PhoneNumber.Contains(s));
         }
 
