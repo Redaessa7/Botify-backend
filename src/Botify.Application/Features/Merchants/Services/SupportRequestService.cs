@@ -155,6 +155,8 @@ public sealed class SupportRequestService : ISupportRequestService
         string? search = null,
             bool? isResolve = null,
         BotPlatform? botPlatform = null,
+        RequestReason? reason = null,
+        SupportRequestType? type = null,
         CancellationToken cancellationToken = default)
     {
         // enforce limits
@@ -174,14 +176,6 @@ public sealed class SupportRequestService : ISupportRequestService
         var query = _db.SupportRequests.AsNoTracking()
             .Where(q => q.MerchantId == merchantId);
 
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var s = search.Trim();
-            query = query.Where(q =>
-                q.Customer.Name.Contains(s) ||
-                q.Message.Contains(s));
-        }
-
         if (isResolve.HasValue)
         {
             query = query.Where(q => q.IsResolved == isResolve.Value);
@@ -191,6 +185,25 @@ public sealed class SupportRequestService : ISupportRequestService
         {
             query = query.Where(q => q.Platform == botPlatform.Value);
         }
+
+        if (reason.HasValue)
+        {
+            query = query.Where(q => q.Reason == reason.Value);
+        }
+
+        if (type.HasValue)
+        {
+            query = query.Where(q => q.Type == type.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            query = query.Where(q =>
+                q.Customer.Name.ToLower().Contains(s) ||
+                q.Message.ToLower().Contains(s));
+        }
+
 
         // order newest-first
         query = query.OrderByDescending(q => q.CreatedAtUtc)
@@ -205,6 +218,7 @@ public sealed class SupportRequestService : ISupportRequestService
                 q.CreatedAtUtc < payload.CreatedAt ||
                 (q.CreatedAtUtc == payload.CreatedAt && q.Id.CompareTo(payload.Id) < 0));
         }
+
 
 
         // fetch one extra to detect next page
@@ -234,15 +248,27 @@ public sealed class SupportRequestService : ISupportRequestService
     public async Task<Result<SupportRequestStatsResponse>> GetStatsAsync(Guid merchantId, CancellationToken ct = default)
     {
         var total = await _db.SupportRequests
+            .AsNoTracking()
             .CountAsync(q => q.MerchantId == merchantId, ct);
 
         var pending = await _db.SupportRequests
+            .AsNoTracking()
             .CountAsync(q => q.MerchantId == merchantId && !q.IsResolved, ct);
+
+        var clinetRequests = await _db.SupportRequests
+            .AsNoTracking()
+            .CountAsync(q => q.MerchantId == merchantId && q.Reason == RequestReason.CLIENT_REQUEST, ct);
+
+        var aiEscalated = await _db.SupportRequests
+            .AsNoTracking()
+            .CountAsync(q => q.MerchantId == merchantId && q.Reason == RequestReason.AI_ESCALATED, ct);
 
         var stats = new SupportRequestStatsResponse
         {
             Total = total,
-            Pending = pending
+            Pending = pending,
+            ClientRequests=clinetRequests,
+            AIEscalated= aiEscalated
         };
 
         return stats;

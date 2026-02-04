@@ -4,5 +4,8 @@
     {
         public int Total { get; init; }
         public int Pending { get; init; }
+
+        public int ClientRequests { get; init; }
+        public int AIEscalated { get; init; }
     }
 }
