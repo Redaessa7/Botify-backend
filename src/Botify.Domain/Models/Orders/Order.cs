@@ -7,6 +7,8 @@ namespace Botify.Domain.Models.Orders
 {
     public sealed class Order : AuditableEntity
     {
+        public string Uuid { get; private set; } = string.Empty; // <-- string UUID
+
         public Guid MerchantId { get; private set; }
         public Guid CustomerId { get; private set; }
         public string CustomerName { get; private set; } = string.Empty;
@@ -23,6 +25,7 @@ namespace Botify.Domain.Models.Orders
 
         private Order(
             Guid id,
+            string uuid,                  // <-- accept UUID string
             Guid merchantId,
             Guid customerId,
             string customerName,
@@ -35,6 +38,7 @@ namespace Botify.Domain.Models.Orders
             string? deliveryAddress,
             string? notes) : base(id)
         {
+            Uuid = uuid;                  // <-- assign from outside
             MerchantId = merchantId;
             CustomerId = customerId;
             CustomerName = customerName;
@@ -50,6 +54,7 @@ namespace Botify.Domain.Models.Orders
 
         public static Result<Order> Create(
             Guid id,
+            string uuid,                  
             Guid merchantId,
             Guid customerId,
             string customerName,
@@ -62,11 +67,11 @@ namespace Botify.Domain.Models.Orders
             string? deliveryAddress = null,
             string? notes = null)
         {
-            var validation = ValidateInputs(id, merchantId, customerId, customerName, customerContact, platform, items, totalAmount, currency, status);
+            var validation = ValidateInputs(id, uuid, merchantId, customerId, customerName, customerContact, platform, items, totalAmount, currency, status);
             if (!validation.IsSuccess)
                 return validation.Errors;
 
-            return new Order(id, merchantId, customerId, customerName, customerContact, platform, items, totalAmount, currency, status, deliveryAddress, notes);
+            return new Order(id, uuid, merchantId, customerId, customerName, customerContact, platform, items, totalAmount, currency, status, deliveryAddress, notes);
         }
 
         public Result<Updated> UpdateStatus(OrderStatus newStatus)
@@ -79,6 +84,7 @@ namespace Botify.Domain.Models.Orders
 
         private static Result<Success> ValidateInputs(
             Guid id,
+            string uuid,                  // <-- validate UUID string
             Guid merchantId,
             Guid customerId,
             string customerName,
@@ -91,6 +97,9 @@ namespace Botify.Domain.Models.Orders
         {
             if (id == Guid.Empty)
                 return OrderErrors.IdRequired;
+
+            if (string.IsNullOrWhiteSpace(uuid))
+                return OrderErrors.UuidRequired; // <-- add a new error type
 
             if (merchantId == Guid.Empty)
                 return OrderErrors.MerchantIdRequired;

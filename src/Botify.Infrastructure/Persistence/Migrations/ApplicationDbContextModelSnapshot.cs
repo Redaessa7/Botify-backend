@@ -353,11 +353,19 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Uuid")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("MerchantId");
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
 
                     b.ToTable("Orders", (string)null);
                 });
