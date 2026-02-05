@@ -28,6 +28,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
+using Botify.Infrastructure.AiAgent.Plugins.Types;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
