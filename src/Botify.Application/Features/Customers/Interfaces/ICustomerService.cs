@@ -1,5 +1,6 @@
 ﻿using Botify.Application.CrossCutting.Responses;
 using Botify.Application.Features.Customers.Responses;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 using System;
 using System.Threading;
@@ -16,8 +17,9 @@ namespace Botify.Application.Features.Customers.Interfaces
             string? cursor,
             int limit = 10,
             string? search = null,
+            BotPlatform? botPlatform = null,
             CancellationToken cancellationToken = default);
-
+        Task<Result<CustomersStatsResponse>> GetStatsAsync(CancellationToken cancellationToken = default);
         /// <summary>
         /// Get a single customer by ID.
         /// </summary>

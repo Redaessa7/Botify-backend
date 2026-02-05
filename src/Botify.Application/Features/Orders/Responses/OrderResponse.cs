@@ -1,4 +1,5 @@
-﻿using Botify.Domain.Models.Merchants.ValueObjects;
+﻿using Botify.Application.Features.Customers.Responses;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Orders.Enums;
 
@@ -7,10 +8,8 @@ namespace Botify.Application.Features.Orders.Responses
     public sealed class OrderResponse
     {
         public Guid Id { get; init; }
-        public Guid MerchantId { get; init; }
-        public Guid CustomerId { get; init; }
-        public string CustomerName { get; init; } = string.Empty;
-        public string CustomerContact { get; init; } = string.Empty;
+        public CustomerDto? Customer { get; init; } 
+        public string Uuid { get; init; } = string.Empty;
         public BotPlatform Platform { get; init; }
         public decimal TotalAmount { get; init; }
         public string Currency { get; init; } = string.Empty;
@@ -25,10 +24,7 @@ namespace Botify.Application.Features.Orders.Responses
             new()
             {
                 Id = order.Id,
-                MerchantId = order.MerchantId,
-                CustomerId = order.CustomerId,
-                CustomerName = order.CustomerName,
-                CustomerContact = order.CustomerContact,
+                Uuid = order.Uuid,
                 Platform = order.Platform,
                 TotalAmount = order.TotalAmount,
                 Currency = order.Currency,
@@ -37,7 +33,8 @@ namespace Botify.Application.Features.Orders.Responses
                 Notes = order.Notes,
                 CreatedAtUtc = order.CreatedAtUtc,
                 UpdatedAtUtc = order.LastModifiedUtc,
-                Items = order.Items.Select(OrderItemResponse.FromDomain).ToList()
+                Items = order.Items.Select(OrderItemResponse.FromDomain).ToList(),
+                Customer = order?.Customer is not null ? CustomerDto.FromDomain(order.Customer) : null
             };
     }
 }

@@ -12,6 +12,10 @@ namespace Botify.Domain.Models.Orders
             "Order.IdRequired",
             "Order ID is required.");
 
+        public static readonly Error UuidRequired = Error.Validation(
+            "Order.UuidRequired",
+            "Order UUID is required.");   // <-- Added for UUID validation
+
         public static readonly Error MerchantIdRequired = Error.Validation(
             "Order.MerchantIdRequired",
             "Merchant ID is required.");
