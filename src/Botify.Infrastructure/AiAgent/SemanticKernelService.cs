@@ -10,90 +10,66 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.Google;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using System.Text.Json;
 
 namespace Botify.Infrastructure.AIServices
 {
+    /// <summary>
+    /// Executes AI requests using Semantic Kernel with plugin support.
+    /// Handles Free and Pro tiers, connector strategies, and customer lookup logic.
+    /// </summary>
     public class SemanticKernelService : IKernelExecutionService
     {
         private readonly IEnumerable<IAIConnectorStrategy> _connectorStrategies;
         private readonly IServiceProvider _serviceProvider;
 
-        public SemanticKernelService(IServiceProvider serviceProvider, IEnumerable<IAIConnectorStrategy> connectorStrategies)
+        public SemanticKernelService(
+            IServiceProvider serviceProvider,
+            IEnumerable<IAIConnectorStrategy> connectorStrategies)
         {
             _serviceProvider = serviceProvider;
             _connectorStrategies = connectorStrategies;
         }
 
+        /// <summary>
+        /// Executes an AI request with Semantic Kernel, loading appropriate plugins and handling customer lookup.
+        /// </summary>
         public async Task<Result<string>> ExecuteAsync(
             KernelExecutionRequest request,
             CancellationToken cancellationToken)
         {
             var kernel = BuildKernel(request.Config);
+            LoadPlugins(kernel, GetPluginNames(request.PluginTier));
 
-            var pluginTierMapping = new Dictionary<PluginTier, List<string>>
-            {
-                { PluginTier.Free, new List<string> { "FreePlugins" } },
-                { PluginTier.Premium, new List<string> { "FreePlugins", "PremiumPlugins" } },
-                { PluginTier.Enterprise, new List<string> { "FreePlugins", "PremiumPlugins", "EnterprisePlugins" } }
-            };
+            var chatService = kernel.GetRequiredService<IChatCompletionService>();
+            var history = BuildChatHistory(request);
 
-            LoadPlugins(kernel, pluginTierMapping[request.PluginTier]);
-
-            var chat = kernel.GetRequiredService<IChatCompletionService>();
-
-            // System prompt must edit and append customer cases
-            
-            var history = new ChatHistory();
-            
-            // 1. تحديث الـ System Prompt ليتعامل مع حالة عدم وجود العميل
-            string customInstructions = "\n- If the customer is not found (null), politely ask the user for their details (Name, Phone, etc.)." +
-                                        "\n- Once you have the details, use the 'CreateCustomer' function to register them.";
-    
-            history.AddSystemMessage(request.Config.SystemPrompt + customInstructions);
-
-            // 2. محاكاة عملية البحث عن العميل (GetCustomer)
-            var callId = $"call_{Guid.NewGuid()}";
-    
-            // المساعد يحاول البحث أولاً
-            history.Add(new ChatMessageContent(AuthorRole.Assistant, items: [ 
-                new FunctionCallContent("GetCustomer", "DatabasePlugin", callId, new KernelArguments { { "customerId", request.Customer?.Id } }) 
-            ]));
-
-            if (request.Customer != null)
-            {
-                // حالة الـ Success: العميل موجود
-                var toolResult = System.Text.Json.JsonSerializer.Serialize(request.Customer);
-                history.Add(new ChatMessageContent(AuthorRole.Tool, items: [ 
-                    new FunctionResultContent("GetCustomer", "DatabasePlugin", callId, toolResult) 
-                ]));
-            }
-            else
-            {
-                // حالة الـ Null: العميل غير موجود
-                // نرسل رد "not_found" لكي يفهم الـ LLM ويبدأ في طلب البيانات
-                var toolResult = "{\"status\": \"not_found\", \"message\": \"Customer record does not exist in our database.\"}";
-                history.Add(new ChatMessageContent(AuthorRole.Tool, items: [ 
-                    new FunctionResultContent("GetCustomer", "DatabasePlugin", callId, toolResult) 
-                ]));
-            }
-           
-            
-            history.AddUserMessage(request.Prompt);
             var settings = GetExecutionSettings(request.Config);
 
-            var result = await chat.GetChatMessageContentAsync(
+            var result = await chatService.GetChatMessageContentAsync(
                 history,
                 settings,
                 kernel: kernel,
                 cancellationToken: cancellationToken);
 
             history.AddAssistantMessage(result.Content ?? string.Empty);
+
             return result.Content;
         }
 
-        private void LoadPlugins(Kernel kernel, IEnumerable<string> requiredPluginNames)
+        #region Private Helpers
+
+        private static IEnumerable<string> GetPluginNames(PluginTier tier) =>
+            tier switch
+            {
+                PluginTier.Free => new[] { "FreePlugins" },
+                PluginTier.Pro => new[] { "ProPlugins" },
+                _ => Array.Empty<string>()
+            };
+
+        private void LoadPlugins(Kernel kernel, IEnumerable<string> pluginNames)
         {
-            foreach (var pluginName in requiredPluginNames)
+            foreach (var pluginName in pluginNames)
             {
                 using var scope = _serviceProvider.CreateScope();
                 var pluginInstance = scope.ServiceProvider.GetKeyedService<IPlugin>(pluginName);
@@ -104,7 +80,7 @@ namespace Botify.Infrastructure.AIServices
                 }
                 else
                 {
-                    Console.WriteLine($"Error: Keyed Plugin '{pluginName}' not found or resolved.");
+                    Console.WriteLine($"Error: Plugin '{pluginName}' not found or resolved.");
                 }
             }
         }
@@ -117,18 +93,53 @@ namespace Botify.Infrastructure.AIServices
                 .FirstOrDefault(s => s.PlatformKey.Equals(config.Platform.ToString(), StringComparison.OrdinalIgnoreCase));
 
             if (connectorStrategy == null)
-            {
-                throw new NotSupportedException($"AI Platform '{config.Platform}' is not supported by any registered connector strategy.");
-            }
+                throw new NotSupportedException($"AI Platform '{config.Platform}' is not supported.");
 
             connectorStrategy.ConfigureBuilder(builder, config);
-
             return builder.Build();
         }
 
-        private PromptExecutionSettings GetExecutionSettings(AIConfiguration config)
+        private static ChatHistory BuildChatHistory(KernelExecutionRequest request)
         {
-            return config.Platform switch
+            var history = new ChatHistory();
+
+            // Extend system prompt with customer handling instructions
+            var customInstructions =
+                "\n- If the customer is not found (null), politely ask the user for their details (Name, Phone, etc.)." +
+                "\n- Once you have the details, use the 'CreateCustomer' function to register them.";
+
+            history.AddSystemMessage(request.Config.SystemPrompt + customInstructions);
+
+            // Simulate customer lookup
+            var callId = $"call_{Guid.NewGuid()}";
+            history.Add(new ChatMessageContent(
+                AuthorRole.Assistant,
+                items: [
+                    new FunctionCallContent(
+                        "GetCustomer",
+                        "DatabasePlugin",
+                        callId,
+                        new KernelArguments { { "customerId", request.Customer?.Id } })
+                ]));
+
+            var toolResult = request.Customer != null
+                ? JsonSerializer.Serialize(request.Customer)
+                : "{\"status\": \"not_found\", \"message\": \"Customer record does not exist in our database.\"}";
+
+            history.Add(new ChatMessageContent(
+                AuthorRole.Tool,
+                items: [
+                    new FunctionResultContent("GetCustomer", "DatabasePlugin", callId, toolResult)
+                ]));
+
+            // Add user prompt
+            history.AddUserMessage(request.Prompt);
+
+            return history;
+        }
+
+        private static PromptExecutionSettings GetExecutionSettings(AIConfiguration config) =>
+            config.Platform switch
             {
                 AIPlatform.OpenAI => new OpenAIPromptExecutionSettings
                 {
@@ -151,6 +162,7 @@ namespace Botify.Infrastructure.AIServices
                 _ => throw new NotSupportedException(
                     $"AI Platform '{config.Platform}' is not supported for execution settings.")
             };
-        }
+
+        #endregion
     }
 }

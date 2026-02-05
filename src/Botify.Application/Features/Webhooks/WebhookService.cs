@@ -35,8 +35,7 @@ public class WebhookService(IApplicationDbContext context, IKernelExecutionServi
         var pluginTier = merchant.Subscription.CurrentPlan switch
         {
             Plan.Free => PluginTier.Free,
-            Plan.Enterprise => PluginTier.Enterprise,
-            Plan.Pro => PluginTier.Premium,
+            Plan.Pro => PluginTier.Pro,
             _ => throw new NotImplementedException(),
         };
 

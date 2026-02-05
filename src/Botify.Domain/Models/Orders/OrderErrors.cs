@@ -2,8 +2,12 @@
 
 namespace Botify.Domain.Models.Orders
 {
+    /// <summary>
+    /// Contains validation and domain error definitions for the Order model.
+    /// </summary>
     public static class OrderErrors
     {
+        // Validation Errors
         public static readonly Error IdRequired = Error.Validation(
             "Order.IdRequired",
             "Order ID is required.");
@@ -43,5 +47,22 @@ namespace Botify.Domain.Models.Orders
         public static readonly Error StatusInvalid = Error.Validation(
             "Order.StatusInvalid",
             "Order status is invalid.");
+
+        // Domain Errors
+        public static readonly Error NotFound = Error.NotFound(
+            "Order.NotFound",
+            "The requested order could not be found.");
+
+        public static readonly Error AlreadyExists = Error.Conflict(
+            "Order.AlreadyExists",
+            "An order with the same identifier already exists.");
+
+        public static readonly Error UpdateFailed = Error.Failure(
+            "Order.UpdateFailed",
+            "Failed to update the order.");
+
+        public static readonly Error DeleteFailed = Error.Failure(
+            "Order.DeleteFailed",
+            "Failed to delete the order.");
     }
 }

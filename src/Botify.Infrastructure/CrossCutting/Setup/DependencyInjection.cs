@@ -162,8 +162,7 @@ namespace Microsoft.Extensions.DependencyInjection
             //     services.AddKeyedScoped(typeof(IPlugin), type.Name, type);
             // }
             services.AddKeyedScoped<IPlugin,FreePlugins>("FreePlugins");
-            services.AddKeyedScoped<IPlugin,PremiumPlugins>("PremiumPlugins");
-            services.AddKeyedScoped<IPlugin,EnterprisePlugins>("EnterprisePlugins");
+            services.AddKeyedScoped<IPlugin,ProPlugins>("ProPlugins");
 
             return services;
         }
