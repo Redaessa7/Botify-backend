@@ -2,14 +2,13 @@
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Requests;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Botify.API.Features.Merchants
 {
     [Route("api/merchants/{merchantId:guid}/shops")]
     [Authorize]
-    public class ShopController :  ApiController
+    public class ShopController : ApiController
     {
         private readonly IMerchantService _merchantService;
 
@@ -18,29 +17,38 @@ namespace Botify.API.Features.Merchants
             _merchantService = merchantService;
         }
 
+        // -------------------- PUT --------------------
         [HttpPut]
-        [Authorize]
-        public async Task<IActionResult> SetShopAsync(Guid merchantId, SetShopRequest request)
+        public async Task<IActionResult> SetShopAsync(Guid merchantId, SetShopRequest request, CancellationToken ct)
         {
-            var result = await _merchantService.SetShopAsync(merchantId, request, HttpContext.RequestAborted);
+            var result = await _merchantService.SetShopAsync(merchantId, request, ct);
             return result.Match(Ok, Problem);
         }
 
-        // GET: api/merchants/{merchantId}/shops
+        // -------------------- GET --------------------
         [HttpGet]
-        public async Task<IActionResult> GetShopAsync(Guid merchantId)
+        public async Task<IActionResult> GetShopAsync(Guid merchantId, CancellationToken ct)
         {
-            var result = await _merchantService.GetShopAsync(merchantId, HttpContext.RequestAborted);
+            var result = await _merchantService.GetShopAsync(merchantId, ct);
             return result.Match(Ok, Problem);
         }
 
-        // GET: api/merchants/{merchantId}/shops/exists
         [HttpGet("exists")]
-        public async Task<IActionResult> CheckShopExistsAsync(Guid merchantId)
+        public async Task<IActionResult> CheckShopExistsAsync(Guid merchantId, CancellationToken ct)
         {
-            var result = await _merchantService.CheckShopExistsAsync(merchantId, HttpContext.RequestAborted);
-            return result.Match(result => Ok(new { exists = result}), Problem);
+            var result = await _merchantService.CheckShopExistsAsync(merchantId, ct);
+            return result.Match(r => Ok(new { exists = r }), Problem);
+        }
+
+        // -------------------- DELETE --------------------
+        [HttpDelete]
+        public async Task<IActionResult> DeleteShopAsync(Guid merchantId, CancellationToken ct)
+        {
+            var result = await _merchantService.DeleteShopAsync(merchantId, ct);
+            return result.Match(
+                _ => Ok(new { message = "Shop deleted successfully." }),
+                Problem
+            );
         }
     }
-
 }

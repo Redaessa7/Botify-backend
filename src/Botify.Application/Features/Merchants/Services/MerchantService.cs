@@ -358,5 +358,20 @@ public sealed class MerchantService : IMerchantService
 
         return ShopResponse.FromDomain(shop.ShopSettings);
     }
+
+    public async Task<Result<Success>> DeleteShopAsync(Guid merchantId, CancellationToken ct = default) 
+    { 
+        var merchant = await _db.Merchants
+            .Include(m => m.ShopSettings)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null) return MerchantErrors.NotFound; 
+        if (merchant.ShopSettings is null) 
+            return
+                Error.NotFound("Merchant.Shop.NotFound", "Shop not found for this merchant.");
+        _db.ShopSettings.Remove(merchant.ShopSettings);
+        await _db.SaveChangesAsync(ct);
+        return Result.Success; 
+    }
     #endregion
 }
