@@ -224,6 +224,31 @@ public sealed class MerchantService : IMerchantService
 
         return Result.Success;
     }
+    public async Task<Result<Success>> UpdateBotNameAsync(Guid merchantId, Guid botId, string newName, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants
+            .Include(m => m.Bots)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null)
+            return MerchantErrors.NotFound;
+
+        var bot = merchant.Bots.FirstOrDefault(b => b.Id == botId);
+        if (bot is null)
+            return BotErrors.BotNotFound;
+
+        if (string.IsNullOrWhiteSpace(newName))
+            return BotErrors.NameRequired;
+
+        if (newName.Length > 100)
+            return BotErrors.NameTooLong;
+
+        bot.UpdateName(newName);
+
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Success;
+    }
 
     public async Task<Result<BotResponse>> CreateBotAsync(Guid merchantId, CreateBotRequest request, CancellationToken ct = default)
     {

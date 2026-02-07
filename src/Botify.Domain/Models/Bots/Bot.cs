@@ -74,4 +74,12 @@ public sealed class Bot : AuditableEntity
         Active = false;
         return Result.Success;
     }
+
+    public Result<Success> UpdateName(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName)) return BotErrors.NameRequired;
+        if (newName.Length > 100) return BotErrors.NameTooLong;
+        Name = newName.Trim();
+        return Result.Success;
+    }
 }

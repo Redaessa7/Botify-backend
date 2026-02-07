@@ -95,6 +95,18 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
             errors => Problem(errors)
         );
     }
+    [HttpPatch("{merchantId:guid}/bots/{botId:guid}/name")]
+    [Authorize]
+    public async Task<IActionResult> UpdateBotNameAsync(Guid merchantId, Guid botId, [FromBody] string newName, CancellationToken ct)
+    {
+        var result = await _merchantService.UpdateBotNameAsync(merchantId, botId, newName, ct);
+
+        return result.Match(
+            _ => Ok(new { merchantId, botId, name = newName }),
+            errors => Problem(errors)
+        );
+    }
+
 
     [HttpDelete("{merchantId:guid}/bots/{botId:guid}")]
     [Authorize]
