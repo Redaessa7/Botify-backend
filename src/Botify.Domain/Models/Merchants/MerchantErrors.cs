@@ -10,6 +10,9 @@ public static class MerchantErrors
 
     public static Error MerchantNameRequired =>
         Error.Validation("Merchant.General.Name.Required", "Merchant name is required.");
+    // Preferences
+    public static Error PreferencesUpdateFailed =>
+        Error.Validation("Merchant.Preferences.UpdateFailed", "Unable to update merchant preferences.");
 
     public static Error MerchantNameTooLong =>
         Error.Validation("Merchant.General.Name.TooLong", "Merchant name cannot exceed 100 characters.");

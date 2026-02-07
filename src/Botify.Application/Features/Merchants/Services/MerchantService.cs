@@ -8,6 +8,7 @@ using Botify.Domain.Identity;
 using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.Models.Shops;
 using Botify.Domain.ResultPattern;
@@ -78,6 +79,22 @@ public sealed class MerchantService : IMerchantService
         return merchantResult;
     }
 
+    public async Task<Result<Success>> UpdatePreferencesAsync(Guid merchantId, QuickActions preferences, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants.FirstOrDefaultAsync(m => m.Id == merchantId, ct); 
+        if (merchant is null) 
+            return MerchantErrors.NotFound; 
+        var result = merchant.UpdatePreferences(preferences);
+
+        if (result is not { IsSuccess: true })
+            return result.Errors;
+
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Success;
+    }
+    
+    
     public async Task<Result<Success>> ApproveAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {
         var merchant = await _db.Merchants.FirstOrDefaultAsync(x => x.Id == merchantId, cancellationToken);

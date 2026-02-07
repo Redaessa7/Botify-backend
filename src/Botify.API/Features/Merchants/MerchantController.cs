@@ -6,6 +6,7 @@ using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Bots;
+using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -79,6 +80,18 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
 
         return result.Match(
             _ => Ok(new { }),
+            errors => Problem(errors)
+        );
+    }
+
+    [HttpPatch("{merchantId:guid}/preferences")]
+    [Authorize]
+    public async Task<IActionResult> UpdatePreferencesAsync(Guid merchantId, [FromBody] int preferences, CancellationToken ct)
+    {
+        var result = await _merchantService.UpdatePreferencesAsync(merchantId, (QuickActions)preferences, ct);
+
+        return result.Match(
+            _ => Ok(new { merchantId, preferences = (int)preferences }),
             errors => Problem(errors)
         );
     }

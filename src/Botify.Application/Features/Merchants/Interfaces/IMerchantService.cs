@@ -3,6 +3,7 @@ using Botify.Application.Features.Merchants.Responses;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.ResultPattern;
 using static Botify.Application.Features.Merchants.Services.MerchantService;
 
@@ -11,6 +12,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
     public interface IMerchantService
     {
        Task<Result<bool>> CheckShopExistsAsync(Guid merchantId, CancellationToken cancellationToken = default);
+        Task<Result<Success>> UpdatePreferencesAsync(Guid merchantId, QuickActions preferences, CancellationToken ct = default);
         Task<Result<ShopResponse>> GetShopAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<BotResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct);

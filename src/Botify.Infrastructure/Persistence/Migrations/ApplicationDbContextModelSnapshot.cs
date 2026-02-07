@@ -280,6 +280,11 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Preferences")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 

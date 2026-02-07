@@ -1,4 +1,5 @@
 ﻿using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,7 +15,10 @@ namespace Botify.Infrastructure.Persistence.Configurations
             // Primary key
             builder.HasKey(m => m.Id);
 
-
+            builder.Property(m => m.Preferences).HasConversion<int>()
+                .IsRequired()
+                .HasDefaultValue(QuickActions.None);   
+            
             builder.Property(m => m.VerifiedAt);
 
             // One-to-one relationship with Subscription
