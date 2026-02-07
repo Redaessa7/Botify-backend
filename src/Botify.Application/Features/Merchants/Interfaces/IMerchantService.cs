@@ -19,7 +19,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
         Task<Result<Success>> UpdatePreferencesAsync(Guid merchantId, QuickActions preferences, CancellationToken ct = default);
         Task<Result<ShopResponse>> GetShopAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default);
-        Task<Result<BotResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct);
+        Task<Result<BotDetailsResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct);
         Task<Result<CurrentMerchantResponse>> GetCurrentMerchantAsync(CancellationToken cancellationToken = default);
         Task<Result<Merchant>> CreateAsync(CreateMerchantRequest request,CancellationToken cancellationToken = default);
         Task<Result<Success>> ApproveAsync(Guid merchantId, CancellationToken cancellationToken = default);

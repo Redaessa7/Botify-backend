@@ -156,7 +156,6 @@ namespace Botify.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Botify.Domain.Models.Bots.Bot", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Active")
@@ -175,6 +174,9 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastPing")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("MerchantId")
@@ -857,6 +859,30 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasForeignKey("MerchantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsMany("Botify.Domain.Models.Bots.ValueObjects.BotDailyStats", "DailyStats", b1 =>
+                        {
+                            b1.Property<Guid>("BotId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTime>("Date")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("MessageCount")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("OrderCount")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("BotId", "Date");
+
+                            b1.ToTable("BotDailyStats", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("BotId");
+                        });
+
+                    b.Navigation("DailyStats");
                 });
 
             modelBuilder.Entity("Botify.Domain.Models.Customers.Customer", b =>

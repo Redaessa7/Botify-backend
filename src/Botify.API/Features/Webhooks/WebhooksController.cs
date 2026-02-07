@@ -28,6 +28,7 @@ public class WebhooksController(IWebhookService webhookService) : ApiController
         if (!HttpContext.Request.Headers.TryGetValue("X-Telegram-Bot-Api-Secret-Token", out var headerVals))
             return Unauthorized();
 
+
         var request = new TelegramRequest(botId,headerVals!,update.Message.Chat.Id, update.Message.Text);
         var result = await webhookService.HandleAsync(request, CancellationToken.None);
 

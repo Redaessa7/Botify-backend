@@ -244,7 +244,7 @@ public sealed class MerchantService : IMerchantService
             return BotErrors.NameTooLong;
 
         bot.UpdateName(newName);
-
+        
         await _db.SaveChangesAsync(ct);
 
         return Result.Success;
@@ -282,15 +282,17 @@ public sealed class MerchantService : IMerchantService
 
         return BotResponse.FromDomain(bot);
     }
-    public async Task<Result<BotResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    public async Task<Result<BotDetailsResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct)
     {
-       var bot =  await _db.Bots
+        var bot = await _db.Bots
+            .Include(b => b.DailyStats)   
+            .Include(b => b.Questions)   
             .Where(b => b.MerchantId == merchantId && b.Id == botId)
             .FirstOrDefaultAsync(ct);
 
         if (bot is null) return BotErrors.BotNotFound;
 
-        return BotResponse.FromDomain(bot);
+        return bot.ToBotDetailsResponse();
     }
     public async Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {
