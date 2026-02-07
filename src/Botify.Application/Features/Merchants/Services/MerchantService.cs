@@ -193,13 +193,44 @@ public sealed class MerchantService : IMerchantService
     #endregion
 
     #region Bot Management
+    public async Task<Result<Success>> DeleteBotAsync(Guid merchantId, Guid botId, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants
+            .Include(m => m.Bots)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null)
+            return MerchantErrors.NotFound;
+
+        var bot = merchant.Bots.FirstOrDefault(b => b.Id == botId);
+        if (bot is null)
+            return Error.NotFound("Merchant.Bot.NotFound", "The specified bot could not be found.");
+
+        // Resolve platform service
+        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(bot.Platform.AsKey());
+        if (platformService is null)
+            return BotErrors.PlatformInvalid;
+
+        // Try to remove webhook before deleting
+        var webhookResult = await platformService.RemoveWebhookAsync(bot.Token, ct);
+        if (!webhookResult.IsSuccess)
+        {
+            // Optionally log or mark bot state
+            return BotErrors.WebhookRemovalFailed;
+        }
+
+        _db.Bots.Remove(bot);
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Success;
+    }
 
     public async Task<Result<BotResponse>> CreateBotAsync(Guid merchantId, CreateBotRequest request, CancellationToken ct = default)
     {
         var merchant = await _db.Merchants.Include(m => m.Bots).FirstOrDefaultAsync(m => m.Id == merchantId, ct);
         if (merchant is null) return MerchantErrors.NotFound;
 
-        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(request.Platform);
+        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(request.Platform.AsKey());
 
         if(platformService is null)
             return BotErrors.PlatformInvalid;

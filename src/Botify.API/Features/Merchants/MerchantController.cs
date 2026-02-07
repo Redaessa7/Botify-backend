@@ -96,6 +96,18 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         );
     }
 
+    [HttpDelete("{merchantId:guid}/bots/{botId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteBotAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    {
+        var result = await _merchantService.DeleteBotAsync(merchantId, botId, ct);
+
+        return result.Match(
+            _ => Ok(new { message = "Bot deleted successfully." }),
+            errors => Problem(errors)
+        );
+    }
+
     [HttpPatch("{merchantId:guid}/bots/{botId:guid}/deactivate")]
     [Authorize]
     public async Task<IActionResult> DeactivateBotAsync(Guid merchantId, Guid botId, CancellationToken ct)
