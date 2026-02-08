@@ -12,7 +12,7 @@ namespace Botify.Application.Features.Merchants.Interfaces
     public interface IMerchantService
     {
         Task<Result<Success>> DeleteShopAsync(Guid merchantId, CancellationToken cancellationToken = default);
-
+        Task<Result<HomePageInitDataResponse>> GetHomePageAsync(Guid merchantId, CancellationToken ct);
         Task<Result<Success>> UpdateBotNameAsync(Guid merchantId, Guid botId, string newName, CancellationToken ct = default);
         Task<Result<Success>> DeleteBotAsync(Guid merchantId, Guid botId, CancellationToken ct = default);
         Task<Result<bool>> CheckShopExistsAsync(Guid merchantId, CancellationToken cancellationToken = default);

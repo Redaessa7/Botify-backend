@@ -2,6 +2,7 @@ using Botify.API.CrossCutting.Controllers;
 using Botify.Application.CrossCutting.Requests;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Features.Merchants.Requests;
+using Botify.Application.Features.Merchants.Responses;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Models.Bots;
@@ -26,6 +27,13 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
     public async Task<IActionResult> GetCurrentMerchant()
     {
         var result = await _merchantService.GetCurrentMerchantAsync();
+        return result.Match(Ok, Problem);
+    }
+    [HttpGet("{merchantId:guid}/home")]
+    [Authorize]
+    public async Task<ActionResult<HomePageInitDataResponse>> GetHomePageAsync(Guid merchantId, CancellationToken ct)
+    {
+        var result = await _merchantService.GetHomePageAsync(merchantId,ct);
         return result.Match(Ok, Problem);
     }
 

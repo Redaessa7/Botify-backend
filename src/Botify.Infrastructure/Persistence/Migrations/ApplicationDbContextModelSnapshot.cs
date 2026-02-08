@@ -258,6 +258,8 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Email");
 
+                    b.HasIndex("MerchantId");
+
                     b.HasIndex("Uuid")
                         .IsUnique();
 
@@ -887,6 +889,12 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Botify.Domain.Models.Customers.Customer", b =>
                 {
+                    b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
+                        .WithMany("Customers")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.OwnsOne("Botify.Domain.Models.Customers.ValueObjects.MessengerProfile", "Messenger", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
@@ -1372,6 +1380,8 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Navigation("AIConfiguration");
 
                     b.Navigation("Bots");
+
+                    b.Navigation("Customers");
 
                     b.Navigation("Orders");
 

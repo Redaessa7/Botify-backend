@@ -5,6 +5,7 @@ using Botify.Domain.Models.Merchants;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Orders.Enums;
+using Botify.Domain.Models.Orders.Helpers;
 using Botify.Domain.ResultPattern;
 using Botify.Infrastructure.AiAgent.Plugins.Types;
 using Microsoft.EntityFrameworkCore;
@@ -90,6 +91,7 @@ namespace Botify.Infrastructure.AIServices.Plugins.Types
             // Create order using domain factory
             var orderResult = Order.Create(
                 Guid.NewGuid(),
+                OrderUuidGenerator.Generate(merchantId,customerId),
                 merchantId,
                 customerId,
                 customerName,
