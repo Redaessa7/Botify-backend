@@ -35,21 +35,23 @@ public class WebhookService(IApplicationDbContext context, IKernelExecutionServi
         var pluginTier = merchant.Subscription.CurrentPlan switch
         {
             Plan.Free => PluginTier.Free,
-            Plan.Enterprise => PluginTier.Enterprise,
-            Plan.Pro => PluginTier.Premium,
+            Plan.Pro => PluginTier.Pro,
             _ => throw new NotImplementedException(),
         };
 
         var bot = merchant.Bots.First(b => b.Id == telegramRequest.BotId);
-
+        var customer = _context.Customers.FirstOrDefault(c => c.MerchantId == merchant.Id && c.Telegram.ChatId ==  telegramRequest.ChatId.ToString());
+        
         var _botPlatformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(bot.Platform.AsKey());
         Console.WriteLine("Now Enter to Ai Model.");
         try
         {
             var aiResult = await _kernelExecutionService.ExecuteAsync(
-              telegramRequest.UserMessage,
-              merchant.AIConfiguration,
-              pluginTier,
+             new KernelExecutionRequest(
+                 telegramRequest.UserMessage,
+                 merchant.AIConfiguration,
+                 pluginTier,
+                 customer),
               cancellationToken);
 
             if (aiResult.IsError)

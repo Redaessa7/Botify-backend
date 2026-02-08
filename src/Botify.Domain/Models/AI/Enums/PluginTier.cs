@@ -3,7 +3,6 @@
     public enum PluginTier
     {
         Free,
-        Premium,
-        Enterprise
+        Pro
     }
 }

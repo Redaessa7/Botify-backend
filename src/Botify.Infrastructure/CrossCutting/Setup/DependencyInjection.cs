@@ -28,6 +28,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
+using Botify.Infrastructure.AiAgent.Plugins.Types;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -161,8 +162,7 @@ namespace Microsoft.Extensions.DependencyInjection
             //     services.AddKeyedScoped(typeof(IPlugin), type.Name, type);
             // }
             services.AddKeyedScoped<IPlugin,FreePlugins>("FreePlugins");
-            services.AddKeyedScoped<IPlugin,PremiumPlugins>("PremiumPlugins");
-            services.AddKeyedScoped<IPlugin,EnterprisePlugins>("EnterprisePlugins");
+            services.AddKeyedScoped<IPlugin,ProPlugins>("ProPlugins");
 
             return services;
         }
