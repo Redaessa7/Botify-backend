@@ -4,35 +4,47 @@ using Botify.Domain.Models.Merchants.ValueObjects;
 namespace Botify.Application.Features.Merchants.Responses
 {
     /// <summary>
-    /// Response DTO for  bots by merchant.
+    /// Response DTO for bots by merchant.
     /// </summary>
     public sealed class BotResponse
     {
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
-        public BotPlatform Platform { get; init; } 
+        public BotPlatform Platform { get; init; }
         public string? ApiToken { get; init; }
         public bool IsActive { get; init; }
-        public DateTimeOffset CreatedAt { get; init; }
-        public DateOnly LastPing { get; init; }
+        public DateTime CreatedAt { get; init; }
+        public DateTime? LastPing { get; init; }
 
-        public int MessagesThisMonth { get; init; } = 0;
-        public int OrdersThisMonth { get; init; } = 0;
-        public int QuestionsForMerchant { get; init; } = 0;
+        public int MessagesThisMonth { get; init; }
+        public int OrdersThisMonth { get; init; }
+        public int QuestionsForMerchant { get; init; }
 
         // Factory method to map from domain Bot entity
-        public static BotResponse FromDomain(Bot bot) => new()
+        public static BotResponse FromDomain(Bot bot)
         {
-            Id = bot.Id,
-            Name = bot.Name,
-            Platform = bot.Platform,
-            ApiToken = bot.Token,
-            IsActive = bot.Active,
-            CreatedAt = bot.CreatedAtUtc,
-            LastPing = DateOnly.FromDateTime(DateTime.UtcNow),
-            MessagesThisMonth = 0,
-            OrdersThisMonth = 0,
-            QuestionsForMerchant = 0
-        };
+            var today = DateTime.UtcNow.Date;
+
+            return new BotResponse
+            {
+                Id = bot.Id,
+                Name = bot.Name,
+                Platform = bot.Platform,
+                ApiToken = bot.Token,
+                IsActive = bot.Active,
+                CreatedAt = bot.CreatedAtUtc,
+                LastPing = bot.LastPing,
+
+                MessagesThisMonth = bot.DailyStats
+                    .Where(s => s.Date.Month == today.Month && s.Date.Year == today.Year)
+                    .Sum(s => s.MessageCount),
+
+                OrdersThisMonth = bot.DailyStats
+                    .Where(s => s.Date.Month == today.Month && s.Date.Year == today.Year)
+                    .Sum(s => s.OrderCount),
+
+                QuestionsForMerchant = bot.Questions.Count
+            };
+        }
     }
 }

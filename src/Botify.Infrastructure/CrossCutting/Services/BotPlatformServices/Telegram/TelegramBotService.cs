@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using Botify.Domain.Models.Bots;
 
 namespace Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
+
 public sealed class TelegramBotService : IBotPlatformService
 {
     private readonly HttpClient _http;
@@ -22,14 +23,14 @@ public sealed class TelegramBotService : IBotPlatformService
 
         return Result.Success;
     }
+
     public async Task<Result<Success>> SendMessageAsync(
- string apiToken,
- long chatId,
- string message,
- CancellationToken ct = default)
+        string apiToken,
+        long chatId,
+        string message,
+        CancellationToken ct = default)
     {
         var url = $"https://api.telegram.org/bot{apiToken}/sendMessage";
-
         var payload = new TelegramSendMessageRequest(chatId, message);
 
         var resp = await _http.PostAsJsonAsync(url, payload, ct);
@@ -58,4 +59,17 @@ public sealed class TelegramBotService : IBotPlatformService
         return webhookUrl;
     }
 
+    public async Task<Result<Success>> RemoveWebhookAsync(string apiToken, CancellationToken ct = default)
+    {
+        var url = $"https://api.telegram.org/bot{apiToken}/deleteWebhook";
+
+        var resp = await _http.GetAsync(url, ct);
+        if (!resp.IsSuccessStatusCode)
+            return BotErrors.WebhookRemovalFailed;
+
+        var payload = await resp.Content.ReadFromJsonAsync<TelegramDeleteWebhookResponse>(cancellationToken: ct);
+        return payload?.Ok == true
+            ? Result.Success
+            : BotErrors.WebhookRemovalFailed;
+    }
 }

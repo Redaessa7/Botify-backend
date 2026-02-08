@@ -8,6 +8,7 @@ using Botify.Domain.Identity;
 using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.Models.Shops;
 using Botify.Domain.ResultPattern;
@@ -78,6 +79,22 @@ public sealed class MerchantService : IMerchantService
         return merchantResult;
     }
 
+    public async Task<Result<Success>> UpdatePreferencesAsync(Guid merchantId, QuickActions preferences, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants.FirstOrDefaultAsync(m => m.Id == merchantId, ct); 
+        if (merchant is null) 
+            return MerchantErrors.NotFound; 
+        var result = merchant.UpdatePreferences(preferences);
+
+        if (result is not { IsSuccess: true })
+            return result.Errors;
+
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Success;
+    }
+    
+    
     public async Task<Result<Success>> ApproveAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {
         var merchant = await _db.Merchants.FirstOrDefaultAsync(x => x.Id == merchantId, cancellationToken);
@@ -176,13 +193,69 @@ public sealed class MerchantService : IMerchantService
     #endregion
 
     #region Bot Management
+    public async Task<Result<Success>> DeleteBotAsync(Guid merchantId, Guid botId, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants
+            .Include(m => m.Bots)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null)
+            return MerchantErrors.NotFound;
+
+        var bot = merchant.Bots.FirstOrDefault(b => b.Id == botId);
+        if (bot is null)
+            return Error.NotFound("Merchant.Bot.NotFound", "The specified bot could not be found.");
+
+        // Resolve platform service
+        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(bot.Platform.AsKey());
+        if (platformService is null)
+            return BotErrors.PlatformInvalid;
+
+        // Try to remove webhook before deleting
+        var webhookResult = await platformService.RemoveWebhookAsync(bot.Token, ct);
+        if (!webhookResult.IsSuccess)
+        {
+            // Optionally log or mark bot state
+            return BotErrors.WebhookRemovalFailed;
+        }
+
+        _db.Bots.Remove(bot);
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Success;
+    }
+    public async Task<Result<Success>> UpdateBotNameAsync(Guid merchantId, Guid botId, string newName, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants
+            .Include(m => m.Bots)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null)
+            return MerchantErrors.NotFound;
+
+        var bot = merchant.Bots.FirstOrDefault(b => b.Id == botId);
+        if (bot is null)
+            return BotErrors.BotNotFound;
+
+        if (string.IsNullOrWhiteSpace(newName))
+            return BotErrors.NameRequired;
+
+        if (newName.Length > 100)
+            return BotErrors.NameTooLong;
+
+        bot.UpdateName(newName);
+        
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Success;
+    }
 
     public async Task<Result<BotResponse>> CreateBotAsync(Guid merchantId, CreateBotRequest request, CancellationToken ct = default)
     {
         var merchant = await _db.Merchants.Include(m => m.Bots).FirstOrDefaultAsync(m => m.Id == merchantId, ct);
         if (merchant is null) return MerchantErrors.NotFound;
 
-        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(request.Platform);
+        var platformService = _serviceProvider.GetRequiredKeyedService<IBotPlatformService>(request.Platform.AsKey());
 
         if(platformService is null)
             return BotErrors.PlatformInvalid;
@@ -209,15 +282,17 @@ public sealed class MerchantService : IMerchantService
 
         return BotResponse.FromDomain(bot);
     }
-    public async Task<Result<BotResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct)
+    public async Task<Result<BotDetailsResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct)
     {
-       var bot =  await _db.Bots
+        var bot = await _db.Bots
+            .Include(b => b.DailyStats)   
+            .Include(b => b.Questions)   
             .Where(b => b.MerchantId == merchantId && b.Id == botId)
             .FirstOrDefaultAsync(ct);
 
         if (bot is null) return BotErrors.BotNotFound;
 
-        return BotResponse.FromDomain(bot);
+        return bot.ToBotDetailsResponse();
     }
     public async Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {
@@ -284,6 +359,21 @@ public sealed class MerchantService : IMerchantService
             return ShopErrors.NotFound;
 
         return ShopResponse.FromDomain(shop.ShopSettings);
+    }
+
+    public async Task<Result<Success>> DeleteShopAsync(Guid merchantId, CancellationToken ct = default) 
+    { 
+        var merchant = await _db.Merchants
+            .Include(m => m.ShopSettings)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null) return MerchantErrors.NotFound; 
+        if (merchant.ShopSettings is null) 
+            return
+                Error.NotFound("Merchant.Shop.NotFound", "Shop not found for this merchant.");
+        _db.ShopSettings.Remove(merchant.ShopSettings);
+        await _db.SaveChangesAsync(ct);
+        return Result.Success; 
     }
     #endregion
 }

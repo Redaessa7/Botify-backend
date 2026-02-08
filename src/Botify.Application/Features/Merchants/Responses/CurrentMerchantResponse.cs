@@ -14,6 +14,7 @@ namespace Botify.Application.Features.Merchants.Responses
         public MerchantStatus Status { get; init; }
         public DateTime? VerifiedAt { get; init; }
 
+        public int Preferences { get; init; }
         // Profile info
         public string FirstName { get; init; } = null!;
         public string LastName { get; init; } = null!;
@@ -48,7 +49,8 @@ namespace Botify.Application.Features.Merchants.Responses
                     HasShop = merchant.ShopSettings != null
                 },
                 CurrentPlan = merchant.Subscription.CurrentPlan,
-                ExpiryDate = merchant.Subscription.ExpiryDate
+                ExpiryDate = merchant.Subscription.ExpiryDate,
+                Preferences = (int)merchant.Preferences
             };
         }
     }

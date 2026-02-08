@@ -12,10 +12,7 @@ public static class BotErrors
         Error.Validation("Bot.MerchantId.Required", "Merchant ID is required.");
 
     public static Error SendMessageFailed =>
-    Error.Conflict(
-        "Bot.Message.SendFailed",
-        "Failed to send message to the bot platform."
-    );
+        Error.Conflict("Bot.Message.SendFailed", "Failed to send message to the bot platform.");
 
     public static Error NameRequired =>
         Error.Validation("Bot.Name.Required", "Bot name is required.");
@@ -49,10 +46,10 @@ public static class BotErrors
         Error.Conflict("Bot.Platform.NotVerified", "Platform must be verified before activating bot.");
 
     public static Error AlreadyActive =>
-        Error.Conflict("Bot.Status.AlreadyActive", "Bot is already active.");   // ✅ renamed
+        Error.Conflict("Bot.Status.AlreadyActive", "Bot is already active.");
 
     public static Error AlreadyInactive =>
-        Error.Conflict("Bot.Status.AlreadyInactive", "Bot is already inactive."); // ✅ renamed
+        Error.Conflict("Bot.Status.AlreadyInactive", "Bot is already inactive.");
 
     public static Error BotPlatformConflict =>
         Error.Conflict("Bot.Platform.Conflict", "Only one bot can be active per platform.");
@@ -62,6 +59,12 @@ public static class BotErrors
 
     public static Error WebhookNotSet =>
         Error.Conflict("Bot.Webhook.NotSet", "Webhook must be set before receiving updates.");
+
+    public static Error WebhookRemovalFailed =>
+        Error.Conflict("Bot.Webhook.RemovalFailed", "Failed to remove webhook from external platform.");
+
+    public static Error WebhookRefreshFailed =>
+        Error.Conflict("Bot.Webhook.RefreshFailed", "Failed to refresh webhook with new configuration.");
 
     // Lookup
     public static Error BotNotFound =>

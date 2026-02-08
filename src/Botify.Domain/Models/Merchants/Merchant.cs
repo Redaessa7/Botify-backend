@@ -3,6 +3,7 @@ using Botify.Domain.Events.Merchants;
 using Botify.Domain.Identity;
 using Botify.Domain.Models.Merchants.Enums;
 using Botify.Domain.ResultPattern;
+using System;
 
 namespace Botify.Domain.Models.Merchants
 {
@@ -14,6 +15,9 @@ namespace Botify.Domain.Models.Merchants
         public UserProfile Profile { get; private set; }
         public MerchantSubscription Subscription { get; private set; }
 
+        // ✅ Added field for QuickActions preferences
+        public QuickActions Preferences { get; private set; } = QuickActions.None;
+
         private Merchant() { }
 
         private Merchant(Guid id, UserProfile userProfile, Plan plan = Plan.Free)
@@ -22,6 +26,7 @@ namespace Botify.Domain.Models.Merchants
             UserProfileId = userProfile.Id;
             Status = MerchantStatus.Pending;
             Subscription = MerchantSubscription.Start(Id, plan);
+            Preferences = QuickActions.None; // default
         }
 
         public static Result<Merchant> Create(Guid id, UserProfile userProfile)
@@ -34,6 +39,7 @@ namespace Botify.Domain.Models.Merchants
 
             return new Merchant(id, userProfile);
         }
+
         public Result<Success> Approve()
         {
             if (Status != MerchantStatus.Pending)
@@ -49,6 +55,12 @@ namespace Botify.Domain.Models.Merchants
         public Result<Success> Suspend(string reason)
         {
             Status = MerchantStatus.Suspended;
+            return Result.Success;
+        }
+
+        public Result<Success> UpdatePreferences(QuickActions actions)
+        {
+            Preferences = actions;
             return Result.Success;
         }
     }
