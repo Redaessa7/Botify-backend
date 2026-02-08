@@ -102,7 +102,7 @@ namespace Botify.Application.Features.Merchants.Responses
                 UniqueCustomers = bot.Questions.Select(q => q.CustomerId).Distinct().Count(),
                 MonthlyStats = monthlyStats,
                 WeeklyStats = weeklyStats,
-                LastPing = bot.LastPing ?? DateTime.MinValue
+                LastPing = bot.LastPing  
             };
         }
     }
