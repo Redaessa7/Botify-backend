@@ -21,6 +21,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
             
             builder.Property(m => m.VerifiedAt);
 
+            builder.HasMany(x=> x.Customers)
+                     .WithOne()
+                     .HasForeignKey(c => c.MerchantId)
+                     .OnDelete(DeleteBehavior.Cascade);
+
             // One-to-one relationship with Subscription
             builder.OwnsOne(m => m.Subscription, subscription =>
             {

@@ -39,7 +39,22 @@ public sealed class MerchantService : IMerchantService
         _serviceProvider = serviceProvider;
         _webhookOptions = webhookOptions.Value;
     }
-
+    public async Task<Result<HomePageInitDataResponse>> GetHomePageAsync(Guid merchantId, CancellationToken ct) { 
+        var merchant = await _db.Merchants
+            .Include(m => m.Profile)
+            .Include(m => m.Subscription)
+            .Include(m => m.Orders)
+            .Include(m => m.Customers)
+            .Include(m => m.ShopSettings)
+            .Include(m => m.Bots)
+                .ThenInclude(b => b.DailyStats)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct); 
+        
+        if (merchant is null) return MerchantErrors.NotFound; 
+        
+        return merchant.ToHomePageInitDataResponse(); 
+    
+    }
     #region Merchant Lifecycle
 
     public async Task<Result<Merchant>> CreateAsync(CreateMerchantRequest request, CancellationToken cancellationToken = default)
