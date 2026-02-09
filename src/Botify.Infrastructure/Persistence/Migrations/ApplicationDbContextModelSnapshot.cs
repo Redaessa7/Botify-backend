@@ -604,6 +604,43 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.ToTable("SupportRequests", (string)null);
                 });
 
+            modelBuilder.Entity("Botify.Infrastructure.AiAgent.ChatSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CurrentSummary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalChatId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastInteractionAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MerchantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MessageCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalChatId", "Platform")
+                        .IsUnique();
+
+                    b.ToTable("ChatSessions", (string)null);
+                });
+
             modelBuilder.Entity("Botify.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")

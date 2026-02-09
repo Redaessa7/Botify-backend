@@ -45,5 +45,13 @@ namespace Botify.Domain.Models.Customers
         public static readonly Error MessengerChatIdRequired = Error.Validation(
             "Customer.Messenger.ChatId.Required",
             "Messenger chat ID is required when Messenger profile is provided.");
+        // Persistence Errors
+        public static readonly Error NotFound = Error.NotFound(
+            "Customer.NotFound",
+            "The requested customer record was not found in our database.");
+
+        public static readonly Error NotFoundByUuid = Error.NotFound(
+            "Customer.NotFoundByUuid",
+            "No customer matches the provided unique identifier.");
     }
 }

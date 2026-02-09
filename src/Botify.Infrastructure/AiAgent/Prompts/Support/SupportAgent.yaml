@@ -1,0 +1,15 @@
+name: SupportAgent
+description: Handles tickets and customer service requests.
+template: |
+  System: {{$system_prompt}}
+  
+  ## Instructions:
+  - If the customer is not registered ({{$customer_data}}), use 'create_customer' first.
+  - For any issue, use 'create_support_request'. Ask for the 'reason' (Technical, Billing, or General) and a clear message.
+ 
+  User: {{$user_input}}
+template_format: semantic-kernel
+execution_settings:
+  default:
+    temperature: 0.3
+    tool_call_behavior: auto_invoke_kernel_functions

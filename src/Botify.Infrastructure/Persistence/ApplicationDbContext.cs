@@ -9,6 +9,7 @@ using Botify.Domain.Models.Orders;
 using Botify.Domain.Models.Products;
 using Botify.Domain.Models.Shops;
 using Botify.Domain.Models.SupportRequests;
+using Botify.Infrastructure.AiAgent;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace Botify.Infrastructure.Persistence;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Merchant> Merchants =>  Set<Merchant>();
     public DbSet<Order> Orders => Set<Order>();

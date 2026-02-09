@@ -24,6 +24,7 @@
       <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.68.0-alpha" />
 	  <PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
 	  <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.70.0" />
+	  <PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.70.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +33,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="AiAgent\Prompts\Info\" />
+    <Folder Include="AiAgent\Prompts\Account\" />
+    <Folder Include="AiAgent\Prompts\System\" />
+    <Folder Include="AiAgent\Prompts\Support\" />
+    <Folder Include="AiAgent\Prompts\Sales\" />
+    <Folder Include="AiAgent\Prompts\Router\" />
     <Folder Include="CrossCutting\Extensions\" />
   </ItemGroup>
 

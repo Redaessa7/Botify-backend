@@ -51,7 +51,9 @@ public class WebhookService(IApplicationDbContext context, IKernelExecutionServi
                  telegramRequest.UserMessage,
                  merchant.AIConfiguration,
                  pluginTier,
-                 customer),
+                 customer,
+                 BotPlatform.TELEGRAM,
+                 telegramRequest.ChatId.ToString()),
               cancellationToken);
 
             if (aiResult.IsError)

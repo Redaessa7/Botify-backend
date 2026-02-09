@@ -16,193 +16,112 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using System.ComponentModel;
 
-namespace Botify.Infrastructure.AiAgent.Plugins.Types
+namespace Botify.Infrastructure.AiAgent.Plugins.Types;
+
+public class FreePlugins(
+    IProductService productService,
+    ICustomerService customerService,
+    IApplicationDbContext db) : IPlugin
 {
-    /// <summary>
-    /// Free plan AI plugin exposing limited functions:
-    /// - Get Products
-    /// - Create Customer
-    /// - Get Customer
-    /// - Get Merchant Details
-    /// - Get Order Details
-    /// - Create Support Request
-    /// </summary>
-    public class FreePlugins : IPlugin
+    private readonly IProductService _productService = productService;
+    private readonly ICustomerService _customerService = customerService;
+    private readonly IApplicationDbContext _db = db;
+
+    [KernelFunction("get_products")]
+    [Description("Get merchant products with search and pagination.")]
+    public async Task<Result<PaginatedResult<ProductResponse>>> GetProductsAsync(
+        Guid merchantId,
+        string? cursor = null,
+        int limit = 10,
+        string? search = null,
+        CancellationToken ct = default) =>
+        await _productService.GetProductsAsync(merchantId, cursor, limit, search, ct);
+
+    [KernelFunction("create_support_request")]
+    [Description("Create support ticket for a customer.")]
+    public async Task<Result<SupportRequest>> CreateSupportRequestAsync(
+        Guid merchantId,
+        Guid botId,
+        string botName,
+        BotPlatform platform,
+        string platformContact,
+        string customerName,
+        Guid customerId,
+        SupportRequestType type,
+        RequestReason reason,
+        string message,
+        CancellationToken ct = default)
     {
-        private readonly IProductService _productService;
-        private readonly ICustomerService _customerService;
-        private readonly IApplicationDbContext _db;
+        var result = SupportRequest.Create(Guid.NewGuid(), merchantId, botId, botName, platform, platformContact, customerName, type, reason, customerId, message);
+        if (!result.IsSuccess) return result.Errors;
 
-        public FreePlugins(
-            IProductService productService,
-            ICustomerService customerService,
-            IApplicationDbContext db)
-        {
-            _productService = productService;
-            _customerService = customerService;
-            _db = db;
-        }
+        _db.SupportRequests.Add(result.Value);
+        await _db.SaveChangesAsync(ct);
+        return result;
+    }
 
-        /// <summary>
-        /// Retrieve paginated list of products for a merchant with optional search and cursor pagination.
-        /// </summary>
-        [KernelFunction("get_products")]
-        [Description("Retrieve paginated list of products for a merchant with optional search and cursor pagination.")]
-        public async Task<Result<PaginatedResult<ProductResponse>>> GetProductsAsync(
-            Guid merchantId,
-            string? cursor = null,
-            int limit = 10,
-            string? search = null,
-            CancellationToken ct = default)
-        {
-            return await _productService.GetProductsAsync(merchantId, cursor, limit, search, ct);
-        }
+    [KernelFunction("get_customer_by_uuid")]
+    [Description("Find customer by UUID string.")]
+    [return: Description("Customer profile data.")]
+    public async Task<Result<CustomerDto>> GetCustomerByUuidAsync(
+        Guid merchantId,
+        string uuid,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(uuid)) return CustomerErrors.UuidRequired;
 
-        /// <summary>
-        /// Create a new support request for a merchant and customer.
-        /// Requires merchant, bot, customer details, type, reason, and message.
-        /// </summary>
-        [KernelFunction("create_support_request")]
-        [Description("Create a new support request for a merchant and customer. Requires merchant, bot, customer details, type, reason, and message.")]
-        public async Task<Result<SupportRequest>> CreateSupportRequestAsync(
-            Guid merchantId,
-            Guid botId,
-            string botName,
-            BotPlatform platform,
-            string platformContact,
-            string customerName,
-            Guid customerId,
-            SupportRequestType type,
-            RequestReason reason,
-            string message,
-            CancellationToken ct = default)
-        {
-            var supportRequestResult = SupportRequest.Create(
-                Guid.NewGuid(),
-                merchantId,
-                botId,
-                botName,
-                platform,
-                platformContact,
-                customerName,
-                type,
-                reason,
-                customerId,
-                message
-            );
+        var customer = await _db.Customers.AsNoTracking()
+            .FirstOrDefaultAsync(c => c.MerchantId == merchantId && c.Uuid == uuid, ct);
 
-            if (!supportRequestResult.IsSuccess)
-                return supportRequestResult.Errors;
+        return customer is null ? CustomerErrors.NotFound : CustomerDto.FromDomain(customer);
+    }
 
-            _db.SupportRequests.Add(supportRequestResult.Value);
-            await _db.SaveChangesAsync(ct);
+    [KernelFunction("create_customer")]
+    [Description("Register new customer for merchant.")]
+    public async Task<Result<CustomerDto>> CreateCustomerAsync(
+        Guid merchantId,
+        string name,
+        string phoneNumber,
+        string? email = null,
+        CancellationToken ct = default)
+    {
+        var customerResult = Customer.Create(Guid.NewGuid(), merchantId, Guid.NewGuid().ToString(), name, phoneNumber, email);
+        if (!customerResult.IsSuccess) return customerResult.Errors;
 
-            return supportRequestResult;
-        }
+        _db.Customers.Add(customerResult.Value);
+        await _db.SaveChangesAsync(ct);
+        return CustomerDto.FromDomain(customerResult.Value);
+    }
 
-        /// <summary>
-        /// Create a new customer for the current merchant.
-        /// Requires name, phone number, and optional email/social profiles.
-        /// </summary>
-        [KernelFunction("create_customer")]
-        [Description("Create a new customer for the current merchant. Requires name, phone number, and optional email/social profiles.")]
-        public async Task<Result<CustomerDto>> CreateCustomerAsync(
-            Guid merchantId,
-            string name,
-            string phoneNumber,
-            string? email = null,
-            CancellationToken ct = default)
-        {
-            var uuid = Guid.NewGuid().ToString();
-            var customerResult = Customer.Create(Guid.NewGuid(), merchantId, uuid, name, phoneNumber, email);
+    [KernelFunction("get_order_details")]
+    [Description("Get full order info, items, and status.")]
+    public async Task<Result<string>> GetOrderDetailsAsync(Guid merchantId, Guid orderId, CancellationToken ct = default)
+    {
+        var order = await _db.Orders.Include(o => o.Customer).Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.MerchantId == merchantId && o.Id == orderId, ct);
 
-            if (!customerResult.IsSuccess)
-                return customerResult.Errors;
+        return order is null ? OrderErrors.NotFound : BuildOrderDetailsMessage(order);
+    }
 
-            _db.Customers.Add(customerResult.Value);
-            await _db.SaveChangesAsync(ct);
+    [KernelFunction("get_customer")]
+    [Description("Get customer details by Guid ID.")]
+    public async Task<Result<CustomerDto>> GetCustomerAsync(Guid merchantId, Guid customerId, CancellationToken ct = default) =>
+        await _customerService.GetByIdAsync(customerId, ct);
 
-            return CustomerDto.FromDomain(customerResult.Value);
-        }
+    [KernelFunction("get_merchant_details")]
+    [Description("Get merchant profile, settings, and plan.")]
+    [return: Description("Merchant preferences and subscription status.")]
+    public async Task<Result<CurrentMerchantResponse>> GetMerchantDetailsAsync(Guid merchantId, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants.Include(m => m.ShopSettings)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
 
-        /// <summary>
-        /// Provide the customer with full details about their order.
-        /// Includes items, total amount, currency, status, and delivery info.
-        /// </summary>
-        [KernelFunction("get_order_details")]
-        [Description("Generate a detailed message for the customer about their order, including items, total, currency, status, and delivery information.")]
-        public async Task<Result<string>> GetOrderDetailsAsync(
-            Guid merchantId,
-            Guid orderId,
-            CancellationToken ct = default)
-        {
-            var order = await _db.Orders
-                .Include(o => o.Customer)
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.MerchantId == merchantId && o.Id == orderId, ct);
+        return merchant is null ? MerchantErrors.NotFound : merchant.ToCurrentResponse();
+    }
 
-            if (order is null)
-                return OrderErrors.NotFound;
-
-            var message = BuildOrderDetailsMessage(order);
-            return message;
-        }
-
-        /// <summary>
-        /// Retrieve a single customer by ID for the current merchant.
-        /// </summary>
-        [KernelFunction("get_customer")]
-        [Description("Retrieve a single customer by ID for the current merchant.")]
-        public async Task<Result<CustomerDto>> GetCustomerAsync(
-            Guid merchantId,
-            Guid customerId,
-            CancellationToken ct = default)
-        {
-            return await _customerService.GetByIdAsync(customerId, ct);
-        }
-
-        /// <summary>
-        /// Retrieve merchant details.
-        /// </summary>
-        [KernelFunction("get_merchant_details")]
-        [Description("Retrieve merchant details.")]
-        public async Task<Result<CurrentMerchantResponse>> GetMerchantDetailsAsync(
-            Guid merchantId,
-            CancellationToken ct = default)
-        {
-            var merchant = await _db.Merchants
-                .Include(m => m.ShopSettings)
-                .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
-
-            if (merchant is null)
-                return MerchantErrors.NotFound;
-
-            return merchant.ToCurrentResponse();
-        }
-
-        #region Private Helpers
-
-        private static string BuildOrderDetailsMessage(Order order)
-        {
-            var itemsList = string.Join(", ", order.Items.Select(i => $"{i.ProductName} (x{i.Quantity})"));
-            var total = $"{order.TotalAmount} {order.Currency}";
-            var status = order.Status.ToString();
-            var delivery = string.IsNullOrEmpty(order.DeliveryAddress)
-                ? "No delivery address provided"
-                : order.DeliveryAddress;
-
-            var notes = string.IsNullOrEmpty(order.Notes) ? "" : $"- Notes: {order.Notes}\n";
-
-            return
-                $"Hello {order.CustomerName}, here are the details of your order {order.Id}:\n" +
-                $"- Items: {itemsList}\n" +
-                $"- Total: {total}\n" +
-                $"- Status: {status}\n" +
-                $"- Delivery Address: {delivery}\n" +
-                notes +
-                "Thank you for shopping with us!";
-        }
-
-        #endregion
+    private static string BuildOrderDetailsMessage(Order order)
+    {
+        var items = string.Join(", ", order.Items.Select(i => $"{i.ProductName} (x{i.Quantity})"));
+        return $"Order {order.Id} for {order.CustomerName}:\n- Items: {items}\n- Total: {order.TotalAmount} {order.Currency}\n- Status: {order.Status}\n- Delivery: {order.DeliveryAddress ?? "N/A"}";
     }
 }

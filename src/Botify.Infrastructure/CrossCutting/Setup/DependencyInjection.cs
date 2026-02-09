@@ -168,6 +168,16 @@ namespace Microsoft.Extensions.DependencyInjection
         }
         private static IServiceCollection AddAIServices(this IServiceCollection services)
         {
+            // 1. Setup Logging BEFORE the Kernel
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug); // Set to Debug to see tool calls and prompt rendering
+
+                // Optional: Filter out noisy logs from other libraries
+                builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Information);
+                builder.AddFilter("Microsoft.SemanticKernel.Connectors", LogLevel.Debug);
+            });
             // Semantic Kernel setup
             services.AddKernel();
             services.AddSemanticKernelPlugins();

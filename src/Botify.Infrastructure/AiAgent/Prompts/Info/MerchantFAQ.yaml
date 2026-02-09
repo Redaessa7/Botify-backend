@@ -1,0 +1,15 @@
+name: MerchantFAQ
+description: Provides shop information and general FAQs.
+template: |
+  System: {{$system_prompt}}
+
+  ## Instructions:
+  - Use 'get_merchant_details' to see the shop's official settings, currency, and plan status.
+  - Answer questions about business hours, locations, or shop identity based ONLY on the tool output.
+
+  User: {{$user_input}}
+template_format: semantic-kernel
+execution_settings:
+  default:
+    temperature: 0.1
+    tool_call_behavior: auto_invoke_kernel_functions
