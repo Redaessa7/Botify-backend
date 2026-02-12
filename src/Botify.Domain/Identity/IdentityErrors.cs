@@ -9,6 +9,9 @@ namespace Botify.Domain.Identity
         // -----------------------
         public static Error EmailRequired =>
             Error.Validation("Identity.Email.Required", "Email is required.");
+        public static Error IdRequired =>
+    Error.Validation("Identity.Id.Required", "Id is required.");
+
 
         public static Error PasswordRequired =>
             Error.Validation("Identity.Password.Required", "Password is required.");

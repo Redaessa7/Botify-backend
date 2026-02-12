@@ -31,9 +31,8 @@ namespace Botify.Infrastructure.Persistence.Configurations
                    .HasConversion<string>(); // Stores 'Telegram' instead of '0' for readability
 
             builder.Property(x => x.CurrentSummary)
-                   .IsRequired(false)
-                   .HasColumnType("nvarchar(max)"); // Allows long bulleted lists of facts
-
+                   .IsRequired(false);
+ 
             builder.Property(x => x.MessageCount)
                    .HasDefaultValue(0);
 
