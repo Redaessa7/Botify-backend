@@ -2,6 +2,7 @@ using Botify.API.CrossCutting.Controllers;
 using Botify.API.CrossCutting.Extensions;
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Requests;
+using Botify.Application.Features.Auths.Requests;
 using Botify.Application.Services.Auths;
 using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
@@ -102,4 +103,22 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
 
         return Ok(userInfo);
     }
+
+    [HttpPost("check-old-password")]
+    [Authorize]
+    public async Task<IActionResult> CheckOldPassword([FromBody] CheckOldPasswordRequest request, CancellationToken ct)
+    {
+        var result = await authServices.CheckOldPasswordAsync(request, ct);
+        return result.Match(_ => Ok(new {isOld = _}), Problem);
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
+    {
+        var result = await authServices.ChangePasswordAsync(request, ct);
+        return result.Match(_ => Ok(new {}), Problem);
+    }
+
+
 }

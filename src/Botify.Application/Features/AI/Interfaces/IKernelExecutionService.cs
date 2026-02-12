@@ -1,6 +1,7 @@
 ﻿using Botify.Domain.Models.AI;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Customers;
+using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 
 namespace Botify.Application.Features.AI.Interfaces
@@ -15,5 +16,7 @@ namespace Botify.Application.Features.AI.Interfaces
         string Prompt,
         AIConfiguration Config,
         PluginTier PluginTier,
-        Customer? Customer);
+        Customer? Customer,
+        BotPlatform Platform,
+        string ChatId);
 }

@@ -1,0 +1,12 @@
+name: IntentRouter
+description: Classifies user input to route to the correct specialized expert.
+template: |
+  Classify the user's intent into exactly one of these categories:
+  - SALES: Buying products, checking prices, or placing orders.
+  - SUPPORT: Reporting issues, creating tickets, or complaining.
+  - INFO: Asking about the shop location, opening hours, or general info.
+  - ACCOUNT: Registering or updating profile details.
+
+  User Message: {{$user_input}}
+  Category:
+template_format: semantic-kernel

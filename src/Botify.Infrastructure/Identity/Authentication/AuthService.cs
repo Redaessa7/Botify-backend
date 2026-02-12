@@ -1,6 +1,7 @@
 using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Requests;
 using Botify.Application.CrossCutting.Responses;
+using Botify.Application.Features.Auths.Requests;
 using Botify.Application.Features.Merchants.Interfaces;
 using Botify.Application.Services.Auths;
 using Botify.Application.Services.Merchants.Requests;
@@ -19,14 +20,15 @@ public class AuthService(
         IMerchantService merchantService,
         ITokenProvider tokenProvider,
         ApplicationDbContext dbContext,
-        IFileService fileService) : IAuthServices
+        IFileService fileService,
+        IUser user) : IAuthServices
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly IMerchantService _merchantService = merchantService;
     private readonly ITokenProvider _tokenProvider = tokenProvider;
     private readonly IFileService _fileService = fileService;
     private readonly ApplicationDbContext _dbContext = dbContext;
-
+    private readonly IUser _user = user;
     // --------------------------
     // Login
     // --------------------------
@@ -164,4 +166,53 @@ public class AuthService(
         await _dbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task<Result<bool>> CheckOldPasswordAsync(CheckOldPasswordRequest request, CancellationToken ct = default)
+    {
+        if(_user.Id is null)
+            return IdentityErrors.IdRequired; 
+        var user = await _userManager.FindByIdAsync(_user.Id);
+
+        // Get current user from context
+         if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.OldPassword);
+        if (!passwordValid)
+            return IdentityErrors.InvalidCredentials;
+
+        return true;
+    }
+    public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken ct = default)
+    {
+        if (request.NewPassword != request.ConfirmPassword)
+            return Error.Validation("Password.Mismatch", "New password and confirm password do not match.");
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        var oldPasswordValid = await _userManager.CheckPasswordAsync(user, request.OldPassword);
+        if (!oldPasswordValid)
+            return IdentityErrors.InvalidCredentials;
+
+        var result = await _userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+
+            return errors;
+        }
+
+        // Invalidate refresh tokens for security
+        var tokens = _dbContext.RefreshTokens.Where(t => t.UserId == user.Id);
+        foreach (var token in tokens)
+            token.Revoke();
+        await _dbContext.SaveChangesAsync(ct);
+
+        return true;
+    }
+
 }

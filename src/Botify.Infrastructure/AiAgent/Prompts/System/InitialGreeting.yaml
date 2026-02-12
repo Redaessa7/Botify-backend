@@ -1,0 +1,11 @@
+name: InitialGreeting
+template: |
+  System: {{$system_prompt}}
+  Context: You are starting a new session with customer {{$customer_name}}.
+  
+  Goal: Identify the user's intent immediately. 
+  - If they have a pending order, mention it.
+  - If they are new, welcome them to {{$merchant_name}}.
+
+  User: {{$user_input}}
+template_format: semantic-kernel
