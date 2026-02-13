@@ -11,6 +11,9 @@ public interface IAuthServices
      Task<Result<bool>> CheckOldPasswordAsync(CheckOldPasswordRequest request, CancellationToken ct = default);
     Task<Result<TokenResponse>> RegisterAsync(RegisterRequest request);
     Task<Result<bool>> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken ct = default);
+    Task<Result<string>> VerifyOtpAsync(VerifyOtpRequest request, CancellationToken ct = default);
+    Task<Result<bool>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default);
+     Task<Result<bool>> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default);
     Task<Result<TokenResponse>> RefreshTokenAsync(string refreshToken);
 
     Task<Result<bool>> LogoutAsync(string refreshToken);

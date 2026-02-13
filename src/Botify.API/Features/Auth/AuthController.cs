@@ -7,6 +7,7 @@ using Botify.Application.Services.Auths;
 using Botify.Domain.ResultPattern;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Botify.API.Features.Auth;
 
@@ -15,7 +16,6 @@ namespace Botify.API.Features.Auth;
 public class AuthController(IAuthServices authServices, IUser user) : ApiController
 {
     private readonly IUser _user = user;
-
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
@@ -118,6 +118,38 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
     {
         var result = await authServices.ChangePasswordAsync(request, ct);
         return result.Match(_ => Ok(new {}), Problem);
+    }
+
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct)
+    {
+        var result = await authServices.ForgotPasswordAsync(request, ct);
+        return result.Match(_ => Ok(new { }), Problem);
+    }
+
+    [HttpPost("verify-otp")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request, CancellationToken ct)
+    {
+        var result = await authServices.VerifyOtpAsync(request, ct);
+        return result.Match(_ => Ok(new {isVerify = _}), Problem);
+    }
+
+    [HttpPost("reset-password")]
+    [Authorize(Policy = "ResetTokenPolicy")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken ct)
+    {
+        // Email and ResetToken will come from headers, not body
+        var email = Request.Headers["X-Email"].ToString();
+        var resetToken = Request.Headers["X-Reset-Token"].ToString();
+        if(string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetToken))
+            return Problem([Error.Unauthorized("ResetToken.Invalid", "Email or reset token is missing in headers")]);
+        // Override values in request with header values
+        var updatedRequest = request with { Email = email, ResetToken = resetToken };
+
+        var result = await authServices.ResetPasswordAsync(updatedRequest, ct);
+        return result.Match(_ => Ok(new { message = "Password reset successfully" }), Problem);
     }
 
 
