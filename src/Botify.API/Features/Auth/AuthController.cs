@@ -128,13 +128,21 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         return result.Match(_ => Ok(new { }), Problem);
     }
 
+    [HttpPost("generate-email-change-otp")]
+    [Authorize]
+    public async Task<IActionResult> GenerateEmailChangeOtp(GenerateEmailChangeOtpRequest request, CancellationToken ct)
+    {
+        var result = await authServices.GenerateEmailChangeOtpAsync(request, ct);
+        return result.Match(_ => Ok(new { token = _ }), Problem);
+    }
+
     [HttpPost("verify-otp")]
     [AllowAnonymous]
     public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request, CancellationToken ct)
     {
         var result = await authServices.VerifyOtpAsync(request, ct);
        
-        return result.Match(_ => Ok(new { isVerify = string.IsNullOrWhiteSpace(_), token = _ }), Problem);
+        return result.Match(_ => Ok(new {  token = _ }), Problem);
     }
 
     [HttpPost("reset-password")]

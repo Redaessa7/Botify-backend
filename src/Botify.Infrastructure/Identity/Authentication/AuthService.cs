@@ -221,21 +221,32 @@ public class AuthService(
     }
     public async Task<Result<bool>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
     {
-        // Always return generic response to prevent user enumeration
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null)
             return true; // generic success
 
-        // Generate OTP
-        var otp = new Random().Next(100000, 999999).ToString();
-        var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) };
-        // Store OTP in Redis with TTL (5-10 minutes)
-        await _redis.SetStringAsync($"otp:{request.Email}", otp, options, ct);
+        var otp = await StoreOtpAsync($"otp:{request.Email}", ct);
 
-        // Send OTP via email/SMS
         await _emailService.SendOtpAsync(request.Email, otp);
 
         return true;
+    }
+
+    public async Task<Result<string>> GenerateEmailChangeOtpAsync(GenerateEmailChangeOtpRequest request, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByEmailAsync(request.OldEmail);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+        if (!passwordValid || !user.Email.Equals(request.OldEmail, StringComparison.OrdinalIgnoreCase))
+            return IdentityErrors.InvalidCredentials;
+
+        var otp = await StoreOtpAsync($"otp:{request.NewEmail}", ct);
+
+        await _emailService.SendOtpAsync(request.NewEmail, otp);
+
+        return otp;
     }
     public async Task<Result<string>> VerifyOtpAsync(VerifyOtpRequest request, CancellationToken ct = default)
     {
@@ -330,6 +341,26 @@ public class AuthService(
         await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
 
         return true;
+    }
+
+    private string GenerateOtp()
+    {
+        return new Random().Next(100000, 999999).ToString();
+    }
+    private async Task<string> StoreOtpAsync(string key, CancellationToken ct = default)
+    {
+        // Generate a 6-digit OTP
+        var otp = GenerateOtp();
+
+        // Store OTP in Redis with TTL (10 minutes)
+        var options = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        };
+
+        await _redis.SetStringAsync(key, otp, options, ct);
+
+        return otp;
     }
 
 }
