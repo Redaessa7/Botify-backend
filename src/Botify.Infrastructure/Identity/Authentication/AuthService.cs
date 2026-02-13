@@ -282,4 +282,54 @@ public class AuthService(
         return true;
     }
 
+    public async Task<Result<bool>> UpdateEmailAsync(UpdateEmailRequest request, CancellationToken ct = default)
+    {
+        // Validate input
+        if (string.IsNullOrWhiteSpace(request.NewEmail) || string.IsNullOrWhiteSpace(request.OldEmail))
+            return Error.Validation("Email.Required", "New email and old email are required.");
+
+        // Validate reset token
+        var storedToken = await _redis.GetStringAsync($"reset:{request.NewEmail}", ct);
+        if (storedToken is null || storedToken != request.ResetToken)
+            return Error.Validation("ResetToken.Invalid", "Invalid or expired reset token.");
+
+        // If old and new email are the same, just clear token
+        if (request.OldEmail.Equals(request.NewEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
+            return true;
+        }
+
+        // Ensure new email is not already taken
+        if (await _dbContext.Users.AnyAsync(u => u.Email == request.NewEmail, ct))
+            return IdentityErrors.EmailAlreadyExists;
+
+        // Find user by old email
+        var user = await _userManager.FindByEmailAsync(request.OldEmail);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        // Validate current password
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+        if (!passwordValid || !user.Email.Equals(request.OldEmail, StringComparison.OrdinalIgnoreCase))
+            return IdentityErrors.InvalidCredentials;
+
+        // Generate and apply email change token
+        var token = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
+        var result = await _userManager.ChangeEmailAsync(user, request.NewEmail, token);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
+
+        // Clear reset token after successful change
+        await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
+
+        return true;
+    }
+
 }
