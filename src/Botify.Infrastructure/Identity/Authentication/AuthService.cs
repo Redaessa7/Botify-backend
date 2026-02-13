@@ -12,15 +12,18 @@ using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Botify.Infrastructure.Identity.Authentication;
 
 public class AuthService(
         UserManager<ApplicationUser> userManager,
+        IDistributedCache redis,
         IMerchantService merchantService,
         ITokenProvider tokenProvider,
         ApplicationDbContext dbContext,
         IFileService fileService,
+        IEmailSender emailService,
         IUser user) : IAuthServices
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
@@ -29,6 +32,8 @@ public class AuthService(
     private readonly IFileService _fileService = fileService;
     private readonly ApplicationDbContext _dbContext = dbContext;
     private readonly IUser _user = user;
+    private readonly IDistributedCache _redis = redis;
+    private readonly IEmailSender _emailService = emailService;
     // --------------------------
     // Login
     // --------------------------
@@ -211,6 +216,68 @@ public class AuthService(
         foreach (var token in tokens)
             token.Revoke();
         await _dbContext.SaveChangesAsync(ct);
+
+        return true;
+    }
+    public async Task<Result<bool>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
+    {
+        // Always return generic response to prevent user enumeration
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+            return true; // generic success
+
+        // Generate OTP
+        var otp = new Random().Next(100000, 999999).ToString();
+        var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) };
+        // Store OTP in Redis with TTL (5-10 minutes)
+        await _redis.SetStringAsync($"otp:{request.Email}", otp, options, ct);
+
+        // Send OTP via email/SMS
+        await _emailService.SendOtpAsync(request.Email, otp);
+
+        return true;
+    }
+    public async Task<Result<string>> VerifyOtpAsync(VerifyOtpRequest request, CancellationToken ct = default)
+    {
+        var storedOtp = await _redis.GetStringAsync($"otp:{request.Email}");
+        if (storedOtp is null || storedOtp != request.Otp)
+            return Error.Validation("Otp.Invalid", "Invalid or expired OTP.");
+
+        // Generate reset token (GUID)
+        var resetToken = Guid.NewGuid().ToString("N");
+        var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) };
+
+        // Store reset token in Redis with TTL (15 minutes)
+        await _redis.SetStringAsync($"reset:{request.Email}", resetToken, options,ct);
+
+        return resetToken;
+    }
+    public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default)
+    {
+        if (request.NewPassword != request.ConfirmPassword)
+            return Error.Validation("Password.Mismatch", "New password and confirm password do not match.");
+
+        var storedToken = await _redis.GetStringAsync($"reset:{request.Email}");
+        if (storedToken is null || storedToken != request.ResetToken)
+            return Error.Validation("ResetToken.Invalid", "Invalid or expired reset token.");
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
+
+        // Delete reset token immediately
+        await _redis.RemoveAsync($"reset:{request.Email}");
 
         return true;
     }

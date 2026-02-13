@@ -8,6 +8,7 @@ using Botify.Application.CrossCutting.Interfaces;
 using Botify.Application.CrossCutting.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -36,7 +37,8 @@ internal static class DependencyInjection
             .AddCorsConfiguration(env)
             .AddApiVersioningServices()
             .AddApiDocumentation()
-            .AddResponseCompressionsServices();
+            .AddResponseCompressionsServices()
+            .AddFilters();
     }
 
     private static IServiceCollection AddResponseCompressionsServices(this IServiceCollection services)
@@ -141,6 +143,17 @@ internal static class DependencyInjection
         return services;
     }
 
+    private static IServiceCollection AddFilters(this IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("ResetTokenPolicy", policy =>
+                policy.Requirements.Add(new ResetTokenRequirement()));
+        });
+
+        services.AddSingleton<IAuthorizationHandler, ResetTokenHandler>();
+        return services;
+    }
     private static IServiceCollection AddOptionsConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtConstants.OptionsSection));

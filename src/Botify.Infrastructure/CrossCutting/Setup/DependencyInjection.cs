@@ -6,6 +6,8 @@ using Botify.Application.Features.Webhooks;
 using Botify.Application.Services.Auths;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Merchants.ValueObjects;
+using Botify.Domain.Models.Shops;
+using Botify.Infrastructure.AiAgent.Plugins.Types;
 using Botify.Infrastructure.AIServices;
 using Botify.Infrastructure.AIServices.AIConnectors.Connectors;
 using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
@@ -13,6 +15,7 @@ using Botify.Infrastructure.AIServices.Plugins.Types;
 using Botify.Infrastructure.AIServices.Strategies;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 using Botify.Infrastructure.CrossCutting.Services.Commons;
+using Botify.Infrastructure.CrossCutting.Services.EmailSenders;
 using Botify.Infrastructure.CrossCutting.Services.FileServices;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Identity.Authentication;
@@ -28,7 +31,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
-using Botify.Infrastructure.AiAgent.Plugins.Types;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -42,6 +44,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddFileServices();
             services.AddBotPlatformServices(configuration);
             services.AddAIServices();
+            services.AddRedis(configuration)
+                    .AddEmailServices(configuration);
             return services;
         }
 
@@ -205,6 +209,30 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
+        #endregion
+        #region Redeis
+        private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Example of adding Redis caching
+            services.AddStackExchangeRedisCache(options =>
+            {
+                string con = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+                options.Configuration = con;
+            });
+
+
+            return services;
+        }
+        #endregion
+        #region Email Services
+        private static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<SmtpSettings>(
+                configuration.GetSection("SmtpSettings"));
+
+            services.AddTransient<IEmailSender, SmtpEmailSender>();
+            return services;
+        }
         #endregion
     }
 }
