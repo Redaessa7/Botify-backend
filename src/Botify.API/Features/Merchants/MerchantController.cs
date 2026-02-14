@@ -53,8 +53,15 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         return result.Match(Ok, Problem);
     }
 
-    // -------------------- PATCH (Update) --------------------
 
+    // -------------------- PATCH (Update) --------------------
+    [HttpPatch("{merchantId:guid}/update-basic-info")]
+    [Authorize]
+    public async Task<IActionResult> UpdateBasicInfoAsync(Guid merchantId, UpdateMerchantBasicInfoRequest request, CancellationToken ct)
+    {
+        var result = await _merchantService.UpdateBasicInfoAsync(merchantId, request, ct);
+        return result.Match(_ => Ok(new {}), Problem);
+    }
     [HttpPatch("{merchantId:guid}/preferences")]
     [Authorize]
     public async Task<IActionResult> UpdatePreferencesAsync(Guid merchantId, [FromBody] int preferences, CancellationToken ct)

@@ -328,7 +328,6 @@ public class AuthService(
         // Generate and apply email change token
         var token = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
         var result = await _userManager.ChangeEmailAsync(user, request.NewEmail, token);
-
         if (!result.Succeeded)
         {
             var errors = result.Errors
@@ -336,9 +335,29 @@ public class AuthService(
                 .ToList();
             return errors;
         }
+        var usernameResult = await _userManager.SetUserNameAsync(user, request.NewEmail);
 
+        if (!usernameResult.Succeeded)
+        {
+            var errors = usernameResult.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
         // Clear reset token after successful change
         await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
+
+
+        var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.Email == request.OldEmail, ct);
+        if (profile != null)
+        {
+           var profileResult =  profile.UpdateEmail(request.NewEmail);
+
+           if(!profileResult.IsSuccess)
+                return profileResult.Errors;
+
+            await _dbContext.SaveChangesAsync(ct);
+        }
 
         return true;
     }

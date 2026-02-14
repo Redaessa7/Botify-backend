@@ -109,6 +109,16 @@ namespace Botify.Domain.Models.Merchants
             return Result.Success;
         }
 
+        public Result<Updated> UpdateBasicInfo(string firstName, string lastName, string? bio, string? profileImageUrl)
+        {
+            var result = Profile.UpdateBasicInfo(firstName, lastName, bio, profileImageUrl);
+
+            if(result.IsError)
+                return result.Errors;
+
+            return result;
+        }
+
         /// <summary>
         /// Determines the current onboarding step based on merchant state.
         /// </summary>

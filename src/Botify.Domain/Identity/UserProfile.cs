@@ -37,7 +37,14 @@ public sealed class UserProfile : AuditableEntity
         TimeZone = timeZone;
         ProfileImageUrl = profileImageUrl;
     }
-
+    public Result<Updated> UpdateBasicInfo(string firstName, string lastName, string? bio, string? profileImageUrl)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        Bio = bio;
+        ProfileImageUrl = profileImageUrl;
+        return Result.Updated;
+    }
     public static Result<UserProfile> Create(
         Guid id,
         string identityUserId,
