@@ -221,21 +221,32 @@ public class AuthService(
     }
     public async Task<Result<bool>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
     {
-        // Always return generic response to prevent user enumeration
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null)
             return true; // generic success
 
-        // Generate OTP
-        var otp = new Random().Next(100000, 999999).ToString();
-        var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) };
-        // Store OTP in Redis with TTL (5-10 minutes)
-        await _redis.SetStringAsync($"otp:{request.Email}", otp, options, ct);
+        var otp = await StoreOtpAsync($"otp:{request.Email}", ct);
 
-        // Send OTP via email/SMS
         await _emailService.SendOtpAsync(request.Email, otp);
 
         return true;
+    }
+
+    public async Task<Result<string>> GenerateEmailChangeOtpAsync(GenerateEmailChangeOtpRequest request, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByEmailAsync(request.OldEmail);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+        if (!passwordValid || !user.Email.Equals(request.OldEmail, StringComparison.OrdinalIgnoreCase))
+            return IdentityErrors.InvalidCredentials;
+
+        var otp = await StoreOtpAsync($"otp:{request.NewEmail}", ct);
+
+        await _emailService.SendOtpAsync(request.NewEmail, otp);
+
+        return otp;
     }
     public async Task<Result<string>> VerifyOtpAsync(VerifyOtpRequest request, CancellationToken ct = default)
     {
@@ -280,6 +291,95 @@ public class AuthService(
         await _redis.RemoveAsync($"reset:{request.Email}");
 
         return true;
+    }
+
+    public async Task<Result<bool>> UpdateEmailAsync(UpdateEmailRequest request, CancellationToken ct = default)
+    {
+        // Validate input
+        if (string.IsNullOrWhiteSpace(request.NewEmail) || string.IsNullOrWhiteSpace(request.OldEmail))
+            return Error.Validation("Email.Required", "New email and old email are required.");
+
+        // Validate reset token
+        var storedToken = await _redis.GetStringAsync($"reset:{request.NewEmail}", ct);
+        if (storedToken is null || storedToken != request.ResetToken)
+            return Error.Validation("ResetToken.Invalid", "Invalid or expired reset token.");
+
+        // If old and new email are the same, just clear token
+        if (request.OldEmail.Equals(request.NewEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
+            return true;
+        }
+
+        // Ensure new email is not already taken
+        if (await _dbContext.Users.AnyAsync(u => u.Email == request.NewEmail, ct))
+            return IdentityErrors.EmailAlreadyExists;
+
+        // Find user by old email
+        var user = await _userManager.FindByEmailAsync(request.OldEmail);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        // Validate current password
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+        if (!passwordValid || !user.Email.Equals(request.OldEmail, StringComparison.OrdinalIgnoreCase))
+            return IdentityErrors.InvalidCredentials;
+
+        // Generate and apply email change token
+        var token = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
+        var result = await _userManager.ChangeEmailAsync(user, request.NewEmail, token);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
+        var usernameResult = await _userManager.SetUserNameAsync(user, request.NewEmail);
+
+        if (!usernameResult.Succeeded)
+        {
+            var errors = usernameResult.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
+        // Clear reset token after successful change
+        await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
+
+
+        var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.Email == request.OldEmail, ct);
+        if (profile != null)
+        {
+           var profileResult =  profile.UpdateEmail(request.NewEmail);
+
+           if(!profileResult.IsSuccess)
+                return profileResult.Errors;
+
+            await _dbContext.SaveChangesAsync(ct);
+        }
+
+        return true;
+    }
+
+    private string GenerateOtp()
+    {
+        return new Random().Next(100000, 999999).ToString();
+    }
+    private async Task<string> StoreOtpAsync(string key, CancellationToken ct = default)
+    {
+        // Generate a 6-digit OTP
+        var otp = GenerateOtp();
+
+        // Store OTP in Redis with TTL (10 minutes)
+        var options = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        };
+
+        await _redis.SetStringAsync(key, otp, options, ct);
+
+        return otp;
     }
 
 }

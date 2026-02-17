@@ -390,5 +390,24 @@ public sealed class MerchantService : IMerchantService
         await _db.SaveChangesAsync(ct);
         return Result.Success; 
     }
+
+    public async Task<Result<Updated>> UpdateBasicInfoAsync(Guid merchantId, UpdateMerchantBasicInfoRequest request, CancellationToken ct = default)
+    {
+        var merchant = await _db.Merchants
+            .Include(m => m.Profile)
+            .FirstOrDefaultAsync(m => m.Id == merchantId, ct);
+
+        if (merchant is null) 
+            return MerchantErrors.NotFound;
+
+        var result = merchant.UpdateBasicInfo(request.FirstName, request.LastName, request.Bio, request.ProfileImageUrl);
+
+        if (!result.IsSuccess)
+            return result.Errors;
+
+        await _db.SaveChangesAsync(ct);
+
+        return Result.Updated;
+    }
     #endregion
 }

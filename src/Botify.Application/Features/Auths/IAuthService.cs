@@ -14,6 +14,9 @@ public interface IAuthServices
     Task<Result<string>> VerifyOtpAsync(VerifyOtpRequest request, CancellationToken ct = default);
     Task<Result<bool>> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default);
      Task<Result<bool>> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken ct = default);
+    Task<Result<bool>> UpdateEmailAsync(UpdateEmailRequest request, CancellationToken ct = default);
+    Task<Result<string>> GenerateEmailChangeOtpAsync(GenerateEmailChangeOtpRequest request, CancellationToken ct = default);
+
     Task<Result<TokenResponse>> RefreshTokenAsync(string refreshToken);
 
     Task<Result<bool>> LogoutAsync(string refreshToken);

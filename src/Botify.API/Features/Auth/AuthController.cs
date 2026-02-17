@@ -128,12 +128,21 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         return result.Match(_ => Ok(new { }), Problem);
     }
 
+    [HttpPost("generate-email-change-otp")]
+    [Authorize]
+    public async Task<IActionResult> GenerateEmailChangeOtp(GenerateEmailChangeOtpRequest request, CancellationToken ct)
+    {
+        var result = await authServices.GenerateEmailChangeOtpAsync(request, ct);
+        return result.Match(_ => Ok(new { token = _ }), Problem);
+    }
+
     [HttpPost("verify-otp")]
     [AllowAnonymous]
     public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request, CancellationToken ct)
     {
         var result = await authServices.VerifyOtpAsync(request, ct);
-        return result.Match(_ => Ok(new {isVerify = _}), Problem);
+       
+        return result.Match(_ => Ok(new {  token = _ }), Problem);
     }
 
     [HttpPost("reset-password")]
@@ -152,5 +161,19 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         return result.Match(_ => Ok(new { message = "Password reset successfully" }), Problem);
     }
 
+    [HttpPost("update-email")]
+    [Authorize(Policy = "ResetTokenPolicy")]
+    public async Task<IActionResult> UpdateEmailAsync(UpdateEmailRequest request,CancellationToken ct)
+    {
+        // Email and ResetToken will come from headers, not body
+        var email = Request.Headers["X-Email"].ToString();
+        var resetToken = Request.Headers["X-Reset-Token"].ToString();
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetToken))
+            return Problem([Error.Unauthorized("ResetToken.Invalid", "Email or reset token is missing in headers")]);
 
+        var updatedRequest =  request with { NewEmail = email, ResetToken = resetToken };
+
+        var result = await authServices.UpdateEmailAsync(updatedRequest, ct);
+        return result.Match(_ => Ok(new { message = "Password reset successfully" }), Problem);
+    }
 }

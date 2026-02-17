@@ -17,6 +17,8 @@ namespace Botify.Application.Features.Merchants.Interfaces
         Task<Result<Success>> DeleteBotAsync(Guid merchantId, Guid botId, CancellationToken ct = default);
         Task<Result<bool>> CheckShopExistsAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<Success>> UpdatePreferencesAsync(Guid merchantId, QuickActions preferences, CancellationToken ct = default);
+        Task<Result<Updated>> UpdateBasicInfoAsync(Guid merchantId,  UpdateMerchantBasicInfoRequest request, CancellationToken ct = default);
+
         Task<Result<ShopResponse>> GetShopAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<List<GetListBotResponse>>> GetBotsAsync(Guid merchantId, CancellationToken cancellationToken = default);
         Task<Result<BotDetailsResponse>> GetBotByIdAsync(Guid merchantId, Guid botId, CancellationToken ct);
