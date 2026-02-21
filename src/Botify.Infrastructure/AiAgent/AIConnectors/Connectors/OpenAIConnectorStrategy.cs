@@ -11,7 +11,7 @@ namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
 {
     internal class OpenAIConnectorStrategy : IAIConnectorStrategy
     {
-        public string PlatformKey => AIPlatform.OpenAI.ToString();
+        public AIPlatform PlatformKey => AIPlatform.OpenAI;
 
         public async Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
         {

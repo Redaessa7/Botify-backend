@@ -9,7 +9,7 @@ namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
 {
     internal class GoogleConnectorStrategy : IAIConnectorStrategy
     {
-        public string PlatformKey => AIPlatform.GooglePaLM.ToString();
+        public AIPlatform PlatformKey => AIPlatform.GooglePaLM;
 
         public async Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
         {

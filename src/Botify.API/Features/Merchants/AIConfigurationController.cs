@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Botify.Api.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("api/merchants/{merchantId:guid}/ai-configurations/")]
+    [Route("api/merchants/{merchantId:guid}/ai-configurations")]
     public sealed class AIConfigurationController : ApiController
     {
         private readonly IAIConfigurationService _service;

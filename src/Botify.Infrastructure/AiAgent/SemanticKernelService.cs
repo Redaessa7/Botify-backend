@@ -26,8 +26,7 @@ namespace Botify.Infrastructure.AIServices
         private readonly ApplicationDbContext _db;
 
         // Root path for dynamic prompt discovery
-        private static readonly string PromptRoot = Path.Combine(AppContext.BaseDirectory, "Prompts");
-
+        private static readonly string PromptRoot = Path.Combine(AppContext.BaseDirectory, "AiAgent", "Prompts");
         public SemanticKernelService(
             IServiceProvider serviceProvider,
             IEnumerable<IAIConnectorStrategy> connectorStrategies,
@@ -40,6 +39,8 @@ namespace Botify.Infrastructure.AIServices
 
         public async Task<Result<string>> ExecuteAsync(KernelExecutionRequest request, CancellationToken ct)
         {
+
+
             var kernel = BuildKernel(request.Config);
             LoadPlugins(kernel, GetPluginNames(request.PluginTier));
 
@@ -132,7 +133,27 @@ namespace Botify.Infrastructure.AIServices
 
             if (session.MessageCount >= 10)
             {
-                _ = Task.Run(() => UpdateSummaryAsync(request.ChatId, request.Platform, history, session.CurrentSummary, request.Config, CancellationToken.None));
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceProvider.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    var kernelService = new SemanticKernelService(
+                        scope.ServiceProvider,
+                        scope.ServiceProvider.GetServices<IAIConnectorStrategy>(),
+                        db
+                    );
+
+                    await kernelService.UpdateSummaryAsync(
+                        request.ChatId,
+                        request.Platform,
+                        history,
+                        session.CurrentSummary,
+                        request.Config,
+                        CancellationToken.None
+                    );
+                });
+
             }
         }
 
@@ -143,7 +164,7 @@ namespace Botify.Infrastructure.AIServices
         private Kernel BuildKernel(AIConfiguration config)
         {
             var builder = Kernel.CreateBuilder();
-            var strategy = _connectorStrategies.FirstOrDefault(s => s.PlatformKey.Equals(config.Platform.ToString(), StringComparison.OrdinalIgnoreCase));
+            var strategy = _connectorStrategies.FirstOrDefault(s => s.PlatformKey.Equals(config.Platform));
 
             if (strategy == null) throw new NotSupportedException($"Platform '{config.Platform}' not supported.");
 
@@ -203,6 +224,7 @@ namespace Botify.Infrastructure.AIServices
             AIPlatform.OpenAI => new OpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
             AIPlatform.AzureOpenAI => new AzureOpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
             AIPlatform.GooglePaLM => new GeminiPromptExecutionSettings { ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
+            AIPlatform.GitHub => new OpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
             _ => throw new NotSupportedException()
         };
 
@@ -218,7 +240,7 @@ namespace Botify.Infrastructure.AIServices
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var kernel = BuildKernel(config);
 
-                string yamlPath = Path.Combine(PromptRoot, "System", "FactSummarizer.yaml");
+                string yamlPath = Path.Combine(PromptRoot, "System", "Summarizer.yaml");
                 var dialogue = string.Join("\n", history.Where(m => m.Role != AuthorRole.System).TakeLast(10).Select(m => $"{m.Role}: {m.Content}"));
 
                 var result = await kernel.InvokeAsync(kernel.CreateFunctionFromPromptYaml(await File.ReadAllTextAsync(yamlPath, ct)), new KernelArguments

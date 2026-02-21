@@ -1,4 +1,4 @@
-name: FactSummarizer
+name: Summarizer
 template: |
   System: You are a memory-compacting agent. 
   Task: Review the recent conversation and update the "Current Summary" with new facts.
