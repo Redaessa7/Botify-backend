@@ -275,18 +275,6 @@ public class AuthService(
         if(user is null) 
             return IdentityErrors.UserNotFound;
 
-        if (!user.EmailConfirmed)
-        {
-            user.EmailConfirmed = true;
-           var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                return result.Errors
-                    .Select(e => Error.Validation(e.Code, e.Description))
-                    .ToList();
-            }
-        }
-
         // Generate reset token (GUID)
         var resetToken = Guid.NewGuid().ToString("N");
         var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) };
@@ -362,6 +350,7 @@ public class AuthService(
         // Generate and apply email change token
         var token = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
         var result = await _userManager.ChangeEmailAsync(user, request.NewEmail, token);
+        
         if (!result.Succeeded)
         {
             var errors = result.Errors
@@ -369,6 +358,7 @@ public class AuthService(
                 .ToList();
             return errors;
         }
+        user.EmailConfirmed = true;// Since OTP verified, we can consider email as confirmed 
         var usernameResult = await _userManager.SetUserNameAsync(user, request.NewEmail);
 
         if (!usernameResult.Succeeded)
@@ -394,6 +384,33 @@ public class AuthService(
         }
 
         return true;
+    }
+    public async Task<Result<Success>> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct = default)
+    {
+        // Check reset token in Redis
+        var storedToken = await _redis.GetStringAsync($"reset:{request.Email}", ct);
+        if (storedToken is null || storedToken != request.ResetToken)
+            return Error.Validation("ResetToken.Invalid", "Invalid or expired reset token.");
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        // Confirm email
+        user.EmailConfirmed = true;
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = updateResult.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
+
+        // Remove reset token after success
+        await _redis.RemoveAsync($"reset:{request.Email}", ct);
+
+        return Result.Success;
     }
 
     private string GenerateOtp()
