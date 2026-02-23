@@ -144,6 +144,23 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
        
         return result.Match(_ => Ok(new {  token = _ }), Problem);
     }
+    [HttpPost("verify-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmail(CancellationToken ct)
+    {
+        // Get values from headers
+        var email = Request.Headers["X-Email"].ToString();
+        var resetToken = Request.Headers["X-Reset-Token"].ToString();
+
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetToken))
+            return Problem([Error.Unauthorized("ResetToken.Invalid", "Email or reset token is missing in headers")]);
+
+        var request = new VerifyEmailRequest(email, resetToken);
+
+        var result = await authServices.VerifyEmailAsync(request, ct);
+
+        return result.Match(_ => Ok(new { message = "Email verified successfully" }), Problem);
+    }
 
     [HttpPost("reset-password")]
     [Authorize(Policy = "ResetTokenPolicy")]

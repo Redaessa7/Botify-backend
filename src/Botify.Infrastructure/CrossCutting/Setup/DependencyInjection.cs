@@ -165,8 +165,8 @@ namespace Microsoft.Extensions.DependencyInjection
             // {
             //     services.AddKeyedScoped(typeof(IPlugin), type.Name, type);
             // }
-            services.AddKeyedScoped<IPlugin,FreePlugins>("FreePlugins");
-            services.AddKeyedScoped<IPlugin,ProPlugins>("ProPlugins");
+            services.AddKeyedTransient<IPlugin,FreePlugins>("FreePlugins");
+            services.AddKeyedTransient<IPlugin,ProPlugins>("ProPlugins");
 
             return services;
         }
@@ -175,10 +175,13 @@ namespace Microsoft.Extensions.DependencyInjection
             // 1. Setup Logging BEFORE the Kernel
             services.AddLogging(builder =>
             {
+                // Console output
                 builder.AddConsole();
-                builder.SetMinimumLevel(LogLevel.Debug); // Set to Debug to see tool calls and prompt rendering
 
-                // Optional: Filter out noisy logs from other libraries
+                // Minimum level: Debug to capture detailed kernel activity
+                builder.SetMinimumLevel(LogLevel.Debug);
+
+                // Optional filters to reduce noise from other libraries
                 builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Information);
                 builder.AddFilter("Microsoft.SemanticKernel.Connectors", LogLevel.Debug);
             });
@@ -187,6 +190,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSemanticKernelPlugins();
             services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GoogleConnectorStrategy>();
+            services.AddScoped<IAIConnectorStrategy, GitHubConnectorStrategy>();
             services.AddScoped<IKernelExecutionService, SemanticKernelService>();
 
             // AI Platform Strategies

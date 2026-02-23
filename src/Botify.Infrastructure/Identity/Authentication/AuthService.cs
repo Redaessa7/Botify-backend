@@ -47,6 +47,13 @@ public class AuthService(
         if (!passwordValid)
             return IdentityErrors.InvalidCredentials;
 
+        if(user.EmailConfirmed == false)
+        {
+            await StoreOtpAsync($"otp:{request.Email}");
+            await _emailService.SendOtpAsync(request.Email, await _redis.GetStringAsync($"otp:{request.Email}"));
+
+            return Error.Validation("Email.NotConfirmed", "Email not confirmed. OTP sent to email for verification.");
+        }
         var roles = await _userManager.GetRolesAsync(user);
 
         var generateTokenRequest = new GenerateTokenRequest
@@ -108,7 +115,8 @@ public class AuthService(
         {
             Email = request.Email,
             UserName = request.Email,
-            PhoneNumber = request.Phone
+            PhoneNumber = request.Phone,
+            EmailConfirmed = false
         };
 
         var created = await _userManager.CreateAsync(user, request.Password);
@@ -155,6 +163,10 @@ public class AuthService(
             Roles = roles.ToList()
         };
 
+        // 6. Generate and send OTP
+        var otp = await StoreOtpAsync($"otp:{request.Email}");
+        await _emailService.SendOtpAsync(request.Email, otp);
+
         return await _tokenProvider.GenerateTokenAsync(generateTokenRequest, default);
     }
     // --------------------------
@@ -184,7 +196,7 @@ public class AuthService(
 
         var passwordValid = await _userManager.CheckPasswordAsync(user, request.OldPassword);
         if (!passwordValid)
-            return IdentityErrors.InvalidCredentials;
+            return Error.Validation("Password.NotValid", "Invalid password.");
 
         return true;
     }
@@ -199,7 +211,7 @@ public class AuthService(
 
         var oldPasswordValid = await _userManager.CheckPasswordAsync(user, request.OldPassword);
         if (!oldPasswordValid)
-            return IdentityErrors.InvalidCredentials;
+            return IdentityErrors.InvalidPassowrd;
 
         var result = await _userManager.ChangePasswordAsync(user, request.OldPassword, request.NewPassword);
         if (!result.Succeeded)
@@ -242,7 +254,12 @@ public class AuthService(
         if (!passwordValid || !user.Email.Equals(request.OldEmail, StringComparison.OrdinalIgnoreCase))
             return IdentityErrors.InvalidCredentials;
 
-        var otp = await StoreOtpAsync($"otp:{request.NewEmail}", ct);
+       var isEmailTaken = await _dbContext.Users.AnyAsync(u => u.Email.ToLower() == request.NewEmail.ToLower(), ct);
+
+       if(isEmailTaken)
+            return IdentityErrors.EmailAlreadyExists;
+
+        var otp = await StoreOtpAsync($"otp:{request.OldEmail}", ct);
 
         await _emailService.SendOtpAsync(request.NewEmail, otp);
 
@@ -253,6 +270,10 @@ public class AuthService(
         var storedOtp = await _redis.GetStringAsync($"otp:{request.Email}");
         if (storedOtp is null || storedOtp != request.Otp)
             return Error.Validation("Otp.Invalid", "Invalid or expired OTP.");
+        var user = await _userManager.FindByEmailAsync(request.Email);
+
+        if(user is null) 
+            return IdentityErrors.UserNotFound;
 
         // Generate reset token (GUID)
         var resetToken = Guid.NewGuid().ToString("N");
@@ -260,6 +281,7 @@ public class AuthService(
 
         // Store reset token in Redis with TTL (15 minutes)
         await _redis.SetStringAsync($"reset:{request.Email}", resetToken, options,ct);
+        await _redis.RemoveAsync($"otp:{request.Email}", ct);
 
         return resetToken;
     }
@@ -328,6 +350,7 @@ public class AuthService(
         // Generate and apply email change token
         var token = await _userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail);
         var result = await _userManager.ChangeEmailAsync(user, request.NewEmail, token);
+        
         if (!result.Succeeded)
         {
             var errors = result.Errors
@@ -335,6 +358,7 @@ public class AuthService(
                 .ToList();
             return errors;
         }
+        user.EmailConfirmed = true;// Since OTP verified, we can consider email as confirmed 
         var usernameResult = await _userManager.SetUserNameAsync(user, request.NewEmail);
 
         if (!usernameResult.Succeeded)
@@ -360,6 +384,33 @@ public class AuthService(
         }
 
         return true;
+    }
+    public async Task<Result<Success>> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct = default)
+    {
+        // Check reset token in Redis
+        var storedToken = await _redis.GetStringAsync($"reset:{request.Email}", ct);
+        if (storedToken is null || storedToken != request.ResetToken)
+            return Error.Validation("ResetToken.Invalid", "Invalid or expired reset token.");
+
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+            return IdentityErrors.UserNotFound;
+
+        // Confirm email
+        user.EmailConfirmed = true;
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = updateResult.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+            return errors;
+        }
+
+        // Remove reset token after success
+        await _redis.RemoveAsync($"reset:{request.Email}", ct);
+
+        return Result.Success;
     }
 
     private string GenerateOtp()
