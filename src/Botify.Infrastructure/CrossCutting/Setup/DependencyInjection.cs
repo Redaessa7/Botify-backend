@@ -13,6 +13,7 @@ using Botify.Infrastructure.AIServices.AIConnectors.Connectors;
 using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
 using Botify.Infrastructure.AIServices.Plugins.Types;
 using Botify.Infrastructure.AIServices.Strategies;
+using Botify.Infrastructure.CrossCutting.BackgroundServices.Email;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 using Botify.Infrastructure.CrossCutting.Services.Commons;
 using Botify.Infrastructure.CrossCutting.Services.EmailSenders;
@@ -231,6 +232,9 @@ namespace Microsoft.Extensions.DependencyInjection
         #region Email Services
         private static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton<IEmailQueue, EmailQueue>();
+            services.AddHostedService<EmailBackgroundService>();
+
             services.Configure<SmtpSettings>(
                 configuration.GetSection("SmtpSettings"));
 

@@ -8,6 +8,7 @@ using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Identity;
 using Botify.Domain.Identity.Enums;
 using Botify.Domain.ResultPattern;
+using Botify.Infrastructure.CrossCutting.BackgroundServices.Email;
 using Botify.Infrastructure.Identity;
 using Botify.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -23,7 +24,7 @@ public class AuthService(
         ITokenProvider tokenProvider,
         ApplicationDbContext dbContext,
         IFileService fileService,
-        IEmailSender emailService,
+        IEmailQueue emailQueue,
         IUser user) : IAuthServices
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
@@ -33,7 +34,7 @@ public class AuthService(
     private readonly ApplicationDbContext _dbContext = dbContext;
     private readonly IUser _user = user;
     private readonly IDistributedCache _redis = redis;
-    private readonly IEmailSender _emailService = emailService;
+    private readonly IEmailQueue _emailQueue = emailQueue;
     // --------------------------
     // Login
     // --------------------------
@@ -50,7 +51,8 @@ public class AuthService(
         if(user.EmailConfirmed == false)
         {
             await StoreOtpAsync($"otp:{request.Email}");
-            await _emailService.SendOtpAsync(request.Email, await _redis.GetStringAsync($"otp:{request.Email}"));
+
+            _emailQueue.Enqueue(request.Email, await _redis.GetStringAsync($"otp:{request.Email}"));
 
             return Error.Validation("Email.NotConfirmed", "Email not confirmed. OTP sent to email for verification.");
         }
@@ -165,7 +167,7 @@ public class AuthService(
 
         // 6. Generate and send OTP
         var otp = await StoreOtpAsync($"otp:{request.Email}");
-        await _emailService.SendOtpAsync(request.Email, otp);
+        _emailQueue.Enqueue(request.Email, otp);
 
         return await _tokenProvider.GenerateTokenAsync(generateTokenRequest, default);
     }
@@ -239,7 +241,7 @@ public class AuthService(
 
         var otp = await StoreOtpAsync($"otp:{request.Email}", ct);
 
-        await _emailService.SendOtpAsync(request.Email, otp);
+        _emailQueue.Enqueue(request.Email, otp);
 
         return true;
     }
@@ -261,7 +263,7 @@ public class AuthService(
 
         var otp = await StoreOtpAsync($"otp:{request.OldEmail}", ct);
 
-        await _emailService.SendOtpAsync(request.NewEmail, otp);
+        _emailQueue.Enqueue(user.Email, otp);
 
         return otp;
     }
@@ -385,7 +387,7 @@ public class AuthService(
 
         return true;
     }
-    public async Task<Result<Success>> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct = default)
+    public async Task<Result<TokenResponse>> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct = default)
     {
         // Check reset token in Redis
         var storedToken = await _redis.GetStringAsync($"reset:{request.Email}", ct);
@@ -410,8 +412,17 @@ public class AuthService(
         // Remove reset token after success
         await _redis.RemoveAsync($"reset:{request.Email}", ct);
 
-        return Result.Success;
+        var roles = await _userManager.GetRolesAsync(user);
+        var generateTokenRequest = new GenerateTokenRequest
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            Roles = roles.ToList()
+        };
+
+        return await _tokenProvider.GenerateTokenAsync(generateTokenRequest, ct);
     }
+
 
     private string GenerateOtp()
     {

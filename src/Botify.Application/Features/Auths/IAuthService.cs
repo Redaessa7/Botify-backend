@@ -7,7 +7,7 @@ namespace Botify.Application.Services.Auths;
 
 public interface IAuthServices
 {
-    Task<Result<Success>> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct = default);
+    Task<Result<TokenResponse>> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken ct = default);
     Task<Result<TokenResponse>> LoginAsync(LoginRequest request);
      Task<Result<bool>> CheckOldPasswordAsync(CheckOldPasswordRequest request, CancellationToken ct = default);
     Task<Result<TokenResponse>> RegisterAsync(RegisterRequest request);
