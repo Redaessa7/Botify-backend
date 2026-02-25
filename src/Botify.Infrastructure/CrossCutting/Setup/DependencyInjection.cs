@@ -189,22 +189,17 @@ namespace Microsoft.Extensions.DependencyInjection
             // Semantic Kernel setup
             services.AddKernel();
             services.AddSemanticKernelPlugins();
-            services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
+            //services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GoogleConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GitHubConnectorStrategy>();
             services.AddScoped<IKernelExecutionService, SemanticKernelService>();
 
             // AI Platform Strategies
             services.AddHttpClient<GeminiStrategy>();
-            services.AddHttpClient<OpenAIStrategy>();
             services.AddHttpClient<GitHubInferenceStrategy>();
 
             services.AddKeyedScoped<IAIPlatformStrategy, GeminiStrategy>(
                 AIPlatform.GooglePaLM.AsKey()
-            );
-
-            services.AddKeyedScoped<IAIPlatformStrategy, OpenAIStrategy>(
-                AIPlatform.OpenAI.AsKey()
             );
 
             services.AddKeyedScoped<IAIPlatformStrategy, GitHubInferenceStrategy>(

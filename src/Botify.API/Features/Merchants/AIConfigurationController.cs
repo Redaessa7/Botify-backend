@@ -49,8 +49,7 @@ namespace Botify.Api.Controllers
             if (strategy is null)
                 return Problem($"Platform {request.Platform} not supported");
 
-            var isValid = await strategy.ValidateTokenAsync(request.ApiKey, request.BaseUrl);
-            Result<Success> result = isValid ? Result.Success : Error.Validation("TokenValidationFailed", "The provided API key could not be validated.");
+            var result = await strategy.ValidateTokenAsync(request);
 
             return result.Match(
                 _ => Ok(new { Valid = true })
