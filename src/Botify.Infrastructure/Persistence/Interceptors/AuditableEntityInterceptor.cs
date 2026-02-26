@@ -34,6 +34,7 @@ public class AuditableEntityInterceptor(IUser user, TimeProvider dateTime) : Sav
 
         foreach (var entry in context.ChangeTracker.Entries<AuditableEntity>())
         {
+
             if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
             {
                 var utcNow = _dateTime.GetUtcNow().DateTime;
@@ -46,6 +47,15 @@ public class AuditableEntityInterceptor(IUser user, TimeProvider dateTime) : Sav
 
                 entry.Entity.LastModifiedBy = _user.Id;
                 entry.Entity.LastModifiedUtc = utcNow;
+
+                if (entry.State == EntityState.Modified && entry.Entity.IsDeleted)
+                {
+                    entry.Entity.DeletedBy = _user.Id;
+                    entry.Entity.DeletedAtUtc = utcNow;
+
+                    // Optional: log or audit
+                    Console.WriteLine($"Soft delete: {entry.Entity.GetType().Name} Id={entry.Entity.Id}");
+                }
 
                 foreach (var ownedEntry in entry.References)
                 {

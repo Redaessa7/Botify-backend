@@ -13,6 +13,7 @@ using Botify.Infrastructure.AiAgent;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.SemanticKernel;
 
 namespace Botify.Infrastructure.Persistence;
 
@@ -42,5 +43,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         base.OnModelCreating(builder);
+
+        builder.Entity<ApplicationUser>()
+        .HasQueryFilter(u => UserProfiles
+            .Any(p => p.IdentityUserId == u.Id && !p.IsDeleted));
     }
 }

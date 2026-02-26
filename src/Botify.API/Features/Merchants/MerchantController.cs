@@ -53,7 +53,14 @@ public class MerchantController(IMerchantService merchantService, IServiceProvid
         return result.Match(Ok, Problem);
     }
 
+    [HttpDelete("{merchantId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteAsyc(Guid merchantId, CancellationToken cancellationToken)
+    {
+        var result = await _merchantService.DeleteAsync(merchantId, cancellationToken);
 
+        return result.Match(_ => Ok(new { message = "Merchant deleted successfully." }), Problem);
+    }
     // -------------------- PATCH (Update) --------------------
     [HttpPatch("{merchantId:guid}/update-basic-info")]
     [Authorize]

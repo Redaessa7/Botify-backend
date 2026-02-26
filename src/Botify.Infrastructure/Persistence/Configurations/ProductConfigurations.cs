@@ -25,6 +25,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
 
             builder.Property(p => p.Description)
                    .HasMaxLength(1000);
+            builder.HasQueryFilter(m => !m.IsDeleted);
 
             builder.Property(p => p.Price)
                    .HasColumnType("decimal(18,2)")

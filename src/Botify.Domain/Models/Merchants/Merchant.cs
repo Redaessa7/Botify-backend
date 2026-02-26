@@ -73,6 +73,20 @@ namespace Botify.Domain.Models.Merchants
             Subscription = MerchantSubscription.Start(Id, plan);
             Preferences = QuickActions.None;
         }
+        public new Result<Success> SoftDelete()
+        {
+            base.SoftDelete();
+
+            Profile.SoftDelete();
+
+            foreach (var bot in _bots)
+                bot.SoftDelete();
+
+            foreach (var product in _products)
+                product.SoftDelete();
+
+            return Result.Success;
+        }
 
         public static Result<Merchant> Create(Guid id, UserProfile userProfile)
         {

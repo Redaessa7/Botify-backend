@@ -40,6 +40,8 @@ public class AuthService(
     // --------------------------
     public async Task<Result<TokenResponse>> LoginAsync(LoginRequest request)
     {
+       var profile = await _dbContext.UserProfiles.AnyAsync(p => p.Email == request.Email);
+        if(!profile) return IdentityErrors.UserNotFound;
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null)
             return IdentityErrors.InvalidCredentials;
@@ -47,8 +49,7 @@ public class AuthService(
         var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
         if (!passwordValid)
             return IdentityErrors.InvalidCredentials;
-
-        if(user.EmailConfirmed == false)
+        if (user.EmailConfirmed == false)
         {
             await StoreOtpAsync($"otp:{request.Email}");
 
@@ -374,7 +375,7 @@ public class AuthService(
         await _redis.RemoveAsync($"reset:{request.NewEmail}", ct);
 
 
-        var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.Email == request.OldEmail, ct);
+        var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.Email.ToLower() == request.OldEmail.ToLower(), ct);
         if (profile != null)
         {
            var profileResult =  profile.UpdateEmail(request.NewEmail);

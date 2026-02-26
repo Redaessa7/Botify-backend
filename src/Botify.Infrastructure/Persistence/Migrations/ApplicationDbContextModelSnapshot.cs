@@ -33,6 +33,12 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -46,6 +52,9 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Language")
                         .HasMaxLength(50)
@@ -99,6 +108,15 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -167,6 +185,15 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("INTEGER");
 
@@ -226,9 +253,18 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -277,6 +313,15 @@ namespace Botify.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -333,9 +378,18 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DeliveryAddress")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("TEXT");
@@ -396,6 +450,12 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -407,6 +467,9 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LastModifiedBy")
@@ -470,6 +533,12 @@ namespace Botify.Infrastructure.Persistence.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("DeliveryEnabled")
                         .HasColumnType("INTEGER");
 
@@ -483,6 +552,9 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("IndustryName")
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsOpen")
                         .HasColumnType("INTEGER");
@@ -557,6 +629,15 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsResolved")
                         .HasColumnType("INTEGER");
@@ -845,8 +926,17 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsRevoked")
                         .HasColumnType("INTEGER");
@@ -896,7 +986,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
                         .WithMany("Bots")
                         .HasForeignKey("MerchantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsMany("Botify.Domain.Models.Bots.ValueObjects.BotDailyStats", "DailyStats", b1 =>
@@ -1046,7 +1136,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
                         .WithMany("Orders")
                         .HasForeignKey("MerchantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsMany("Botify.Domain.Models.Orders.OrderItem", "Items", b1 =>
@@ -1088,7 +1178,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
                         .WithMany("Products")
                         .HasForeignKey("MerchantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -1341,7 +1431,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
                         .WithMany("Questions")
                         .HasForeignKey("MerchantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Customer");

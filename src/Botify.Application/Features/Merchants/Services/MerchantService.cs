@@ -109,7 +109,15 @@ public sealed class MerchantService : IMerchantService
         return Result.Success;
     }
     
-    
+    public async Task<Result<Success>> DeleteAsync(Guid merchantId, CancellationToken cancellationToken = default)
+    {
+        var merchant = await _db.Merchants.FirstOrDefaultAsync(x => x.Id == merchantId, cancellationToken);
+        if (merchant is null) return MerchantErrors.NotFound;
+        merchant.SoftDelete();
+        await _db.SaveChangesAsync(cancellationToken);
+        return Result.Success;
+    }
+
     public async Task<Result<Success>> ApproveAsync(Guid merchantId, CancellationToken cancellationToken = default)
     {
         var merchant = await _db.Merchants.FirstOrDefaultAsync(x => x.Id == merchantId, cancellationToken);
@@ -233,8 +241,7 @@ public sealed class MerchantService : IMerchantService
             // Optionally log or mark bot state
             return BotErrors.WebhookRemovalFailed;
         }
-
-        _db.Bots.Remove(bot);
+        bot.SoftDelete();
         await _db.SaveChangesAsync(ct);
 
         return Result.Success;
