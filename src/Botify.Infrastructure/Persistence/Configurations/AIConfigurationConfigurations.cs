@@ -60,7 +60,11 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.HasOne<Merchant>() 
                    .WithOne(x => x.AIConfiguration) 
                    .HasForeignKey<AIConfiguration>(ai => ai.MerchantId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
+
+
         }
     }
 }

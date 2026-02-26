@@ -72,7 +72,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
                      .HasForeignKey(q => q.MerchantId)
                      .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasQueryFilter(m => !m.IsDeleted);
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME,m => !m.IsDeleted);
 
         }
     }

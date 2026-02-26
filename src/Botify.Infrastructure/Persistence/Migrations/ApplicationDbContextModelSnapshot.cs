@@ -968,7 +968,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasOne("Botify.Infrastructure.Identity.ApplicationUser", null)
                         .WithOne()
                         .HasForeignKey("Botify.Domain.Identity.UserProfile", "IdentityUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -977,7 +977,7 @@ namespace Botify.Infrastructure.Persistence.Migrations
                     b.HasOne("Botify.Domain.Models.Merchants.Merchant", null)
                         .WithOne("AIConfiguration")
                         .HasForeignKey("Botify.Domain.Models.AI.AIConfiguration", "MerchantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

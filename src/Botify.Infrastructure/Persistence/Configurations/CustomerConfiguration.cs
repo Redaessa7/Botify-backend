@@ -60,6 +60,9 @@ namespace Botify.Infrastructure.Persistence.Configurations
                 messenger.Property(m => m.Link).HasMaxLength(200);
                 messenger.Property(m => m.ChatId).HasMaxLength(100);
             });
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
+
+
         }
     }
 }

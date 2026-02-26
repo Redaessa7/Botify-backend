@@ -19,6 +19,7 @@ namespace Botify.Infrastructure.Persistence;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
+    public const string SOFT_DELETE_FILTER_NAME = nameof(SOFT_DELETE_FILTER_NAME);
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<Merchant> Merchants =>  Set<Merchant>();
@@ -45,7 +46,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         base.OnModelCreating(builder);
 
         builder.Entity<ApplicationUser>()
-        .HasQueryFilter(u => UserProfiles
-            .Any(p => p.IdentityUserId == u.Id && !p.IsDeleted));
+            .HasQueryFilter(SOFT_DELETE_FILTER_NAME,
+            u => UserProfiles
+            .Any(p => p.IdentityUserId == u.Id && !p.IsDeleted));    
     }
-}
+    }
