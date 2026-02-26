@@ -5,11 +5,13 @@ using Botify.Application.CrossCutting.Responses;
 using Botify.Application.Features.AI.Interfaces;
 using Botify.Application.Features.AI.Requests;
 using Botify.Application.Features.AI.Responses;
+using Botify.Application.Features.AI.Strategies;
 using Botify.Domain.Models.AI;
 using Botify.Domain.Models.AI.Enums;
 using Botify.Domain.Models.Merchants;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Botify.Application.Features.AI.Services;
@@ -18,10 +20,12 @@ public sealed class AIConfigurationService : IAIConfigurationService
 {
     private readonly IApplicationDbContext _db;
     private readonly PaginationOptions _paginationOptions;
+    private readonly IServiceProvider _provider;
 
-    public AIConfigurationService(IApplicationDbContext db, IOptions<PaginationOptions> options)
+    public AIConfigurationService(IApplicationDbContext db,IServiceProvider provider, IOptions<PaginationOptions> options)
     {
         _db = db;
+        _provider = provider;
         _paginationOptions = options.Value;
     }
 
@@ -37,6 +41,18 @@ public sealed class AIConfigurationService : IAIConfigurationService
 
         if (merchant is null)
             return MerchantErrors.NotFound;
+
+        var strategy =  _provider.GetRequiredKeyedService<IAIPlatformStrategy>(request.Platform.AsKey());
+
+        var tokenValidationResult = await strategy.ValidateTokenAsync(new TokenValidationRequest
+        {
+            ApiKey = request.ApiKey,
+            Model = request.ModelName,
+            Platform = request.Platform
+        });
+    
+          if (!tokenValidationResult.IsSuccess)
+            return tokenValidationResult.Errors;
 
         var configResult = AIConfiguration.Create(
             Guid.NewGuid(),
