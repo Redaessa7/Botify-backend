@@ -40,10 +40,10 @@ public class ApplicationDbContextInitializer(
         try
         {
             // Roles
-            //await _context.SeedRolesAsync(_roleManager, _logger);
+            await _context.SeedRolesAsync(_roleManager, _logger);
 
             //// Merchants (with bots, questions, products, customers, orders)
-            //await _context.SeedMerchantsAsync(_userManager, _logger);
+            await _context.SeedMerchantsAsync(_userManager, _logger);
 
             // Save changes once all seeding is done
             await _context.SaveChangesAsync();

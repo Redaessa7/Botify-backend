@@ -63,6 +63,7 @@ public static class SeedMerchantDetailsExtensions
         await context.SeedOrdersAsync(merchant.Id);
         await context.SaveChangesAsync();
 
+        await context.SeedShopAndStatsAsync(merchant.Id, bot.Id);
         logger.LogInformation($"Seeded merchant '{email}' with bot and questions.");
     }
 

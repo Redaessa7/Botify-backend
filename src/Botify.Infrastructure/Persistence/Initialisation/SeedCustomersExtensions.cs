@@ -23,8 +23,7 @@ public static class SeedCustomersExtensions
                 Name = "John Doe",
                 PhoneNumber = "+1555000001",
                 Email = "john@example.com",
-                Telegram = new TelegramProfile { Link = "https://t.me/john_doe", ChatId = "123456" },
-                Messenger = new MessengerProfile { Link = "https://facebook.com/john.doe", ChatId = "fb-123456" }
+                Telegram = new TelegramProfile { Link = "https://t.me/john_doe", ChatId = "123456" }
             },
             new
             {
@@ -33,8 +32,7 @@ public static class SeedCustomersExtensions
                 Name = "Fatima Ali",
                 PhoneNumber = "+1555000002",
                 Email = "fatima@example.com",
-                Telegram = new TelegramProfile { Link = "https://t.me/fatima_ali", ChatId = "654321" },
-                Messenger = new MessengerProfile { Link = "https://facebook.com/fatima.ali", ChatId = "fb-654321" }
+                Telegram = new TelegramProfile { Link = "https://t.me/fatima_ali", ChatId = "654321" }
             },
             new
             {
@@ -43,8 +41,7 @@ public static class SeedCustomersExtensions
                 Name = "Carlos Mendes",
                 PhoneNumber = "+1555000003",
                 Email = "carlos@example.com",
-                Telegram = new TelegramProfile { Link = "https://t.me/carlos_mendes", ChatId = "789012" },
-                Messenger = new MessengerProfile { Link = "https://facebook.com/carlos.mendes", ChatId = "fb-789012" }
+                Telegram = new TelegramProfile { Link = "https://t.me/carlos_mendes", ChatId = "789012" }
             }
         };
 
@@ -57,8 +54,7 @@ public static class SeedCustomersExtensions
                 data.Name,
                 data.PhoneNumber,
                 data.Email,
-                telegram: data.Telegram,
-                messenger: data.Messenger
+                telegram: data.Telegram
             );
 
             if (customerResult.IsSuccess)
