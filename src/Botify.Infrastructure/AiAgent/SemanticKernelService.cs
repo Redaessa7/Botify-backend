@@ -221,8 +221,8 @@ namespace Botify.Infrastructure.AIServices
 
         private static PromptExecutionSettings GetExecutionSettings(AIConfiguration config) => config.Platform switch
         {
-            AIPlatform.OpenAI => new OpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
-            AIPlatform.AzureOpenAI => new AzureOpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
+            //AIPlatform.OpenAI => new OpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
+            //AIPlatform.AzureOpenAI => new AzureOpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
             AIPlatform.GooglePaLM => new GeminiPromptExecutionSettings { ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
             AIPlatform.GitHub => new OpenAIPromptExecutionSettings { ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions, Temperature = config.Temperature, MaxTokens = config.MaxTokens },
             _ => throw new NotSupportedException()

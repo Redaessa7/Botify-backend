@@ -85,8 +85,7 @@ public sealed class ProductService : IProductService
 
         if (product is null)
             return ProductErrors.NotFound;
-
-        _db.Products.Remove(product);
+        product.SoftDelete();
         await _db.SaveChangesAsync(cancellationToken);
 
         return Result.Success;

@@ -44,6 +44,9 @@ namespace Botify.Infrastructure.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(x => x.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
+
         }
     }
 }

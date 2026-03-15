@@ -21,17 +21,6 @@ public class ApplicationDbContextInitializer(
     {
         try
         {
-            // Ensure SQLite directory exists
-            var connectionString = _context.Database.GetDbConnection().ConnectionString;
-            var builder = new SqliteConnectionStringBuilder(connectionString);
-
-            var dataSource = builder.DataSource;
-            var directory = Path.GetDirectoryName(dataSource);
-
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
 
             // Apply migrations if needed
             if ((await _context.Database.GetPendingMigrationsAsync()).Any())
@@ -51,10 +40,10 @@ public class ApplicationDbContextInitializer(
         try
         {
             // Roles
-            await _context.SeedRolesAsync(_roleManager, _logger);
+            //await _context.SeedRolesAsync(_roleManager, _logger);
 
-            // Merchants (with bots, questions, products, customers, orders)
-            await _context.SeedMerchantsAsync(_userManager, _logger);
+            //// Merchants (with bots, questions, products, customers, orders)
+            //await _context.SeedMerchantsAsync(_userManager, _logger);
 
             // Save changes once all seeding is done
             await _context.SaveChangesAsync();

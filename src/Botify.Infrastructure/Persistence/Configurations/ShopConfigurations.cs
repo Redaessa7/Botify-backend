@@ -59,6 +59,8 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(s => s.DeliveryFee);
             builder.Property(s => s.IsOpen);
 
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
+
             // SocialMediaLinks as owned value object
             builder.OwnsOne(s => s.SocialMediaLinks, sm =>
                 {

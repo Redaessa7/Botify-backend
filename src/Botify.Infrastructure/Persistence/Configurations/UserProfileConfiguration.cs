@@ -41,11 +41,14 @@ namespace Botify.Infrastructure.Persistence.Configurations
 
             builder.HasIndex(x => x.IdentityUserId).IsUnique();
 
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
+
+
             // One-to-One relationship
             builder.HasOne<ApplicationUser>()
                    .WithOne()
                    .HasForeignKey<UserProfile>(x => x.IdentityUserId)
-                   .OnDelete(DeleteBehavior.Cascade)
+                   .OnDelete(DeleteBehavior.Restrict)
                    .IsRequired();
         }
     }

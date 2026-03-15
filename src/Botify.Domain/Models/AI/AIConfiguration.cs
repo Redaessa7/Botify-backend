@@ -119,7 +119,7 @@ namespace Botify.Domain.Models.AI
             var systemPrompt = "You are a helpful AI assistant.";
             var modelName = "gpt-4o"; // default model placeholder
             var apiKey = "YOUR_API_KEY_HERE"; // placeholder to be replaced with merchant's actual key
-            var platform = AIPlatform.OpenAI; // sensible default platform
+            var platform = AIPlatform.GooglePaLM; // sensible default platform
             var temperature = 0.7;
             var maxTokens = 800;
 

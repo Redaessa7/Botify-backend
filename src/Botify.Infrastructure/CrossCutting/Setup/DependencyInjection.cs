@@ -13,6 +13,7 @@ using Botify.Infrastructure.AIServices.AIConnectors.Connectors;
 using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
 using Botify.Infrastructure.AIServices.Plugins.Types;
 using Botify.Infrastructure.AIServices.Strategies;
+using Botify.Infrastructure.CrossCutting.BackgroundServices.Email;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 using Botify.Infrastructure.CrossCutting.Services.Commons;
 using Botify.Infrastructure.CrossCutting.Services.EmailSenders;
@@ -56,7 +57,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-                options.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
             services.AddScoped<ApplicationDbContextInitializer>();
@@ -188,22 +189,17 @@ namespace Microsoft.Extensions.DependencyInjection
             // Semantic Kernel setup
             services.AddKernel();
             services.AddSemanticKernelPlugins();
-            services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
+            //services.AddScoped<IAIConnectorStrategy, OpenAIConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GoogleConnectorStrategy>();
             services.AddScoped<IAIConnectorStrategy, GitHubConnectorStrategy>();
             services.AddScoped<IKernelExecutionService, SemanticKernelService>();
 
             // AI Platform Strategies
             services.AddHttpClient<GeminiStrategy>();
-            services.AddHttpClient<OpenAIStrategy>();
             services.AddHttpClient<GitHubInferenceStrategy>();
 
             services.AddKeyedScoped<IAIPlatformStrategy, GeminiStrategy>(
                 AIPlatform.GooglePaLM.AsKey()
-            );
-
-            services.AddKeyedScoped<IAIPlatformStrategy, OpenAIStrategy>(
-                AIPlatform.OpenAI.AsKey()
             );
 
             services.AddKeyedScoped<IAIPlatformStrategy, GitHubInferenceStrategy>(
@@ -231,6 +227,9 @@ namespace Microsoft.Extensions.DependencyInjection
         #region Email Services
         private static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton<IEmailQueue, EmailQueue>();
+            services.AddHostedService<EmailBackgroundService>();
+
             services.Configure<SmtpSettings>(
                 configuration.GetSection("SmtpSettings"));
 

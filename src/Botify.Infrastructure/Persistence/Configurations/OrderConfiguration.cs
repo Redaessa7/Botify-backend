@@ -78,6 +78,8 @@ namespace Botify.Infrastructure.Persistence.Configurations
 
             builder.Navigation(o => o.Items)
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
+
         }
     }
 }

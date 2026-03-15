@@ -1,38 +1,38 @@
 ﻿
 
-using Botify.Domain.Models.AI;
-using Botify.Domain.Models.AI.Enums;
-using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+//using Botify.Domain.Models.AI;
+//using Botify.Domain.Models.AI.Enums;
+//using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
+//using Microsoft.Extensions.DependencyInjection;
+//using Microsoft.SemanticKernel;
+//using Microsoft.SemanticKernel.Connectors.OpenAI;
 
-namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
-{
-    internal class OpenAIConnectorStrategy : IAIConnectorStrategy
-    {
-        public AIPlatform PlatformKey => AIPlatform.OpenAI;
+//namespace Botify.Infrastructure.AIServices.AIConnectors.Connectors
+//{
+//    internal class OpenAIConnectorStrategy : IAIConnectorStrategy
+//    {
+//        public AIPlatform PlatformKey => AIPlatform.OpenAI;
 
-        public async Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
-        {
-            var endpoint = new Uri("https://models.github.ai/inference");
+//        public async Task ConfigureBuilder(IKernelBuilder builder, AIConfiguration config)
+//        {
+//            var endpoint = new Uri("https://models.github.ai/inference");
 
-            // Register OpenAI chat completion
-            builder.AddOpenAIChatCompletion(
-                modelId: config.ModelName,
-                endpoint,
-                apiKey: config.ApiKey);
+//            // Register OpenAI chat completion
+//            builder.AddOpenAIChatCompletion(
+//                modelId: config.ModelName,
+//                endpoint,
+//                apiKey: config.ApiKey);
 
-            // Configure execution settings
-           OpenAIPromptExecutionSettings openAiSettings = new()
-            {
-                ToolCallBehavior =  ToolCallBehavior.AutoInvokeKernelFunctions,
-                Temperature = config.Temperature,
-                MaxTokens = config.MaxTokens
-            };
+//            // Configure execution settings
+//           OpenAIPromptExecutionSettings openAiSettings = new()
+//            {
+//                ToolCallBehavior =  ToolCallBehavior.AutoInvokeKernelFunctions,
+//                Temperature = config.Temperature,
+//                MaxTokens = config.MaxTokens
+//            };
 
            
-            // You can pass these settings when invoking chat completions later
-        }
-    }
-}
+//            // You can pass these settings when invoking chat completions later
+//        }
+//    }
+//}

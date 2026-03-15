@@ -42,7 +42,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.HasMany(m => m.Bots)
                    .WithOne()
                    .HasForeignKey(b => b.MerchantId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             // Tell EF to use the private field "_bots" for change tracking
             builder.Navigation(m => m.Bots)
@@ -57,7 +57,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.HasMany(x => x.Products)
                      .WithOne()
                      .HasForeignKey(p => p.MerchantId)
-                     .OnDelete(DeleteBehavior.Cascade);
+                     .OnDelete(DeleteBehavior.Restrict);
 
             builder.Navigation(m => m.Products)
                    .UsePropertyAccessMode(PropertyAccessMode.Field);
@@ -65,12 +65,15 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.HasMany(x => x.Questions)
                      .WithOne()
                      .HasForeignKey(q => q.MerchantId)
-                     .OnDelete(DeleteBehavior.Cascade);
+                     .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(x => x.Orders)
                      .WithOne()
                      .HasForeignKey(q => q.MerchantId)
-                     .OnDelete(DeleteBehavior.Cascade);
+                     .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME,m => !m.IsDeleted);
+
         }
     }
 }

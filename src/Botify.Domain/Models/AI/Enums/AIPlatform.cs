@@ -2,11 +2,7 @@
 {
     public enum AIPlatform
     {
-        OpenAI,
-        AzureOpenAI,
-        Anthropic,
         GooglePaLM,
-        HuggingFace,
         GitHub
     }
 

@@ -39,6 +39,8 @@ namespace Botify.Domain.Identity
         // -----------------------
         public static Error InvalidCredentials =>
             Error.Unauthorized("Identity.Login.InvalidCredentials", "Invalid email or password.");
+        public static Error InvalidPassowrd =>
+            Error.Validation("Identity.InvalidPassowrd", "Invalid password.");
 
         public static Error UserNotFound =>
             Error.NotFound("Identity.User.NotFound", "User not found.");

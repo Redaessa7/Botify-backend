@@ -33,6 +33,7 @@ namespace Botify.Infrastructure.Persistence.Configurations
             builder.Property(b => b.Active).IsRequired();
             builder.Property(b => b.PlatformVerified).IsRequired();
             builder.Property(b => b.IsPrimary).IsRequired();
+            builder.HasQueryFilter(ApplicationDbContext.SOFT_DELETE_FILTER_NAME, m => !m.IsDeleted);
 
             builder.Property(b => b.Platform)
                 .HasConversion(
