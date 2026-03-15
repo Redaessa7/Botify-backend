@@ -12,8 +12,6 @@ public static class SeedIds
     public static readonly Guid ProductDeskChair = Guid.Parse("f4444444-4444-4444-4444-444444444444");
     public static readonly Guid ProductAirFryer = Guid.Parse("f5555555-5555-5555-5555-555555555555");
     public static readonly Guid ProductWaterBottle = Guid.Parse("f6666666-6666-6666-6666-666666666666");
-    public static readonly Guid ProductYogaMat = Guid.Parse("f7777777-7777-7777-7777-777777777777");
-
     // --- Customers ---
     public static readonly Guid CustomerJohnDoe = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
     public static readonly Guid CustomerFatimaAli = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee");
