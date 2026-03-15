@@ -3,6 +3,5 @@
 public enum Plan
 {
     Free = 0,
-    Pro = 1,
-    Enterprise = 2
+    Pro = 1
 }

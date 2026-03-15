@@ -53,7 +53,6 @@ namespace Botify.Domain.Models.Merchants
             {
                 Plan.Free => _bots.Count <= 1,
                 Plan.Pro => _bots.Count < 3,
-                Plan.Enterprise => true,
                 _ => false
             };
         }
