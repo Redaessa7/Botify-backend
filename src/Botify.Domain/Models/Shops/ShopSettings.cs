@@ -259,7 +259,7 @@ namespace Botify.Domain.Models.Shops
             );
 
             // Return a ShopSettings with default values
-            return new ShopSettings(Guid.NewGuid(), merchantId, "Default Shop", "USD", "en", "123 Default Street")
+            return new ShopSettings(Guid.NewGuid(), merchantId, "Tech Shop", "USD", "en", "123 Default Street")
             {
                 IndustryName = "General",
                 BusinessEmail = "default@shop.com",

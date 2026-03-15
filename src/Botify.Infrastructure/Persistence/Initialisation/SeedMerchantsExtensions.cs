@@ -21,6 +21,7 @@ public static class SeedMerchantsExtensions
             new { Id  = Guid.Parse("11111111-1111-1111-1111-111111111111"), Email = "merchant1@botify.com", Password = "Merchant123@", Phone = "500000001", FirstName = "Ali", LastName = "Saleh", Bio = "Seeded merchant for Botify", ProfileImageUrl = "https://example.com/images/merchant1.png", Language = "en" },
         };
 
+
         foreach (var data in merchantsData)
         {
             await context.SeedMerchantWithBotAndQuestionsAsync(
