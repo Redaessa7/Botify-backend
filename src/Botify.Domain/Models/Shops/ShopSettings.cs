@@ -273,8 +273,8 @@ namespace Botify.Domain.Models.Shops
                     Whatsapp = "https://wa.me/10000000000",
                     LinkedIn = "https://linkedin.com/company/defaultshop"
                 },
-                LogoImageUrl = "https://cdn.defaultshop.com/logo.png",
-                CoverImageUrl = "https://cdn.defaultshop.com/cover.png",
+                LogoImageUrl = "https://vjjx8gr7or.ufs.sh/f/YEh2DAq4MAFcs2W7wjVRPnkVWS7G8F2cQYLBiwEOqyj5Agfd",
+                CoverImageUrl = "https://vjjx8gr7or.ufs.sh/f/YEh2DAq4MAFcU6IIxp8yBHtEPab2QWlVp4DX3fY7jisNFuKS",
                 TaxRate = 0.15m,
                 Description = "This is a default shop description.",
                 Timezone = "UTC",

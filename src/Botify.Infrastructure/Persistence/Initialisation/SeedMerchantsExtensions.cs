@@ -18,7 +18,7 @@ public static class SeedMerchantsExtensions
 
         var merchantsData = new[]
         {
-            new { Id  = Guid.Parse("11111111-1111-1111-1111-111111111111"), Email = "merchant1@botify.com", Password = "Merchant123@", Phone = "500000001", FirstName = "Ali", LastName = "Saleh", Bio = "Seeded merchant for Botify", ProfileImageUrl = "https://example.com/images/merchant1.png", Language = "en" },
+            new { Id  = Guid.Parse("11111111-1111-1111-1111-111111111111"), Email = "merchant1@botify.com", Password = "Merchant123@", Phone = "500000001", FirstName = "Ali", LastName = "Saleh", Bio = "Seeded merchant for Botify", ProfileImageUrl = "https://vjjx8gr7or.ufs.sh/f/YEh2DAq4MAFcdp5nS2uQjEmrXugF3JMnfKaviP1LZc5z8Sk2", Language = "en" },
         };
 
 
