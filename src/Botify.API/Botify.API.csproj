@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+	  <PackageReference Include="EssaLab.StronglyTypedIds.Convertors.Json" Version="1.0.0-preview">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
 	  <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />

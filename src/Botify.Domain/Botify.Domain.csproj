@@ -10,4 +10,11 @@
     <Folder Include="Common\Options\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EssaLab.StronglyTypedIds.Core" Version="1.0.0-preview">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

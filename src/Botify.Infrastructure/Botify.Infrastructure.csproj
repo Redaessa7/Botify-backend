@@ -11,6 +11,10 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <PackageReference Include="EssaLab.StronglyTypedIds.Convertors.EFCore" Version="1.0.0-preview">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
@@ -19,6 +23,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
       <PackageReference Include="Mapster" Version="7.4.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
