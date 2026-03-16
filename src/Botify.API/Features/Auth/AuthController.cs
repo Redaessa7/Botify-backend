@@ -24,7 +24,6 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         if (!result.IsSuccess)
             return Problem(result.Errors);
 
-        await HttpContext.SetTokenCookiesAsync(result.Value);
         return Ok(new { message = "Register merchant successfully" });
     }
 

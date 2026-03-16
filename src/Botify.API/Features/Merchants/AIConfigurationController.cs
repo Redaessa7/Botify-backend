@@ -32,7 +32,7 @@ namespace Botify.Api.Controllers
             [FromBody] SetAIConfigurationRequest request,
             CancellationToken cancellationToken)
         {
-            var result = await _service.UpdateAsync(merchantId,request, cancellationToken);
+            var result = await _service.UpdateAsync(merchantId, request, cancellationToken);
             return result.Match(Ok, Problem);
         }
 
@@ -53,7 +53,7 @@ namespace Botify.Api.Controllers
 
             return result.Match(
                 _ => Ok(new { Valid = true })
-                ,Problem);
+                , Problem);
         }
 
         #endregion
@@ -86,6 +86,14 @@ namespace Botify.Api.Controllers
             var result = await _service.GetConfigurationsAsync(merchantId, cancellationToken);
             return result.Match(Ok, Problem);
         }
+
+        // [HttpGet("is-valid-model")]
+        // [Authorize]
+        // public async Task<IActionResult> IsValidModelAsync(string name, AIPlatform platform, CancellationToken cancellationToken)
+        // {
+        //     var result = await _service.IsValidModelAsync(name, platform, cancellationToken);
+        //     return result.Match(Ok, Problem);
+        // }
 
         #endregion
     }
