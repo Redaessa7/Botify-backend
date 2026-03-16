@@ -234,8 +234,7 @@ namespace Botify.Infrastructure.AIServices
 
         private async Task UpdateSummaryAsync(string chatId, BotPlatform platform, ChatHistory history, string? existingSummary, AIConfiguration config, CancellationToken ct)
         {
-            try
-            {
+  
                 using var scope = _serviceProvider.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var kernel = BuildKernel(config);
@@ -256,8 +255,6 @@ namespace Botify.Infrastructure.AIServices
                     session.MessageCount = 0;
                     await db.SaveChangesAsync(ct);
                 }
-            }
-            catch (Exception ex) { Console.WriteLine($"Summarization Fail: {ex.Message}"); }
         }
 
         #endregion

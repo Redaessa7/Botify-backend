@@ -12,7 +12,9 @@ namespace Botify.Domain.Identity
         public static Error IdRequired =>
     Error.Validation("Identity.Id.Required", "Id is required.");
 
-
+// Add this to your Registration section in IdentityErrors.cs
+public static Error AccountDeleted =>
+    Error.Conflict("Identity.Account.Deleted", "This account was previously deleted. Please contact support to restore it.");
         public static Error PasswordRequired =>
             Error.Validation("Identity.Password.Required", "Password is required.");
 
