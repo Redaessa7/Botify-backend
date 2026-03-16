@@ -10,6 +10,7 @@ using Botify.Domain.Models.Merchants.ValueObjects;
 using Botify.Domain.ResultPattern;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace Botify.Application.Features.Customers.Services;
 
@@ -18,12 +19,14 @@ public sealed class CustomerService : ICustomerService
     private readonly IApplicationDbContext _db;
     private readonly IUser _user;
     private readonly PaginationOptions _paginationOptions;
+    private readonly ILogger<CustomerService> _logger;
 
-    public CustomerService(IApplicationDbContext db, IUser user, IOptions<PaginationOptions> options)
+    public CustomerService(IApplicationDbContext db, IUser user, IOptions<PaginationOptions> options, ILogger<CustomerService> logger)
     {
         _db = db;
         _user = user;
         _paginationOptions = options.Value;
+        _logger = logger;
     }
 
     /// <summary>
@@ -36,31 +39,34 @@ public sealed class CustomerService : ICustomerService
         BotPlatform? botPlatform = null,
         CancellationToken cancellationToken = default)
     {
-        // enforce limits
+        _logger.LogInformation("Fetching customers for UserId={UserId} Limit={Limit} Cursor={Cursor} Search={Search} Platform={Platform}", 
+            _user.Id, limit, cursor, search, botPlatform);
+
         if (limit <= 0) limit = _paginationOptions.DefaultLimit;
         limit = Math.Min(limit, _paginationOptions.MaxLimit);
 
-        // get current merchant
-        var merchant = await _db.Merchants
-            .Include(m => m.Profile)
+        var merchant = await _db.Merchants.Include(m => m.Profile)
             .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
 
-        if (merchant is null) return MerchantErrors.NotFound;
+        if (merchant is null)
+        {
+            _logger.LogWarning("Merchant not found for UserId={UserId}", _user.Id);
+            return MerchantErrors.NotFound;
+        }
 
-        // decode cursor if provided
         CursorHelper.CursorPayload? payload = null;
         if (!string.IsNullOrEmpty(cursor))
         {
             payload = CursorHelper.Decode(cursor);
             if (payload == null)
+            {
+                _logger.LogWarning("Invalid cursor provided for MerchantId={MerchantId}", merchant.Id);
                 return Error.Validation("Invalid cursor");
+            }
         }
 
-        // base query
-        var query = _db.Customers.AsNoTracking()
-            .Where(c => c.MerchantId == merchant.Id);
+        var query = _db.Customers.AsNoTracking().Where(c => c.MerchantId == merchant.Id);
 
-        // optional BotPlatform filter
         if (botPlatform.HasValue)
         {
             query = botPlatform.Value switch
@@ -68,11 +74,10 @@ public sealed class CustomerService : ICustomerService
                 BotPlatform.TELEGRAM => query.Where(c => c.Telegram != null),
                 BotPlatform.WHATSAPP => query.Where(c => c.WhatsApp != null),
                 BotPlatform.MESSENGER => query.Where(c => c.Messenger != null),
-                _ => query // fallback: no filter
+                _ => query
             };
         }
 
-        // optional search filter
         if (!string.IsNullOrWhiteSpace(search))
         {
             var s = search.Trim().ToLower();
@@ -82,11 +87,8 @@ public sealed class CustomerService : ICustomerService
                 c.PhoneNumber.Contains(s));
         }
 
-        // order newest-first
-        query = query.OrderByDescending(c => c.CreatedAtUtc)
-                     .ThenByDescending(c => c.Id);
+        query = query.OrderByDescending(c => c.CreatedAtUtc).ThenByDescending(c => c.Id);
 
-        // total count for metadata
         var totalCount = await query.CountAsync(cancellationToken);
 
         if (payload != null)
@@ -96,17 +98,13 @@ public sealed class CustomerService : ICustomerService
                 (c.CreatedAtUtc == payload.CreatedAt && c.Id.CompareTo(payload.Id) < 0));
         }
 
-        // fetch one extra to detect next page
-        var items = await query
-            .Take(limit + 1)
-            .Select(c => CustomerDto.FromDomain(c))
+        var items = await query.Take(limit + 1)
+            .Select(x => CustomerDto.FromDomain(x))
             .ToListAsync(cancellationToken);
 
         var hasMore = items.Count > limit;
-        if (hasMore)
-            items.RemoveAt(items.Count - 1);
+        if (hasMore) items.RemoveAt(items.Count - 1);
 
-        // build next cursor
         string? nextCursor = null;
         if (hasMore && items.Any())
         {
@@ -115,50 +113,69 @@ public sealed class CustomerService : ICustomerService
             nextCursor = CursorHelper.Encode(nextPayload);
         }
 
-        var result = new PaginatedResult<CustomerDto>(items, limit, totalCount, nextCursor);
-        return result;
+        _logger.LogInformation("Customers retrieved for MerchantId={MerchantId}. Count={Count} Total={TotalCount} HasMore={HasMore}", merchant.Id, items.Count, totalCount, hasMore);
+
+        return new PaginatedResult<CustomerDto>(items, limit, totalCount, nextCursor);
     }
 
     /// <summary>
     /// Get a single customer by ID for the current merchant.
     /// </summary>
-    public async Task<Result<CustomerDto>> GetByIdAsync(
-        Guid customerId,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<CustomerDto>> GetByIdAsync(Guid customerId, CancellationToken cancellationToken = default)
     {
-        var merchant = await _db.Merchants
-            .Include(m => m.Profile)
+        _logger.LogInformation("Fetching customer CustomerId={CustomerId} for UserId={UserId}", customerId, _user.Id);
+
+        var merchant = await _db.Merchants.Include(m => m.Profile)
             .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
 
-        if (merchant is null) return MerchantErrors.NotFound;
+        if (merchant is null)
+        {
+            _logger.LogWarning("Merchant not found for UserId={UserId}", _user.Id);
+            return MerchantErrors.NotFound;
+        }
 
-        var customer = await _db.Customers
-            .AsNoTracking()
+        var customer = await _db.Customers.AsNoTracking()
             .FirstOrDefaultAsync(c => c.MerchantId == merchant.Id && c.Id == customerId, cancellationToken);
 
-        if (customer is null) return CustomerErrors.IdRequired;
+        if (customer is null)
+        {
+            _logger.LogWarning("Customer not found CustomerId={CustomerId} MerchantId={MerchantId}", customerId, merchant.Id);
+            return CustomerErrors.IdRequired;
+        }
 
+        _logger.LogInformation("Customer retrieved successfully CustomerId={CustomerId} MerchantId={MerchantId}", customerId, merchant.Id);
         return CustomerDto.FromDomain(customer);
     }
 
-        public async Task<Result<CustomersStatsResponse>> GetStatsAsync(CancellationToken cancellationToken = default)
-        {
-            var merchant = await _db.Merchants
-                .Include(m => m.Profile)
-                .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
+    public async Task<Result<CustomersStatsResponse>> GetStatsAsync(CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Fetching customer stats for UserId={UserId}", _user.Id);
+
+        var merchant = await _db.Merchants.Include(m => m.Profile)
+            .FirstOrDefaultAsync(x => x.Profile.IdentityUserId == _user.Id, cancellationToken);
+
         if (merchant is null)
+        {
+            _logger.LogWarning("Merchant not found for UserId={UserId}", _user.Id);
             return MerchantErrors.NotFound;
+        }
 
         var query = _db.Customers.AsNoTracking().Where(c => c.MerchantId == merchant.Id);
 
-            var total = await query.CountAsync(cancellationToken);
-  var telegram = await query.CountAsync(c => c.Telegram != null, cancellationToken); var whatsapp = await query.CountAsync(c => c.WhatsApp != null, cancellationToken); var messenger = await query.CountAsync(c => c.Messenger != null, cancellationToken);
+        var total = await query.CountAsync(cancellationToken);
+        var telegram = await query.CountAsync(c => c.Telegram != null, cancellationToken);
+        var whatsapp = await query.CountAsync(c => c.WhatsApp != null, cancellationToken);
+        var messenger = await query.CountAsync(c => c.Messenger != null, cancellationToken);
+
+        _logger.LogInformation("Customer stats retrieved for MerchantId={MerchantId}. Total={Total}, Telegram={Telegram}, WhatsApp={WhatsApp}, Messenger={Messenger}",
+            merchant.Id, total, telegram, whatsapp, messenger);
+
         return new CustomersStatsResponse
-            {
-                Total = total,
-                Telegram = telegram,
-                WhatsApp = whatsapp,
-                Messenger = messenger
-            };
-        }
+        {
+            Total = total,
+            Telegram = telegram,
+            WhatsApp = whatsapp,
+            Messenger = messenger
+        };
     }
+}
