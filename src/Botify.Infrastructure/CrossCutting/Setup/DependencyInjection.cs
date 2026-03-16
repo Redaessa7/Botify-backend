@@ -14,6 +14,7 @@ using Botify.Infrastructure.AIServices.AIConnectors.Interfaces;
 using Botify.Infrastructure.AIServices.Plugins.Types;
 using Botify.Infrastructure.AIServices.Strategies;
 using Botify.Infrastructure.CrossCutting.BackgroundServices.Email;
+using Botify.Infrastructure.CrossCutting.HealthChecks;
 using Botify.Infrastructure.CrossCutting.Services.BotPlatformServices.Telegram;
 using Botify.Infrastructure.CrossCutting.Services.Commons;
 using Botify.Infrastructure.CrossCutting.Services.EmailSenders;
@@ -54,13 +55,18 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-            });
+            })
+            .AddHealthChecks().AddCheck<DBHealthCheck>("database");
+
             services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+
             services.AddScoped<ApplicationDbContextInitializer>();
+            
             return services;
         }
         #endregion

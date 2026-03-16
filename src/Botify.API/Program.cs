@@ -3,6 +3,7 @@ using Botify.API.CrossCutting.Extensions;
 using Botify.API.CrossCutting.Setup;
 using Botify.Application.CrossCutting.Options;
 using Botify.Infrastructure.Persistence.Initialisation;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Configuration;
@@ -31,6 +32,25 @@ builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment)
 var app = builder.Build();
 
 #region Middlewares
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (ctx, report) =>
+    {
+        ctx.Response.ContentType = "application/json";
+        var payload = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        };
+
+        await ctx.Response.WriteAsJsonAsync(payload);
+    }
+});
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
