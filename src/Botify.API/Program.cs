@@ -4,6 +4,7 @@ using Botify.API.CrossCutting.Setup;
 using Botify.Application.CrossCutting.Options;
 using Botify.Infrastructure.Persistence.Initialisation;
 using Scalar.AspNetCore;
+using Serilog;
 using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,9 @@ builder.Configuration
 builder.Services.AddOptions<PaginationOptions>()
     .Bind(builder.Configuration.GetSection("PaginationOptions"));
 #region DI Container
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
+
 builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment);
 #endregion
 
@@ -41,6 +45,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 app.UseResponseCompression();
+app.UseSerilogRequestLogging();
 app.MapControllers();
 
 #endregion

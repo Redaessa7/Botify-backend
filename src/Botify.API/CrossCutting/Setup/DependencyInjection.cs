@@ -36,6 +36,7 @@ internal static class DependencyInjection
             .AddFluentValidationServices()
             .AddCorsConfiguration(env)
             .AddApiVersioningServices()
+            .AddAppRateLimiting(configuration)
             .AddApiDocumentation()
             .AddResponseCompressionsServices()
             .AddFilters();
