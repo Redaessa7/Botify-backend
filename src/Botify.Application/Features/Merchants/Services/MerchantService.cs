@@ -5,6 +5,7 @@ using Botify.Application.Features.Merchants.Responses;
 using Botify.Application.Services.Merchants;
 using Botify.Application.Services.Merchants.Requests;
 using Botify.Domain.Identity;
+using Botify.Domain.Identity.Enums;
 using Botify.Domain.Models.AI;
 using Botify.Domain.Models.Bots;
 using Botify.Domain.Models.Merchants;
@@ -140,11 +141,20 @@ public sealed class MerchantService : IMerchantService
         var merchant = await _db.Merchants
                             .Include(x => x.Profile)
                             .FirstOrDefaultAsync(x => x.Id == merchantId, cancellationToken);
+
         if (merchant is null)
         {
             _logger.LogWarning("Merchant not found for MerchantId={MerchantId}", merchantId);
             return MerchantErrors.NotFound;
         }
+        var user = _user.UserInfo();
+
+        if (user.Roles.Contains(Roles.ADMIN.ToString()) && user.Id == merchant.Profile.IdentityUserId)
+        {
+            _logger.LogWarning("Delete failed: Admin cannot delete their own account. MerchantId={MerchantId}", merchantId);
+            return MerchantErrors.AdminCannotDeleteSelf;
+        }
+
 
         merchant.SoftDelete();
         await _db.SaveChangesAsync(cancellationToken);

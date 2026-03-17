@@ -89,13 +89,14 @@ public class AuthService(
     {
         _logger.LogInformation("Registration initiated for email: {Email}", request.Email);
         // Use FirstOrDefaultAsync to execute the query and get a single result or null
-var existingMerchant = await _dbContext.Merchants
-    .Where(x => x.Profile.Email == request.Email)
-    .Select(x => new 
-    { 
-        x.IsDeleted 
-    })
-    .FirstOrDefaultAsync();
+    var existingMerchant = await _dbContext.Merchants
+        .IgnoreQueryFilters()
+        .Where(x => x.Profile != null && x.Profile.Email == request.Email)
+        .Select(x => new 
+        { 
+            x.IsDeleted 
+        })
+        .FirstOrDefaultAsync();
 
     if (existingMerchant is not null)
     {
