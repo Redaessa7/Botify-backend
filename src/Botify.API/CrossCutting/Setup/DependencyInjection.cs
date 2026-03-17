@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -39,7 +41,8 @@ internal static class DependencyInjection
             .AddAppRateLimiting(configuration)
             .AddApiDocumentation()
             .AddResponseCompressionsServices()
-            .AddFilters();
+            .AddFilters()
+            .AddOpenTelemetryServicers();
     }
 
     private static IServiceCollection AddResponseCompressionsServices(this IServiceCollection services)
@@ -62,7 +65,7 @@ internal static class DependencyInjection
         {
             options.Level = CompressionLevel.Fastest;
         });
-    
+
 
         services.Configure<GzipCompressionProviderOptions>(options =>
         {
@@ -162,7 +165,7 @@ internal static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddCorsConfiguration(this IServiceCollection services,IWebHostEnvironment env)
+    private static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IWebHostEnvironment env)
     {
         using var sp = services.BuildServiceProvider();
         var corsOptions = sp.GetRequiredService<IOptions<CorsOptions>>().Value;
@@ -198,4 +201,19 @@ internal static class DependencyInjection
         return services;
     }
 
+    private static IServiceCollection AddOpenTelemetryServicers(this IServiceCollection services)
+    {
+        services.AddOpenTelemetry()
+                .ConfigureResource(res => res.AddService("Botify.API"))
+                .WithTracing(tracing =>
+                {
+                    tracing.AddAspNetCoreInstrumentation()
+                            .AddHttpClientInstrumentation();
+
+                    tracing.AddOtlpExporter();
+                });
+
+
+        return services;
+    }
 }

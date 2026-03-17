@@ -7,6 +7,9 @@ public static class MerchantErrors
     // General Validation
     public static Error IdRequired =>
         Error.Validation("Merchant.General.Id.Required", "Merchant ID is required.");
+// Status / Permissions
+public static Error AdminCannotDeleteSelf =>
+    Error.Forbidden("Merchant.Status.AdminCannotDeleteSelf", "Admin cannot delete their own account.");
 
     public static Error MerchantNameRequired =>
         Error.Validation("Merchant.General.Name.Required", "Merchant name is required.");
