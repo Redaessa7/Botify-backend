@@ -494,3 +494,4 @@ src/Botify.Infrastructure/Database/
 src/Botify.API/uploads/
 src/Botify.API/wwwroot/uploads
 /src/Botify.API/appsettings.Development.json
+src/Botify.API/appsettings.Development.json
