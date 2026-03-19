@@ -1,0 +1,30 @@
+name: Botify API CI/CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. جلب الكود
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. إعداد .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # 3. استعادة الحزم
+      - name: Restore dependencies
+        run: dotnet restore src/Botify.API/Botify.API.csproj
+
+      # 4. بناء المشروع
+      - name: Build
+        run: dotnet build src/Botify.API/Botify.API.csproj --configuration Release --no-restore
