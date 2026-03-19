@@ -1,7 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+	  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Botify.Domain\Botify.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="CrossCutting\Extensions\" />
+    <Folder Include="Features\Customers\Requests\" />
+    <Folder Include="Features\Merchants\Validators\" />
   </ItemGroup>
 
   <PropertyGroup>

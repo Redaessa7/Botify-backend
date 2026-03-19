@@ -1,6 +1,147 @@
 @baseurl = https://localhost:7257
+@contentType = application/json
 
-GET {{baseurl}}/weatherforecast/
-Accept: application/json
+### Register
+# ### Register a new merchant
+# POST {{baseurl}}/api/auth/register
+# Content-Type: application/json
+
+# {
+#   "email": "owner@myshop.com",
+#   "password": "StrongPass123!",
+#   "phone": "+201234567890",
+#   "firstName": "",
+#   "lastName": "gdgf",
+#   "bio": "Merchant owner using Botify platform",
+#   "profileImageUrl": "https://cdn.example.com/profiles/reda.png",
+#   "language": "en",
+#   "merchantName": "MyShop",
+#   "industry": "Retail",
+#   "logoUrl": "https://cdn.example.com/logos/myshop.png"
+# }
+
+
+####
+
+
+POST {{baseurl}}/api/uploads
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="file"; filename="ARAMxLogo.png"
+Content-Type: image/png
+
+< C:/Users/Administrator/Downloads/aramxLogo.png
+--MyBoundary--
+ 
+###
+
+
+
+POST {{baseurl}}/api/auth/register
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="email"
+
+owner@myshop.com
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="password"
+
+StrongPass123!
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phone"
+
++201234567890
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
+
+Reda
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Gdfg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="bio"
+
+Merchant owner using Botify platform
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="language"
+
+en
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="merchantName"
+
+MyShop
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="industry"
+
+Retail
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="profile.png"
+Content-Type: image/png
+
+<@profile.png> 
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="logo"; filename="logo.png"
+Content-Type: image/png
+
+<@logo.png>
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+### Example of invalid request (missing email)
+POST {{baseurl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "password": "StrongPass123!",
+  "phone": "+201234567890",
+  "firstName": "Reda",
+  "lastName": "Ahmed",
+  "merchantName": "MyShop",
+  "industry": "Retail"
+}
+
+
+
+### Login
+POST {{baseurl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "owner@myshop.com",
+  "password": "StrongPass123!"
+}
+
+### user info
+GET {{baseurl}}/api/auth/user
+
+### Refresh Token
+POST {{baseurl}}/api/auth/refresh-token
+###
+GET {{baseurl}}/api/merchants/me
+
+### Logout
+POST {{baseurl}}/api/auth/logout
+
+
+### Test webhook Receive message
+@platform = telegram
+@botId = 312c5fe0-de56-4c80-856a-03699a98ef53
 
 ###
+POST {{baseurl}}/api/webhook/bot/{{platform}}/{{botId}}
+Content-Type: {{contentType}}
+X-Telegram-Bot-Api-Secret-Token: JgLaDUrPxdluYjz6zoGWmzgumKNDL9PQL6L_nfMemO8
+
+{
+  "message":"Hello Reda"
+}
+
+
+### Delete All webhooks 
+@botToken = 2101566260:AAGIbxYaqcBfHB-0znVqkuQDh00
+
+POST https://api.telegram.org/bot{{botToken}}/deleteWebhook
+

@@ -1,46 +1,79 @@
-using System.Text.Json.Serialization;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+using Botify.API.CrossCutting.Constants;
+using Botify.API.CrossCutting.Extensions;
+using Botify.API.CrossCutting.Setup;
+using Botify.Application.CrossCutting.Options;
+using Botify.Infrastructure.Persistence.Initialisation;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
+using Serilog;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+#region Bootstrap
+builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), AppPaths.WwwRootFolder);
+Directory.CreateDirectory(builder.Environment.WebRootPath);
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-});
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile(AppPaths.AppSettingsFile, optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+#endregion
+builder.Services.AddOptions<PaginationOptions>()
+    .Bind(builder.Configuration.GetSection("PaginationOptions"));
+#region DI Container
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddInfrastructureServices(builder.Configuration);
-builder.Services.AddFluentValidationAutoValidation();
-
-// builder.Services.AddValidatorsFromAssemblyContaining<>();
-
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("DevelopmentPolicy", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+builder.Services.AddApplicationSetup(builder.Configuration, builder.Environment);
+#endregion
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+#region Middlewares
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (ctx, report) =>
+    {
+        ctx.Response.ContentType = "application/json";
+        var payload = new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        };
+
+        await ctx.Response.WriteAsJsonAsync(payload);
+    }
+});
+
+app.UseExceptionHandler();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseCors(app.CurrentCorsPolicy().Name);
+app.UseAuthentication();
+app.UseAuthorization();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
-
-app.UseHttpsRedirection();
-app.UseCors("DevelopmentPolicy");
-
+app.UseResponseCompression();
+app.UseSerilogRequestLogging();
 app.MapControllers();
+
+#endregion
+
+//using (var scope = app.Services.CreateScope())
+//{
+//    await scope.ServiceProvider.SeedRolesAsync();
+//}
+await app.InitialiseDatabaseAsync();
 
 app.Run();

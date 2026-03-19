@@ -1,15 +1,53 @@
+using Botify.Application.CrossCutting.Interfaces;
+using Botify.Domain.Identity;
+using Botify.Domain.Models;
+using Botify.Domain.Models.AI;
+using Botify.Domain.Models.Bots;
+using Botify.Domain.Models.Customers;
+using Botify.Domain.Models.Merchants;
+using Botify.Domain.Models.Orders;
+using Botify.Domain.Models.Products;
+using Botify.Domain.Models.Shops;
+using Botify.Domain.Models.SupportRequests;
+using Botify.Infrastructure.AiAgent;
 using Botify.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.SemanticKernel;
 
 namespace Botify.Infrastructure.Persistence;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
-    
+    public const string SOFT_DELETE_FILTER_NAME = nameof(SOFT_DELETE_FILTER_NAME);
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Merchant> Merchants =>  Set<Merchant>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<AIConfiguration> AIConfigurations => Set<AIConfiguration>();
+    public DbSet<Bot> Bots => Set<Bot>();
+    public DbSet<SupportRequest> SupportRequests => Set<SupportRequest>();
+    public DbSet<ShopSettings> ShopSettings => Set<ShopSettings>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<MerchantSubscription> MerchantSubscription => Set<MerchantSubscription>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+
         base.OnModelCreating(builder);
+
+        builder.Entity<ApplicationUser>()
+            .HasQueryFilter(SOFT_DELETE_FILTER_NAME,
+            u => UserProfiles
+            .Any(p => p.IdentityUserId == u.Id && !p.IsDeleted));    
     }
-}
+    }

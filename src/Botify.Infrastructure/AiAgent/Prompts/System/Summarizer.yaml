@@ -1,0 +1,17 @@
+name: Summarizer
+template: |
+  System: You are a memory-compacting agent. 
+  Task: Review the recent conversation and update the "Current Summary" with new facts.
+  
+  Existing Summary: {{$current_summary}}
+  
+  Recent Messages:
+  {{$recent_history}}
+
+  New Summary Requirements:
+  - Keep it under 200 tokens.
+  - Focus on: User preferences, order status, and unresolved questions.
+  - Format as a concise bulleted list.
+
+  Updated Summary:
+template_format: semantic-kernel

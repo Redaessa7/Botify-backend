@@ -6,19 +6,49 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
+	<ItemGroup>
+		<None Include="AiAgent\Prompts\**\*.yaml" CopyToOutputDirectory="Always" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <PackageReference Include="EssaLab.StronglyTypedIds.Convertors.EFCore" Version="1.0.0-preview">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
       <PackageReference Include="Mapster" Version="7.4.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
+      <PackageReference Include="Microsoft.SemanticKernel" Version="1.72.0" />
+      <PackageReference Include="Microsoft.SemanticKernel.Connectors.Google" Version="1.68.0-alpha" />
+	  <PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
+	  <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.72.0" />
+	  <PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.70.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Botify.Domain\Botify.Domain.csproj" />
     <ProjectReference Include="..\Botify.Application\Botify.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AiAgent\Prompts\Info\" />
+    <Folder Include="AiAgent\Prompts\Account\" />
+    <Folder Include="AiAgent\Prompts\System\" />
+    <Folder Include="AiAgent\Prompts\Support\" />
+    <Folder Include="AiAgent\Prompts\Sales\" />
+    <Folder Include="AiAgent\Prompts\Router\" />
+    <Folder Include="CrossCutting\Extensions\" />
   </ItemGroup>
 
 </Project>
