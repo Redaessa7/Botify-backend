@@ -1,8 +1,8 @@
 ﻿namespace Botify.Application.Features.Auths.Requests;
 
 public sealed record UpdateEmailRequest(
-    string OldEmail,
+    string NewEmail,
     string CurrentPassword,
-    string? NewEmail,
+    string? OldEmail,
     string? ResetToken
 );

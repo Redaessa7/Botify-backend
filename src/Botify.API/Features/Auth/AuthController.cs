@@ -191,7 +191,7 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetToken))
             return Problem([Error.Unauthorized("ResetToken.Invalid", "Email or reset token is missing in headers")]);
 
-        var updatedRequest =  request with { NewEmail = email, ResetToken = resetToken };
+        var updatedRequest =  request with { OldEmail = email, ResetToken = resetToken };
 
         var result = await authServices.UpdateEmailAsync(updatedRequest, ct);
         return result.Match(_ => Ok(new { message = "Password reset successfully" }), Problem);
