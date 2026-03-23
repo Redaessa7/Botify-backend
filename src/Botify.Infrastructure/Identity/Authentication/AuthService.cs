@@ -257,7 +257,7 @@ public class AuthService(
     // --------------------------
     // Email & OTP Verification
     // --------------------------
-    public async Task<Result<string>> GenerateEmailChangeOtpAsync(GenerateEmailChangeOtpRequest request, CancellationToken ct = default)
+    public async Task<Result<Success>> GenerateEmailChangeOtpAsync(GenerateEmailChangeOtpRequest request, CancellationToken ct = default)
     {
         var user = await _userManager.FindByEmailAsync(request.OldEmail);
         if (user is null) return IdentityErrors.UserNotFound;
@@ -272,7 +272,7 @@ public class AuthService(
         _emailQueue.Enqueue(user.Email, otp);
 
         _logger.LogInformation("Email change OTP generated for user {UserId}.", user.Id);
-        return otp;
+        return Result.Success;
     }
 
     public async Task<Result<string>> VerifyOtpAsync(VerifyOtpRequest request, CancellationToken ct = default)
@@ -352,7 +352,7 @@ public async Task<Result<bool>> ResetPasswordAsync(ResetPasswordRequest request,
 public async Task<Result<bool>> UpdateEmailAsync(UpdateEmailRequest request, CancellationToken ct = default)
 {
     // 1. Validation Logic
-    var storedToken = await _redis.GetStringAsync($"reset:{request.NewEmail}", ct);
+    var storedToken = await _redis.GetStringAsync($"reset:{request.OldEmail}", ct);
     if (storedToken is null || storedToken != request.ResetToken)
         return Error.Validation("ResetToken.Invalid", "Invalid or expired reset token.");
 

@@ -132,7 +132,7 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
     public async Task<IActionResult> GenerateEmailChangeOtp(GenerateEmailChangeOtpRequest request, CancellationToken ct)
     {
         var result = await authServices.GenerateEmailChangeOtpAsync(request, ct);
-        return result.Match(_ => Ok(new { token = _ }), Problem);
+        return result.Match(_ => Ok(new { }), Problem);
     }
 
     [HttpPost("verify-otp")]
@@ -194,6 +194,6 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         var updatedRequest =  request with { OldEmail = email, ResetToken = resetToken };
 
         var result = await authServices.UpdateEmailAsync(updatedRequest, ct);
-        return result.Match(_ => Ok(new { message = "Password reset successfully" }), Problem);
+        return result.Match(_ => Ok(new { message = "Email reset successfully" }), Problem);
     }
 }
