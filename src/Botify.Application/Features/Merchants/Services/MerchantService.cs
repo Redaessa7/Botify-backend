@@ -56,6 +56,7 @@ public sealed class MerchantService : IMerchantService
             .Include(m => m.Subscription)
             .Include(m => m.Products)
             .Include(m => m.Orders)
+            .Include(m => m.AIConfiguration)
             .Include(m => m.Customers)
             .Include(m => m.ShopSettings)
             .Include(m => m.Bots).ThenInclude(b => b.DailyStats)
