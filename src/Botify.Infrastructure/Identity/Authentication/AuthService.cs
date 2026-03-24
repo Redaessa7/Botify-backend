@@ -256,6 +256,7 @@ public class AuthService(
 
     // --------------------------
     // Email & OTP Verification
+    // to do why in update email send to old and new email
     // --------------------------
     public async Task<Result<Success>> GenerateEmailChangeOtpAsync(GenerateEmailChangeOtpRequest request, CancellationToken ct = default)
     {
