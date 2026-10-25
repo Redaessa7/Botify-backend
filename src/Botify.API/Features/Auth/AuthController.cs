@@ -132,7 +132,7 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
     public async Task<IActionResult> GenerateEmailChangeOtp(GenerateEmailChangeOtpRequest request, CancellationToken ct)
     {
         var result = await authServices.GenerateEmailChangeOtpAsync(request, ct);
-        return result.Match(_ => Ok(new { token = _ }), Problem);
+        return result.Match(_ => Ok(new { }), Problem);
     }
 
     [HttpPost("verify-otp")]
@@ -191,9 +191,9 @@ public class AuthController(IAuthServices authServices, IUser user) : ApiControl
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(resetToken))
             return Problem([Error.Unauthorized("ResetToken.Invalid", "Email or reset token is missing in headers")]);
 
-        var updatedRequest =  request with { NewEmail = email, ResetToken = resetToken };
+        var updatedRequest =  request with { OldEmail = email, ResetToken = resetToken };
 
         var result = await authServices.UpdateEmailAsync(updatedRequest, ct);
-        return result.Match(_ => Ok(new { message = "Password reset successfully" }), Problem);
+        return result.Match(_ => Ok(new { message = "Email reset successfully" }), Problem);
     }
 }
